@@ -14,5 +14,5 @@ Guided, Stochastic Model-based GUI Testing of Android Apps (FSE'2017)
 ```
 # Quick Review
 
-Click this [link] (https://sites.google.com/site/stoat2017/) for quick review, including the approach workflow, evaluation results, and demo.
+Click this link (https://sites.google.com/site/stoat2017/) for quick review on the approach workflow, evaluation results, demo and etc.
 
