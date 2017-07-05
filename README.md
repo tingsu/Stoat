@@ -1,5 +1,5 @@
 # Stoat
-Stoat (STochastic model App Tester) is an prototype tool for improving and enhancing automatic testing of android apps.
+Stoat (STochastic model App Tester) is a guided approach to perform stochastic model-based testing on Android Apps. The idea is to thoroughly test the functionalities of an app from its GUI model, and validate the app’s behavior by enforcing various user/system interactions. 
 
 # Publication
 Guided, Stochastic Model-based GUI Testing of Android Apps (FSE'2017)
@@ -12,3 +12,7 @@ Guided, Stochastic Model-based GUI Testing of Android Apps (FSE'2017)
     year = "2017"
 } 
 ```
+# Quick Review
+
+Click this [link] (https://sites.google.com/site/stoat2017/) for quick review, including the approach workflow, evaluation results, and demo.
+
