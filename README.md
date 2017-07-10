@@ -50,5 +50,13 @@ We strongly recommend to run Stoat on a physical machine to ensure the performan
 Stoat provides several ways to test android apps by command lines.
 
 ### Subject Requirement:
-* to fully open-source apps should be instrumented 
-* closed-source/non-instrumented apk name should end with ".apk" 
+* instrumented apps (use [Emma](http://emma.sourceforge.net/index.html)/[Jacoco](http://www.eclemma.org/jacoco/trunk/index.html) for open-source apps and [Ella](https://github.com/saswatanand/ella) for closed-source apps) should end with "-debug.apk"
+* closed-source/non-instrumented apk can also be tested, and its name should end with ".apk" 
+
+##  Notes
+* This implementation has been tested with Android 4.4, running on Ubuntu 14.04 and Mac OS 10.10
+* If measure statement coverage for open-sourced apps, the subjects need to be processed to support EMMA instrumentation:
+(Please refer to [Dynodroid](https://code.google.com/archive/p/dyno-droid/))
+
+## Contact
+<tsuletgo@gmail.com>
