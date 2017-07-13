@@ -41,7 +41,10 @@ You can checkout Stoat from this repo.
 
 * Android SDK: API 18/19
 
-* Ubuntu 14.04/Linux 
+* Ubuntu 14.04/Linux
+
+* Mac OS:
+    brew install coreutils for gtimeout
 
 We strongly recommend to run Stoat on a physical machine to ensure the performance instead of ruuning on virtual machines (e.g., VirtualBox or Docker). In addition, please choose x86 image if you use Android emulators, and [setup hardware acceleration](https://developer.android.com/studio/run/emulator-acceleration.html) for [Ubuntu](https://help.ubuntu.com/community/KVM/Installation).
 
