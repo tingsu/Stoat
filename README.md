@@ -93,18 +93,18 @@ Stoat provides several ways to test android apps by command lines. Note before r
 
 stoat_fsm_building_output: the outputs of model construction. 
 
-	```
+	
 	 crashes/ -- crash report (include crash stack, event trace, screen shots); 
 	 ui/ -- ui xml files; 
 	 coverage/ -- coverage files during model construction; 
 	 FSM.txt/app.gv -- xdot model graph; 
 	 fsm_building_process.txt/fsm_states_edges.txt -- the model building process, mainly the increasing coverage/#states/#edges 
 	 CONF.txt -- configuration file 
-         ```
+         
 	 
 stoat_mcmc_sampling_output: the outputs of mcmc sampling. 
     
-    	```
+    	
 	 crashes/ -- crash report (include crash stack, event trace, screen shots); 
 	 MCMC_coverage/ -- the coverage data during mcmc sampling; 
 	 mcmc_sampling_progress.txt/mcmc_data.txt -- mcmc sampling progress data; 
@@ -112,7 +112,7 @@ stoat_mcmc_sampling_output: the outputs of mcmc sampling.
 	 mcmc_all_history_testsuites.txt -- all executed test suites for mcmc sampling; 
 	 test_suite_to_execute.txt -- the current test suite under execution;
 	 CONF.txt -- configuration file. 
-	 ```
+	 
      
 coverage: the all coverage data during two phases
 
