@@ -83,12 +83,9 @@ Stoat provides several ways to test android apps by command lines. Note before r
 
 	ruby run_stoat_testing.rb --apps_dir /home/XX/test_apps/ --apps_list /home/XX/test_apps/apps_list.txt --avd_name testAVD_1 --avd_port 5554 --stoat_port 2000 --force_restart
 
-5. Gradle open-source projects
-
- 	ruby run_stoat_testing.rb --app_dir /home/XX/com.linuxcounter.lico_update_003_5_src.tar.gz --apk /home/XX/com.linuxcounter.lico_update_003_5_src.tar.gz/app/build/outputs/apk/app-debug.apk --avd_name testAVD_1 --avd_port 5554 --stoat_port 2000 --project_type gradle 
 
 ### Subject Requirement:
-* instrumented apps (use [Emma](http://emma.sourceforge.net/index.html) or [JaCoCo](http://www.eclemma.org/jacoco/trunk/index.html) for open-source apps and [Ella](https://github.com/saswatanand/ella) for closed-source apps) should end with "-debug.apk"
+* instrumented apps (use [Emma](http://emma.sourceforge.net/index.html) for open-source apps and [Ella](https://github.com/saswatanand/ella) for closed-source apps) should end with "-debug.apk"
 * closed-source/non-instrumented apk can also be tested, and its name should end with ".apk" 
 
 
@@ -96,22 +93,26 @@ Stoat provides several ways to test android apps by command lines. Note before r
 
 stoat_fsm_building_output: the outputs of model construction. 
 
-         crashes/ -- crash report (include crash stack, event trace, screen shots); 
-		 ui/ -- ui xml files; 
-		 coverage/ -- coverage files during model construction; 
-		 FSM.txt/app.gv -- xdot model graph; 
-		 fsm_building_process.txt/fsm_states_edges.txt -- the model building process, mainly the increasing coverage/#states/#edges 
-		 CONF.txt -- configuration file 
-         
+	```
+	 crashes/ -- crash report (include crash stack, event trace, screen shots); 
+	 ui/ -- ui xml files; 
+	 coverage/ -- coverage files during model construction; 
+	 FSM.txt/app.gv -- xdot model graph; 
+	 fsm_building_process.txt/fsm_states_edges.txt -- the model building process, mainly the increasing coverage/#states/#edges 
+	 CONF.txt -- configuration file 
+         ```
+	 
 stoat_mcmc_sampling_output: the outputs of mcmc sampling. 
     
-		 crashes/ -- crash report (include crash stack, event trace, screen shots); 
-		 MCMC_coverage/ -- the coverage data during mcmc sampling; 
-		 mcmc_sampling_progress.txt/mcmc_data.txt -- mcmc sampling progress data; 
-		 initial_markov_model.txt/optimal_markov_model.txt/mcmc_models.txt -- the initial/optimal/all mcmc sampling models; 
-		 mcmc_all_history_testsuites.txt -- all executed test suites for mcmc sampling; 
-		 test_suite_to_execute.txt -- the current test suite under execution;
-		 CONF.txt -- configuration file. 
+    	```
+	 crashes/ -- crash report (include crash stack, event trace, screen shots); 
+	 MCMC_coverage/ -- the coverage data during mcmc sampling; 
+	 mcmc_sampling_progress.txt/mcmc_data.txt -- mcmc sampling progress data; 
+	 initial_markov_model.txt/optimal_markov_model.txt/mcmc_models.txt -- the initial/optimal/all mcmc sampling models; 
+	 mcmc_all_history_testsuites.txt -- all executed test suites for mcmc sampling; 
+	 test_suite_to_execute.txt -- the current test suite under execution;
+	 CONF.txt -- configuration file. 
+	 ```
      
 coverage: the all coverage data during two phases
 
