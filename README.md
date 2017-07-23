@@ -35,7 +35,9 @@ Click this [link](https://sites.google.com/site/stoat2017/) for quick review on 
 You can checkout Stoat from this repo.
 
 ### Environment Configration
-* Ruby: 2.2
+* Ruby: 2.2 
+
+* [Nokogiri](http://www.nokogiri.org/tutorials/installing_nokogiri.html)
 
 * Python: 2.7
 
@@ -43,8 +45,20 @@ You can checkout Stoat from this repo.
 
 * Ubuntu 14.04/Linux
 
+* uiautomator (A python wrapper of [UIAutomator](https://github.com/xiaocong/uiautomator))
+
 We strongly recommend to run Stoat on a physical machine to ensure the performance instead of ruuning on virtual machines (e.g., VirtualBox or Docker). In addition, please choose x86 image if you use Android emulators, and [setup hardware acceleration](https://developer.android.com/studio/run/emulator-acceleration.html) for [Ubuntu](https://help.ubuntu.com/community/KVM/Installation).
 
+Please export ANDROID_HOME (for android sdk), PYTHON_PATH (for uiautomator), CLASSPATH (for soot)
+
+ Example:
+  ```
+  export ANDROID_HOME="/home/XX/Android/Sdk"
+  export PYTHONPATH="/home/XX/uiautomator"
+  export CLASSPATH="/home/XX/fsmdroid/soot-github/lib/soot-develop.jar
+  export PATH=$PATH:${ANDROID_HOME}/build-tools/25.0.0:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:
+  ```
+  
 # Usage
 
 Stoat provides several ways to test android apps by command lines. Note before running Stoat, please disable keyboard (for emulator, add "hw.keyboard=yes" in its config.ini; for real device, please install the "com.wparam.nullkeyboard_1.apk" at "fsmdroid/bin", and configure it to be the default input method)
