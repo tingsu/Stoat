@@ -1,0 +1,8 @@
+
+Release checklist
+
+See official checklist
+
+My checklist:
+For all Log.d statements: Put an if statement around them so that they are removed when running proguard (tips from android dev office hours)
+Run proguard

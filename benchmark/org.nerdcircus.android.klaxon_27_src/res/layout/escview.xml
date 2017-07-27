@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="none"
+    >
+<LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <ImageView android:id="@+id/view_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            />
+        <TextView android:id="@+id/view_subject"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="no subject"
+            android:textStyle="bold"
+            android:textSize="25sp"
+            android:lines="2"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/view_icon"
+            />
+    </RelativeLayout>
+    <TextView android:id="@+id/sender"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Sender: unknown"
+        android:textSize="15sp"
+        />
+    <TextView android:id="@+id/datestamp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Recieived: unknown"
+        android:textSize="15sp"
+        />
+    <TextView android:id="@+id/view_body"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="no data"
+        android:autoLink="all"
+        android:textSize="20sp"
+        />
+</LinearLayout>
+</ScrollView>
+

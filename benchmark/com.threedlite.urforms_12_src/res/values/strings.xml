@@ -1,0 +1,13 @@
+<resources>
+ 
+    <string name="app_name">URforms Database</string>
+    <string name="title_activity_search_data">URForms</string>
+    <string name="title_activity_search_results">URForms - Search Results</string>
+    <string name="title_activity_enter_data">URForms - Enter Data</string>
+    <string name="title_activity_manage_forms">URForms - Manage Forms</string>
+    <string name="title_activity_backup_restore">URForms - Backup / Resore</string>
+    
+     <!--  aFileChooser -->
+    <string name="select_file">Choose file</string>
+    
+</resources>

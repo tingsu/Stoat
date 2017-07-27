@@ -1,0 +1,27 @@
+
+andra appar eller del av samma app
+[för detta kan vi använda action drawer, som också kan ha med undermenyer]
+tidsschema (med behov)
+reminders, notifications
+gratefulness
+training: developing a needs literacy
+emotion training: different parts of the body
+andra personer
+
+
+habitual reaction
+mindful reaction
+visualization of both
+
+
+Workplace relaxation and physical activity helper
+Stress ball
+Throwing the stress ball close to the ceiling
+The "i don't want to seem strange to others" flag (komiskt inslag)
+
+
+Använda ActionBar för att visa olika vyer
+http://developer.android.com/design/patterns/actionbar.html
+
+
+Adding a summary screen

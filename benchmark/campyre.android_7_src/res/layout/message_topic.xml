@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	
+	android:focusable="false"
+	
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	
+	android:background="@color/message_topic_background"
+	>
+	
+	<View
+		android:layout_width="fill_parent"
+		android:layout_height="1px"
+		
+		android:background="@color/message_topic_border"
+		/>
+	
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		>
+	
+		<TextView android:id="@+id/person"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			
+			android:layout_marginTop="5dp"
+			android:layout_marginLeft="5dp"
+			android:layout_marginRight="5dp"
+			
+			android:textSize="14sp"
+			android:textStyle="bold"
+			android:textColor="@color/main_foreground"
+			
+			android:text="Sir L."
+			/>
+			
+		<TextView 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="5dp"
+			android:layout_marginRight="5dp"
+			
+			android:textSize="14sp"
+			android:textColor="@color/main_foreground"
+			
+			android:text="@string/has_changed_topic"
+			/>
+	</LinearLayout>
+	
+	<TextView android:id="@+id/text"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="5dp"
+		android:layout_marginLeft="10dp"
+		android:layout_marginRight="10dp"
+		android:layout_marginBottom="5dp"
+			
+		android:textSize="14sp"
+		android:textColor="@color/main_foreground"
+		
+  		android:text="the best topic is a great topic"
+  		/>
+  	
+  	<View
+		android:layout_width="fill_parent"
+		android:layout_height="1px"
+		
+		android:background="@color/message_topic_border"
+		/>
+  		
+</LinearLayout>

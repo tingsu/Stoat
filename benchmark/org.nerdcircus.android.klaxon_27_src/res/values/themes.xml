@@ -1,0 +1,4 @@
+<resources>
+    <style name="SelectorTheme" parent="@android:style/Theme">
+    </style>
+</resources>

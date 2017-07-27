@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string-array name="listsourceArray">
+        <item >Центробанк России</item>
+        <item >Данные пользователя</item>
+        <item >НацБанк Украины</item>
+        <item >НацБанк Беларуси</item>
+        <item >НацБанк Молдовы</item>
+        <item >Центробанк Азербайджана</item>
+        <item >Европейский ЦБ</item>
+        <item >Форекс</item>
+</string-array>
+
+<string-array name="listsourceConfig">
+        <item >Центробанк России</item>
+        <item >НацБанк Украины</item>
+        <item >НацБанк Беларуси</item>
+        <item >НацБанк Молдовы</item>
+        <item >Центробанк Азербайджана</item>
+        <item >Европейский ЦБ</item>
+        <item >Форекс</item>
+</string-array>
+
+<string-array name="listupdateArray">
+        <item >Вручную</item>
+        <item >В фоновом режиме</item>
+        <item >Принудительные</item>
+        <item >Раз в день</item>
+</string-array>
+ 
+<string-array name="listBKG">
+        <item >ICS</item>
+        <item >Черный</item>
+        <item >Серый (плоский)</item>
+        <item >Системный</item>
+        <item >Cube</item>
+        <item >Gray Dot</item>
+        <item >Violet Fabric</item>
+        <item >Black Dot</item>
+        <item >ICS 2</item>
+		<item >Flowers</item>
+</string-array>
+ 
+<string-array name="listwidgettheme">
+        <item >Темная</item>
+        <item >Светлая</item>
+</string-array>
+
+</resources>

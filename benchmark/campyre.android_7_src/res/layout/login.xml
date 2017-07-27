@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:fillViewport="true"
+	android:background="@color/main_background"
+	>
+	<LinearLayout  
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+	    
+	    <include layout="@layout/title" />
+	    <include layout="@layout/line" />
+		
+		<LinearLayout
+			android:orientation="vertical"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginTop="10dp"
+			>
+			
+			<LinearLayout
+				android:orientation="horizontal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="5dp"
+				>
+				
+				<EditText android:id="@+id/subdomain"
+					android:layout_width="150dp"
+					android:layout_height="wrap_content"
+					
+					android:inputType="textUri"
+					/>
+					
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="5dp"
+					
+					android:textSize="17sp"
+					android:text=".campfirenow.com"
+					/>
+			</LinearLayout>
+				
+		</LinearLayout>
+		
+		<LinearLayout android:id="@+id/regular_input"
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginTop="10dp"
+			>
+			
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="3dp"
+				android:visibility="gone"
+				/>
+
+			<EditText android:id="@+id/username"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp"
+				
+				android:inputType="text"
+				
+				android:hint="Username"
+				/>
+			
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp"
+				android:layout_marginLeft="3dp"
+				
+				android:text="Password"
+				android:visibility="gone"
+				/>
+			
+			<EditText android:id="@+id/password"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp"
+				
+				android:inputType="text"
+				android:password="true"
+				android:hint="Password"
+				/>
+				
+			<TextView 
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp"
+				android:layout_marginBottom="5dp"
+				android:layout_marginLeft="3dp"
+				
+				android:textSize="15sp"
+				android:text="@string/regular_message"
+				/>
+		</LinearLayout>
+		
+		<Button android:id="@+id/login_button"
+			android:layout_width="fill_parent"
+			android:layout_height="60dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:layout_marginBottom="10dp"
+			android:layout_marginTop="15dp"
+			
+			android:textSize="20sp"
+			android:text="Log in"
+			/>
+				
+	</LinearLayout>
+
+</ScrollView>

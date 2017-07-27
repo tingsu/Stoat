@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    arXiv mobile - a free Android app for arXiv.org
+    
+    Copyright (C) 2010 Jack Deslippe
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/back4"
+    >
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/back1"
+        >
+
+        <TextView  
+            android:id="@+id/theader"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:paddingBottom="3sp"
+            android:paddingTop="6sp"
+            android:paddingLeft="5sp"
+            android:text="arXiv.org"
+            android:textSize="40sp"
+            android:textColor="#FFFFFF"
+        />
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:paddingTop="6sp"
+            android:paddingBottom="1sp"
+            >
+
+            <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/searchbutton"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:focusable="true"
+                android:clickable="true"
+                android:src="@drawable/whitesearch"
+                android:onClick="searchPressed"
+            />
+
+            <!--
+            <ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/serchbutton"
+                android:onClick="searchPressed"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:src="@drawable/search"
+            />
+            -->
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tabhost"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            >
+
+            <TabWidget android:id="@+android:id/tabs"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+            />
+
+            <FrameLayout android:id="@android:id/tabcontent"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                >
+
+                <ListView
+                    android:id="@+id/catlist"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:drawSelectorOnTop="false"
+                    android:layout_weight="0.6"
+                    android:cacheColorHint="#3b3838"
+                />
+
+                <ListView
+                    android:id="@+id/favlist"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:drawSelectorOnTop="false"
+                    android:layout_weight="0.6"
+                    android:cacheColorHint="#3b3838"
+                />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </TabHost>
+
+</LinearLayout>
+

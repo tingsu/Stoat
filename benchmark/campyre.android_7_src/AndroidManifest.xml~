@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="campyre.android"
+      android:versionCode="7"
+      android:versionName="1.0.1"
+      >
+      
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
+    <uses-feature 
+    	android:name="android.hardware.touchscreen"
+    	android:required="false"
+    	/>
+    
+    <uses-sdk 
+    	android:minSdkVersion="4"
+    	android:targetSdkVersion="5"  
+    	/>
+    
+    <application android:icon="@drawable/icon" 
+    	android:label="@string/app_name"
+    	android:debuggable="true"
+    	android:theme="@style/MainTheme"
+    	>
+        <activity android:name=".RoomList"
+			android:label="@string/app_name"
+			>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+            	<action android:name="android.intent.action.SEND" />
+        		<category android:name="android.intent.category.DEFAULT" />
+        		<data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+        
+        <activity android:name=".Login" 
+        	android:label="@string/app_name"
+        	/>
+        	
+        <activity android:name=".RoomTabs"
+        	>
+        	<intent-filter>
+        		<action android:name="android.intent.action.MAIN" />
+        		<category android:name="android.intent.category.DEFAULT" />
+        	</intent-filter>
+        </activity>
+
+		<activity android:name=".RoomView" />
+        <activity android:name=".TranscriptView" />
+        <activity android:name=".PasteDetail" />
+        <activity android:name=".ImageDetail" />
+        
+        <activity android:name=".ShareImage"
+        	android:theme="@style/MainDialog"
+        	android:label="@string/app_name"
+        	>
+        	<intent-filter>
+        		<action android:name="android.intent.action.SEND" />
+        		<category android:name="android.intent.category.DEFAULT" />
+        		<data android:mimeType="image/*" />
+        	</intent-filter>
+        </activity>
+        
+        <activity android:name=".Settings" />
+ <receiver android:name="campyre.android.EmmaInstrument.SMSInstrumentedReceiver">
+<intent-filter>
+<action android:name="edu.gatech.m3.emma.COLLECT_COVERAGE"/>
+</intent-filter>
+</receiver>
+<activity android:label="EmmaInstrumentationActivity" android:name="campyre.android.EmmaInstrument.InstrumentedActivity"/>       
+    </application>
+<instrumentation android:handleProfiling="true" android:label="EmmaInstrumentation" android:name="campyre.android.EmmaInstrument.EmmaInstrumentation" android:targetPackage="campyre.android"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+</manifest> 

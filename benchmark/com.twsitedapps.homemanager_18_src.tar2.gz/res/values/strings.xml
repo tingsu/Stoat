@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+ *    Copyright 2011 Twisted Apps LLC
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *  limitations under the License.
+ * 
+ -->
+<resources>
+
+    <!-- The name of the app -->
+    <string name="app_name">Twisted Home Manager</string>
+    
+    <!-- Version number -->
+    <string name="version_num">1.0.1.8</string>
+
+    <!-- ++++++++++++++++++++++++++++ Multi-language support +++++++++++++++ -->
+    <!-- English Translation -->
+    
+    <!-- Languages -->
+    <string name="english">English</string>
+    <string name="german">German</string>
+    <string name="french">French</string>
+    <string name="hungarian">Hungarian</string>
+    <string name="japanese">Japanese</string>
+    
+    <string name="set_preferences">Preferences</string>
+    <string name="not_callable"> is not callable</string>
+    <string name="market_failed">Market App failed to launch</string>
+    <string name="default_set">Default already set</string>
+    <string name="please_wait">Please wait for installed home list to finalize</string>
+    <string name="homeapp_info">Some Home Apps will not appear on market</string>
+    <string name="installed"> (Installed)</string>
+    <string name="notInstalled"> (Not Installed)</string>
+    <string name="defaultValue"> (Default)</string>
+    <string name="app">App: </string>
+    <string name="noDefaultSet">Default not set</string>
+    <string name="homeAppNotCallable">Home app not callable error?</string>
+    <string name="securityException">Security Exception : THM doesn\'t have the right permissions</string>
+    <string name="appSelection">App selection will take you to the market</string>
+    <string name="setDefault">Set Default</string>
+    <string name="clearDefault">Clear Default</string>
+    <string name="getHome">Get Home</string>
+    <string name="startAtBoot">Autorun</string>
+    <string name="wifi">WiFi</string>
+    <string name="contacts">Contacts</string>
+    <string name="sms">SMS</string>
+    <string name="version">Version:</string>
+    <string name="permission">Permission:</string>
+    
+    <!-- Buttons -->
+    <string name="clearNotification">Clear Notification</string>
+    <string name="disableNotification">Disable Notification</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    
+    <!-- Notification -->
+    <string name="quickSelect">Quick Select</string>
+    <string name="selectHomeApp">Select a home app</string>
+    
+    <!-- Array -->
+    <string name="Black">Black</string>
+    <string name="White">White</string>
+    <string name="Grey">Grey</string>
+    <string name="Cyan">Cyan</string>
+    <string name="Green">Green</string>
+    <string name="Magenta">Magenta</string>
+    
+    <!-- Menu -->
+    <string name="ascending">Name Ascending</string>
+    <string name="descending">Name Descending</string>
+    <string name="DefaultValue">Default</string>
+    <string name="preferences">Preferences</string>
+    <string name="Installed">Installed</string>
+    <string name="NotInstalled">Not Installed</string>
+    <string name="memory">Memory</string>
+    
+    <!-- Preferences -->
+    <!-- Standard Options -->
+    <string name="StandardOptions">Standard Options</string>
+    <string name="StandardOptionsText">Select to change standard options</string>
+    <string name="AppTheme">App Theme</string>
+    <string name="AppThemeText">Sets the Theme to a new color</string>
+    <string name="Notification">Enable Notification</string>
+    <string name="NotificationText">Enable the quick select notification</string>
+    <!-- About -->
+    <string name="About">About</string>
+    <string name="CopyrightText">Copyright © 2010 Twisted Apps™ LLC</string>
+    <string name="Github">Open Source site</string>
+    <string name="GithubText">Open source url &#8230;</string>    
+    <string name="Blog">Blog</string>
+    <string name="BlogText">Blog about Twisted Home Manager, version, changes, help, etc &#8230;</string>
+    <string name="Email">E-mail</string>
+    <string name="EmailText">Send e-mail: suggestions or help</string>
+    <string name="Rollback">Rollback</string>
+    <string name="RollbackText">Rollback to an earlier version if issues. Download previous version and install.</string>
+    <string name="Market">Market</string>
+    <string name="MarketText">Take you to the market for Twisted Home Manager: rate, info, etc &#8230;</string>
+    
+</resources>

@@ -1,0 +1,8 @@
+1) Make sure you bumped the version and tagged the release
+  * Also update the version number in strings.xml
+
+2) Remove the debuggable flag
+
+3) Export campyre.apk
+
+4) Tag in version control

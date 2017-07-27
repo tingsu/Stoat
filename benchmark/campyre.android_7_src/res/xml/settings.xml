@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	
+	<EditTextPreference android:key="number_messages"
+		android:title="@string/number_messages_title"
+		android:summary="@string/number_messages_summary"
+		
+		android:inputType="number|phone"
+		
+		android:defaultValue="@string/number_messages_default"
+		/>
+	
+	<CheckBoxPreference android:key="entry_exit"
+		android:title="@string/entry_exit_title"
+		android:summaryOn="@string/entry_exit_summary_on"
+		android:summaryOff="@string/entry_exit_summary_off"
+		
+		android:defaultValue="@string/entry_exit_default"
+		/>
+	
+	<CheckBoxPreference android:key="timestamps"
+		android:title="@string/timestamps_title"
+		android:summaryOn="@string/timestamps_summary_on"
+		android:summaryOff="@string/timestamps_summary_off"
+		
+		android:defaultValue="@string/timestamps_default"
+		/>
+	
+	<CheckBoxPreference 
+	    android:key="load_images" 
+	    android:summaryOff="@string/load_images_summary_off" 
+	    android:summaryOn="@string/load_images_summary_on" 
+	    android:title="@string/load_images_title" 
+	    android:defaultValue="@string/load_images_default"
+	    />
+
+</PreferenceScreen>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:id="@+id/AboutLayout">
+    <ScrollView android:id="@+id/ScrollView01"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent" android:paddingLeft="10dp" android:paddingRight="10dp">
+        <TextView android:id="@+id/AboutTextView"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content" />
+    </ScrollView>
+    <Button android:layout_width="fill_parent"
+            android:id="@+id/CloseButton"
+            android:layout_marginTop="5dp"
+            android:layout_alignParentBottom="true"
+            android:text="@string/close_button"
+            android:layout_height="wrap_content"/>
+</LinearLayout>

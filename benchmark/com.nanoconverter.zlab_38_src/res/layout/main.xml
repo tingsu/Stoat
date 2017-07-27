@@ -1,0 +1,3087 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/bkgmain" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+
+            
+            
+
+            <LinearLayout
+                android:id="@+id/tab1"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/headtab1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:id="@+id/head"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:id="@+id/textView623"
+                            android:layout_width="50sp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#444444"
+                            android:text="@string/hello"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textView223"
+                            android:layout_width="50sp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#444444"
+                            android:text="@string/result"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+ 
+                            <LinearLayout
+                                android:id="@+id/textfield"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" >
+
+
+                                <EditText
+                                    android:id="@+id/ValueFrom"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="right"
+                                    android:inputType="numberDecimal|numberSigned"
+                                    android:maxLength="10"
+                                    android:text="@string/curentamount" >
+
+                                </EditText>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:text="=" />
+
+
+                                <EditText
+                                    android:id="@+id/ValueResult"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="left"
+                                    android:inputType="none"
+                                    android:maxLength="12"
+                                    android:text="@string/curentamount" >
+
+                                </EditText>
+                            </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/head2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:id="@+id/textView4"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#444444"
+                            android:text="@string/FROM"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textView2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="#444444"
+                            android:text="@string/TO"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ScrollView
+                    android:id="@+id/scroll1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+
+                    <LinearLayout
+                        android:id="@+id/courseslayout1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp" >
+
+                        <RadioGroup
+                            android:id="@+id/radioGroup1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" >
+
+                            <RadioButton
+                                android:id="@+id/fromUSD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:drawableLeft="@drawable/us"
+                                android:drawablePadding="5dp"
+                                android:text="@string/USDfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromEUR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/europeanunion"
+                                android:drawablePadding="5dp"
+                                android:text="@string/EURfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromCHF"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ch"
+                                android:drawablePadding="10dp"
+                                android:text="@string/CHFfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromGBP"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/gb"
+                                android:drawablePadding="5dp"
+                                android:text="@string/GBPfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromJPY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/jp"
+                                android:drawablePadding="5dp"
+                                android:text="@string/JPYfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromUAH"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ua"
+                                android:drawablePadding="5dp"
+                                android:text="@string/UAHfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromRUB"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ru"
+                                android:drawablePadding="5dp"
+                                android:text="@string/RUBfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromMDL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/md"
+                                android:drawablePadding="5dp"
+                                android:text="@string/MDLfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromBYR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/by"
+                                android:drawablePadding="5dp"
+                                android:text="@string/BYRfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromPLN"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/pl"
+                                android:drawablePadding="5dp"
+                                android:text="@string/PLNfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromLTL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/lt"
+                                android:drawablePadding="5dp"
+                                android:text="@string/LTLfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromLVL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/lv"
+                                android:drawablePadding="5dp"
+                                android:text="@string/LVLfrom" />
+
+                            <RadioButton
+                                android:id="@+id/fromAZN"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/az"
+                                android:drawablePadding="5dp"
+                                android:text="@string/AZNfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromAUD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/au"
+                                android:drawablePadding="5dp"
+                                android:text="@string/AUDfrom" />
+                            
+                            <RadioButton
+                                 android:id="@+id/fromAMD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/am"
+                                android:drawablePadding="5dp"
+                                android:text="@string/AMDfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromBGN"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/bg"
+                                android:drawablePadding="5dp"
+                                android:text="@string/BGNfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromBRL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/br"
+                                android:drawablePadding="5dp"
+                                android:text="@string/BRLfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromHUF"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/hu"
+                                android:drawablePadding="5dp"
+                                android:text="@string/HUFfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromDKK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/dk"
+                                android:drawablePadding="5dp"
+                                android:text="@string/DKKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromINR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/in"
+                                android:drawablePadding="5dp"
+                                android:text="@string/INRfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromKZT"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/kz"
+                                android:drawablePadding="5dp"
+                                android:text="@string/KZTfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromCAD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ca"
+                                android:drawablePadding="5dp"
+                                android:text="@string/CADfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromKGS"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/kg"
+                                android:drawablePadding="5dp"
+                                android:text="@string/KGSfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromCNY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/cn"
+                                android:drawablePadding="5dp"
+                                android:text="@string/CNYfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromNOK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/no"
+                                android:drawablePadding="5dp"
+                                android:text="@string/NOKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromRON"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ro"
+                                android:drawablePadding="5dp"
+                                android:text="@string/RONfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromXDR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/fam"
+                                android:drawablePadding="5dp"
+                                android:text="@string/XDRfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromSGD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/sg"
+                                android:drawablePadding="5dp"
+                                android:text="@string/SGDfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromTJS"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/tj"
+                                android:drawablePadding="5dp"
+                                android:text="@string/TJSfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromTRY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/tr"
+                                android:drawablePadding="5dp"
+                                android:text="@string/TRYfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromTMT"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/tm"
+                                android:drawablePadding="5dp"
+                                android:text="@string/TMTfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromUZS"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/uz"
+                                android:drawablePadding="5dp"
+                                android:text="@string/UZSfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromCZK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/cz"
+                                android:drawablePadding="5dp"
+                                android:text="@string/CZKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromSEK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/se"
+                                android:drawablePadding="5dp"
+                                android:text="@string/SEKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromZAR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/za"
+                                android:drawablePadding="5dp"
+                                android:text="@string/ZARfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/fromKRW"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/kr"
+                                android:drawablePadding="5dp"
+                                android:text="@string/KRWfrom" />
+                            <RadioButton
+                                android:id="@+id/fromFOO"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/fam"
+                                android:drawablePadding="5dp"
+                                android:text="@string/FOOfrom" />
+                        </RadioGroup>
+
+                        <RadioGroup
+                            android:id="@+id/radioGroup2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" >
+
+                            <RadioButton
+                                android:id="@+id/toUSD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:drawableLeft="@drawable/us"
+                                android:drawablePadding="5dp"
+                                android:text="@string/USDfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toEUR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/europeanunion"
+                                android:drawablePadding="5dp"
+                                android:text="@string/EURfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toCHF"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ch"
+                                android:drawablePadding="10dp"
+                                android:text="@string/CHFfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toGBP"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/gb"
+                                android:drawablePadding="5dp"
+                                android:text="@string/GBPfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toJPY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/jp"
+                                android:drawablePadding="5dp"
+                                android:text="@string/JPYfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toUAH"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ua"
+                                android:drawablePadding="5dp"
+                                android:text="@string/UAHfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toRUB"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ru"
+                                android:drawablePadding="5dp"
+                                android:text="@string/RUBfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toMDL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/md"
+                                android:drawablePadding="5dp"
+                                android:text="@string/MDLfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toBYR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/by"
+                                android:drawablePadding="5dp"
+                                android:text="@string/BYRfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toPLN"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/pl"
+                                android:drawablePadding="5dp"
+                                android:text="@string/PLNfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toLTL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/lt"
+                                android:drawablePadding="5dp"
+                                android:text="@string/LTLfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toLVL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/lv"
+                                android:drawablePadding="5dp"
+                                android:text="@string/LVLfrom" />
+
+                            <RadioButton
+                                android:id="@+id/toAZN"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/az"
+                                android:drawablePadding="5dp"
+                                android:text="@string/AZNfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toAUD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/au"
+                                android:drawablePadding="5dp"
+                                android:text="@string/AUDfrom" />
+                            
+                            <RadioButton
+                                 android:id="@+id/toAMD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/am"
+                                android:drawablePadding="5dp"
+                                android:text="@string/AMDfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toBGN"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/bg"
+                                android:drawablePadding="5dp"
+                                android:text="@string/BGNfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toBRL"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/br"
+                                android:drawablePadding="5dp"
+                                android:text="@string/BRLfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toHUF"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/hu"
+                                android:drawablePadding="5dp"
+                                android:text="@string/HUFfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toDKK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/dk"
+                                android:drawablePadding="5dp"
+                                android:text="@string/DKKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toINR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/in"
+                                android:drawablePadding="5dp"
+                                android:text="@string/INRfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toKZT"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/kz"
+                                android:drawablePadding="5dp"
+                                android:text="@string/KZTfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toCAD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ca"
+                                android:drawablePadding="5dp"
+                                android:text="@string/CADfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toKGS"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/kg"
+                                android:drawablePadding="5dp"
+                                android:text="@string/KGSfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toCNY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/cn"
+                                android:drawablePadding="5dp"
+                                android:text="@string/CNYfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toNOK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/no"
+                                android:drawablePadding="5dp"
+                                android:text="@string/NOKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toRON"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/ro"
+                                android:drawablePadding="5dp"
+                                android:text="@string/RONfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toXDR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/fam"
+                                android:drawablePadding="5dp"
+                                android:text="@string/XDRfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toSGD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/sg"
+                                android:drawablePadding="5dp"
+                                android:text="@string/SGDfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toTJS"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/tj"
+                                android:drawablePadding="5dp"
+                                android:text="@string/TJSfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toTRY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/tr"
+                                android:drawablePadding="5dp"
+                                android:text="@string/TRYfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toTMT"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/tm"
+                                android:drawablePadding="5dp"
+                                android:text="@string/TMTfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toUZS"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/uz"
+                                android:drawablePadding="5dp"
+                                android:text="@string/UZSfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toCZK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/cz"
+                                android:drawablePadding="5dp"
+                                android:text="@string/CZKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toSEK"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/se"
+                                android:drawablePadding="5dp"
+                                android:text="@string/SEKfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toZAR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/za"
+                                android:drawablePadding="5dp"
+                                android:text="@string/ZARfrom" />
+                            
+                            <RadioButton
+                                android:id="@+id/toKRW"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/kr"
+                                android:drawablePadding="5dp"
+                                android:text="@string/KRWfrom" />
+                            <RadioButton
+                                android:id="@+id/toFOO"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableLeft="@drawable/fam"
+                                android:drawablePadding="5dp"
+                                android:text="@string/FOOfrom" />
+                        </RadioGroup>
+                    </LinearLayout>
+
+                </ScrollView>
+            </LinearLayout>
+            
+            
+            <LinearLayout
+        android:id="@+id/tab2"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:background="#444444" />
+
+        <ScrollView
+            android:id="@+id/scroll2"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" >
+
+            <LinearLayout
+                android:id="@+id/container"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/USDcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texUSDfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/USDfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textUSD_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/USD_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseUSD"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/USD"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseUSDrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/USD" >
+                        </EditText>
+                        <!--
+									android:background="@drawable/edittext"
+									android:padding="2dp"
+
+                        -->
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/USDcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/EURcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texEURfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/EURfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textEUR_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/EUR_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseEUR"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/EUR"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseEURrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/EUR" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/EURcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/CHFcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texCHFfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CHFfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textCHF_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CHF_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseCHF"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CHF"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseCHFrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CHF" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/CHFcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/GBPcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texGBPfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/GBPfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textGBP_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/GBP_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseGBP"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/GBP"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseGBPrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/GBP" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/GBPcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/JPYcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texJPYfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/JPYfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textJPY_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/JPY_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseJPY"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/JPY"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseJPYrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/JPY" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/JPYcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/UAHcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texUAHfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/UAHfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textUAH_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/UAH_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseUAH"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/UAH"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseUAHrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/UAH" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/UAHcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/RUBcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texRUBfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/RUBfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textRUB_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/RUB_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseRUB"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/RUB"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseRUBrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/RUB" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/RUBcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/MDLcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texMDLfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/MDLfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textMDL_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/MDL_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseMDL"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/MDL"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseMDLrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/MDL" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/MDLcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/BYRcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texBYRfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/BYRfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textBYR_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/BYR_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseBYR"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/BYR"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseBYRrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/BYR" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/BYRcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/PLNcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texPLNfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/PLNfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textPLN_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/PLN_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CoursePLN"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/PLN"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CoursePLNrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/PLN" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/PLNcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/LTLcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texLTLfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/LTLfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textLTL_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/LTL_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseLTL"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/LTL"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseLTLrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/LTL" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/LTLcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/LVLcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texLVLfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/LVLfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textLVL_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/LVL_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseLVL"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/LVL"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseLVLrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/LVL" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/LVLcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/AZNcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texAZNfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/AZNfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textAZN_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/AZN_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseAZN"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/AZN"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseAZNrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/AZN" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/AZNcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/AUDcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texAUDfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/AUDfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textAUD_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/AUD_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseAUD"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/AUD"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseAUDrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/AUD" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/AUDcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/AMDcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texAMDfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/AMDfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textAMD_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/AMD_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseAMD"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/AMD"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseAMDrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/AMD" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/AMDcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/BGNcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texBGNfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/BGNfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textBGN_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/BGN_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseBGN"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/BGN"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseBGNrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/BGN" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/BGNcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/BRLcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texBRLfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/BRLfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textBRL_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/BRL_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseBRL"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/BRL"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseBRLrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/BRL" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/BRLcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/HUFcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texHUFfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/HUFfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textHUF_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/HUF_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseHUF"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/HUF"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseHUFrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/HUF" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/HUFcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/DKKcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texDKKfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/DKKfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textDKK_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/DKK_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseDKK"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/DKK"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseDKKrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/DKK" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/DKKcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/INRcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texINRfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/INRfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textINR_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/INR_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseINR"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/INR"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseINRrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/INR" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/INRcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/KZTcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texKZTfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/KZTfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textKZT_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/KZT_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseKZT"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/KZT"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseKZTrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/KZT" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/KZTcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/CADcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texCADfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CADfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textCAD_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CAD_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseCAD"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CAD"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseCADrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CAD" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/CADcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/KGScl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texKGSfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/KGSfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textKGS_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/KGS_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseKGS"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/KGS"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseKGSrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/KGS" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/KGScls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/CNYcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texCNYfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CNYfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textCNY_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CNY_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseCNY"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CNY"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseCNYrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CNY" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/CNYcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/NOKcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texNOKfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/NOKfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textNOK_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/NOK_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseNOK"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/NOK"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseNOKrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/NOK" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/NOKcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/RONcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texRONfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/RONfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textRON_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/RON_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseRON"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/RON"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseRONrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/RON" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/RONcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/XDRcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texXDRfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/XDRfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textXDR_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/XDR_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseXDR"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/XDR"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseXDRrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/XDR" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/XDRcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/SGDcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texSGDfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SGDfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textSGD_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SGD_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseSGD"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/SGD"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseSGDrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/SGD" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/SGDcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/TJScl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texTJSfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/TJSfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textTJS_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/TJS_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseTJS"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/TJS"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseTJSrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/TJS" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/TJScls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/TRYcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texTRYfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/TRYfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textTRY_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/TRY_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseTRY"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/TRY"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseTRYrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/TRY" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/TRYcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/TMTcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texTMTfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/TMTfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textTMT_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/TMT_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseTMT"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/TMT"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseTMTrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/TMT" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/TMTcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/UZScl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texUZSfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/UZSfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textUZS_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/UZS_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseUZS"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/UZS"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseUZSrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/UZS" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/UZScls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/CZKcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texCZKfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CZKfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textCZK_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/CZK_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseCZK"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CZK"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseCZKrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/CZK" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/CZKcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/SEKcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texSEKfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SEKfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textSEK_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/SEK_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseSEK"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/SEK"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseSEKrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/SEK" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/SEKcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/ZARcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texZARfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ZARfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textZAR_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ZAR_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseZAR"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/ZAR"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseZARrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/ZAR" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/ZARcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/KRWcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texKRWfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/KRWfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textKRW_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/KRW_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseKRW"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/KRW"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseKRWrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/KRW" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/KRWcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+
+                <LinearLayout
+                    android:id="@+id/FOOcl"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="2dp" >
+
+                        <TextView
+                            android:id="@+id/texFOOfrom"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/FOOfrom"
+                            android:textSize="18sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/textFOO_discription"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/FOO_discription"
+                            android:textSize="12sp" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:padding="2dp" >
+
+                        <EditText
+                            android:id="@+id/CourseFOO"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/FOO"
+                            android:visibility="invisible" >
+                        </EditText>
+
+                        <EditText
+                            android:id="@+id/CourseFOOrate"
+                            android:layout_width="150sp"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="@string/FOO" >
+                        </EditText>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/FOOcls"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dip"
+                    android:background="#444444" />
+            </LinearLayout>
+        </ScrollView>
+
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp" >
+
+            <Button
+                android:id="@+id/BankChangeButton"
+                android:layout_width="45dp"
+                android:layout_height="fill_parent"
+                android:drawableLeft="@drawable/bank"
+                android:onClick="BankChangeClickHandler" />
+
+            <Button
+                android:id="@+id/UpdateButton"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:onClick="UpdateButtonClickHandler"
+                android:text="@string/UpdateButtonText"
+                android:textSize="14dp" />
+
+            <Button
+                android:id="@+id/CopyFromBankButton"
+                android:layout_width="45dp"
+                android:layout_height="fill_parent"
+                android:drawableLeft="@drawable/copy_from_bank"
+                android:onClick="CopyFromBankClickHandler" />
+
+
+
+
+            <ToggleButton
+                android:id="@+id/InverseStateButton"
+                android:layout_width="45dp"
+                android:layout_height="fill_parent"
+                android:drawableLeft="@drawable/inverse"
+                android:onClick="InverseStateClickHandler"
+                android:textOff=""
+                android:textOn="" />
+
+        </LinearLayout>
+    </LinearLayout>
+            
+        </FrameLayout>
+    </LinearLayout>
+
+</TabHost>

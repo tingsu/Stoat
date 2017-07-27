@@ -1,0 +1,116 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="3dip"
+    android:paddingRight="3dip"
+    >
+    
+    <TextView
+        android:id="@+id/txtStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:gravity="center"
+        android:layout_marginTop="5dp"
+        android:text="@string/status_stopped"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <ProgressBar 
+	    android:id="@+id/pbCurrent"
+	    android:layout_width="match_parent"
+	    android:layout_height="6dip"
+        android:layout_margin="3dip"
+        android:layout_below="@id/txtStatus"
+        style="@style/brightnessIndicator"
+	    />
+	
+    <Button
+        android:id="@+id/btnOnOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="2dip"
+        android:layout_below="@id/pbCurrent"
+        android:minWidth="90dip"
+        android:text="@string/btn_start_text" />
+
+    <Button
+        android:id="@+id/btnNight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/btnOnOff"
+        android:layout_marginTop="6dip"
+        android:minWidth="90dip"
+        android:text="@string/txt_night" />
+
+    <CheckBox
+        android:id="@+id/cbAutostart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pbCurrent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBaseline="@id/btnOnOff"
+        android:text="@string/cb_autostart_text" />
+
+    <CheckBox
+        android:id="@+id/cbAutonight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cbAutostart"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentLeft="true"
+        android:text="@string/cb_autonight_text" />
+
+    <TextView
+        android:id="@+id/lblManualAdjustment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/cbAutonight"
+        android:layout_marginTop="18dp"
+        android:text="@string/manual_adjust"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <LinearLayout
+        android:id="@+id/seekBox"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lblManualAdjustment" 
+        android:layout_alignParentLeft="true"
+        >
+    <SeekBar
+        android:id="@+id/sbAdjLevel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+    <SeekBar
+        android:id="@+id/sbNightBrightness"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        />
+    	</LinearLayout>
+    <TextView
+        android:id="@+id/lblHowToUse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/seekBox"
+        android:layout_alignRight="@+id/seekBox"
+        android:layout_below="@+id/seekBox"
+        android:layout_marginTop="26dp"
+        android:text="@string/txt_howto_use" />
+
+    <Button
+        android:id="@+id/btnDonate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btnNight"
+        android:layout_below="@+id/lblHowToUse"
+        android:layout_marginTop="18dp"
+        android:text="@string/btn_donate_text" />
+
+</RelativeLayout>

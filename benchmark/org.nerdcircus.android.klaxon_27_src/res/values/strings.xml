@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2007, Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+-->
+
+<!-- This file contains resource definitions for displayed strings, allowing
+     them to be changed based on the locale and options. -->
+
+<resources>
+    <!-- window and activity names -->
+    <string name="app_name">Klaxon</string>
+    <string name="prefs_activity">Preferences</string>
+    <string name="replylist_activity">Reply Listing</string>
+    <!-- menu items -->
+    <string name="notify_page">You have been paged</string>
+    <string name="sms_ok">Response Sent.</string>
+    <string name="sms_failed">Response Failed. Please try again.</string>
+    <string name="esclist_empty">No pages... yet.</string>
+
+    <!-- replying and deleting -->
+    <string name="delete_all">Delete All</string>
+    <string name="delete">Delete</string>
+    <string name="confirm_delete">Delete all pages?</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="other">other</string>
+    <string name="reply_ok">Reply sent</string>
+    <string name="add_reply">Add new reply</string>
+
+    <!-- Prefs -->
+    <string name="pref_oncall">On Call</string>
+    <string name="pref_oncall_summary">Are you oncall?</string>
+    <string name="pref_alertsound">Alert Sound</string>
+    <string name="pref_alarmstream">Use Alarm Volume?</string>
+    <string name="pref_alarmstream_summary">use the alarm volume, instead of the ringer volume</string>
+    <string name="pref_smssettings">Sms Settings</string>
+    <string name="pref_smssettings_summary">preferences for pages received by SMS</string>
+    <string name="pref_sms_sender">Sender</string>
+    <string name="pref_sms_sender_summary">substring match on sender phone number or email</string>
+    <string name="pref_sms_subject">Include Subject Line</string>
+    <string name="pref_sms_subject_summary">include the subject line in parenthesis in reply.</string>
+    <string name="pref_sms_servicecenter">Use Received Service Center</string>
+    <string name="pref_sms_servicecenter_summary">use the SMS Service Center from the received message?</string>
+    <string name="pref_sms_consumesms">Consume SMS Message</string>
+    <string name="pref_sms_consumesms_summary">prevent the SMS from being delivered to other apps</string>
+    <string name="pref_sms_send_dest">Send Destination</string>
+    <string name="pref_sms_send_dest_summary">Some SMS gateways require that the destination address be specified</string>
+    <string name="pref_editreplies">Edit Replies</string>
+    <string name="pref_editreplies_summary">edit the text of quick responses</string>
+    <string name="pref_notificationtime">Notification Interval</string>
+    <string name="pref_notificationtime_summary">length of time between notifications</string>
+    <string name="pref_vibrate">Vibrate?</string>
+    <string name="pref_match_message_body">Also Match Message Body</string>
+    <string name="pref_match_message_body_summary">match sender pattern against the body of the message</string>
+    <string name="pref_alternate_lineendings">Use alternate separator</string>
+    <string name="pref_alternate_lineendings_summary">Parse : as a replacement separator between sender, subject, and body</string>
+    <string name="pref_changelog">Changelog</string>
+    <string name="pref_changelog_summary">notable changes between releases</string>
+    <string name="pref_version">Version</string>
+
+    <!-- Alert contents -->
+    <string name="alert_no_subject">Subject not specified</string>
+    <string name="alert_no_body">Body not specified</string>
+
+</resources>
+

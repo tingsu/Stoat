@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- <color name="kindmind_background">#2a2a2a</color>  -->
+    <color name="kindmind_green">#006000</color>
+    <color name="kindmind_light_green">#009000</color>
+     
+    <!-- Colours for showing/indicating the action type to the user -->
+    <!-- <color name="no_action">@color/kindmind_background</color> -->
+    <color name="one_action">#5a5a5a</color>
+    <color name="multiple_actions">#9a9a9a</color>
+    <color name="special_built_in_action">@color/kindmind_green</color>
+    
+</resources>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <!-- focusable and focusableInTouchMode added to remove focus from edittext -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+    	android:focusableInTouchMode="true"
+        android:orientation="vertical" >
+        
+		<TextView
+            android:id="@+id/textView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:text="@string/itemSetup_listItem_title"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            style="?android:attr/listSeparatorTextViewStyle" />
+        <EditText
+            android:id="@+id/listitem_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions|textCapSentences"
+            android:hint="@string/itemSetup_listItemNameHint" />
+
+        <TextView
+            android:id="@+id/notificationTextView"
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:text="@string/itemSetup_dailyReminder_title"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Switch
+                android:id="@+id/notificationSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/timePickerButton"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@id/notificationSwitch"
+                android:text="@string/itemSetup_dailyReminder_timeNotSet" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/actionOnClickTextView"
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:text="@string/itemSetup_actionsOnClick_title"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <!-- List of actions -->
+        <LinearLayout 
+            android:id="@+id/actionsLinearLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        </LinearLayout>
+        <Button
+            android:id="@+id/newActionButton"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/itemSetup_addNewAction_title" />
+ 
+    </LinearLayout>
+
+</ScrollView>

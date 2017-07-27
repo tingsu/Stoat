@@ -1,0 +1,2 @@
+1) export using Inkscape
+2) add padding (e.g. 3px for 96x96) using Gimp

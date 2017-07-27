@@ -1,0 +1,52 @@
+
+SM Nonviolent Communication, kan jag använda detta?
+
+
+Gå igenom alla [Refactor]-taggar
+
+
+----------Test av användare-----------
+Gustaf, Sebastian, Pappa
+
+
+fixa så att om man markerar något i en lista så får det mycket hög relevans för andra val ___i samma lista___
+
+
+användaren kan ställa in en förvald e-postadress (sin egen kanske, kan man fixa så att den hämtas
+från ett annat ställe?)
+
+
+
+*****Spinner med Happiness*****
+Receiving empathically
+Values
+https://developer.android.com/reference/android/app/ActionBar.html#setListNavigationCallbacks%28android.widget.SpinnerAdapter,%20android.app.ActionBar.OnNavigationListener%29
+Och ta bort den sista "strategies" ALT: Ändra till _celebration_ och ge möjlighet att dela med andra
+
+
+*****Decorator pattern för strategies*****
+Lösning för att kunna lägga till funktionalitet dynamiskt: *Decorator och Fragments*
+https://developer.android.com/training/basics/fragments/index.html
+
+Strategies: Detaljer
+Påminnelser (service?)
+Kollar i slutet av dagen (checklista, service)
+
+
+Contentprovider för Backup av filer (istället för world read permission)
+Forskning: Read android documentation about contentproviders
+
+Algorithms (and connected data structures)
+
+Flera knappar
+Olika knappar för olika vyer
+Fixing the structure for the buttons (strategy pattern?)
+
+Koppling till zenfolio
+JSON-RTC
+alternativt SOAP
+
+newly added listdataitem at the top instead of bottom of the list and/or scrolling to it
+
+bug: om man använder force close och sedan snabbt försöker starta igen så kommer inte appen igång
+

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">ApkTrack</string>
+
+    <!-- Menu bar strings -->
+    <string name="refresh_menu_desc">Ponovno otkrij instalirane aplikacije</string>
+    <string name="check_all_apps_desc">Provjeri nadogradnje za sve aplikacije</string>
+    <string name="show_system_apps">Prikaži sistemske aplikacije</string>
+    <string name="hide_system_apps">Sakrij sistemske aplikacije</string>
+    <string name="sort_type_alpha">Sortiraj po abecedi</string>
+    <string name="sort_type_updated">Sortiraj po statusu</string>
+    <string name="settings">Postavke</string>
+    <string name="search">Pretraži aplikacije</string>
+
+    <!-- Refresh installed apps button strings. Please mind the leading space and trailing line feed! -->
+    <string name="new_apps_detected"> %1$d novih aplikacija otkriveno\n</string>
+    <string name="apps_updated"> %1$d aplikacija nadograđeno\n</string>
+    <string name="apps_deleted">%1$d aplikacija izbrisano</string>
+
+    <!-- Notification strings -->
+    <string name="app_updated_notification">%1$s je nadograđena.</string>
+    <string name="apps_updated_notification">Pronađene su nove nadogradnje.</string>
+    <string name="apps_updated_notification_summary">%1$s i %2$d ostalih aplikacija se može nadograditi.</string>
+    <string name="app_version_available">Verzija %1$s je dostupna!</string>
+    <string name="app_can_be_updated">%1$s se može nadograditi!</string>
+
+    <!-- Application status strings -->
+    <string name="no_data_found">Nisu pronađene informacije o nadogradnji</string>
+    <string name="network_error">Problemi s povezivanjem</string>
+    <string name="current">Trenutno:</string>
+    <string name="generic_exception">Greška: %1$s</string>
+    <string name="last_check">Zadnja provjera:</string>
+    <string name="never">nikada</string>
+
+    <!-- Update source chooser dialog -->
+    <string name="available_update_sources">Dostupni izvori nadogradnje</string>
+    <string name="ok">Uredu</string>
+    <string name="cancel">Odustani</string>
+
+    <!-- Settings strings -->
+    <string name="general">Opće postavke</string>
+    <string name="preferred_search_engine">Preferirana tražilica</string>
+    <string name="preferred_search_engine_desc">Odaberite koju tražilicu želite koristiti za pretraživanje APK-a\nTrenutni odabir: %s</string>
+    <string name="enable_background_checks">Omogući provjeru u pozadini</string>
+    <string name="enable_background_checks_desc">Periodično odradi automatske provjere nadogradnji za sve aplikacije.</string>
+    <string name="background_checks_on_wifi_only">Samo WiFi</string>
+    <string name="background_checks_on_wifi_only_desc">Nikada ne koristi mobilne podatke za pozadinsku provjeru.</string>
+    <string name="appearance">Izgled</string>
+    <string name="hide_unknown_apps">Sakrij nepoznate aplikacije</string>
+    <string name="hide_unknown_apps_desc">Ne prikazuj aplikacije za koje se ne mogu pronaći informacije o nadogradnji</string>
+
+    <!-- Messages -->
+    <string name="search_no_result">Nije pronađeno ništa.</string>
+
+</resources>

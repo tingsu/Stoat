@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <include layout="@layout/title_strip"/>
+    
+    <LinearLayout style="@style/TitleBar">
+    	<!--  <ImageView style="@style/TitleBarLogo"
+            android:src="@drawable/title_logo" />-->
+        <TextView
+        	style="@style/TitleBarText"
+        	android:textColor="@color/amount_color"
+        	android:text="@string/app_name" />    
+    	<View style="@style/TitleBarSpacer" />
+    	
+    	<!-- <ImageButton style="@style/TitleBarAction"
+            android:src="@drawable/icon" />
+    	<ImageView style="@style/TitleBarSeparator" />
+    	<ImageButton style="@style/TitleBarAction"
+            android:src="@drawable/icon" />
+    	<ImageView style="@style/TitleBarSeparator" />
+    	<ImageButton style="@style/TitleBarAction"
+            android:src="@drawable/icon" />  -->
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:padding="@dimen/layout_padding" >
+    	<Button
+			android:id="@+id/add_one_serving_button"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="@string/one_serving_button_label"
+			android:onClick="onOneServingClick" />
+		<TableLayout
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_gravity="center"
+			android:stretchColumns="*" >
+			<TableRow>
+			    <Button
+					android:id="@+id/add_two_servings_button"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/two_serving_button_label"
+					android:onClick="onFavServingsClick" />
+				<Button
+					android:id="@+id/add_custom_serving_button"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/custom_serving_button_label"
+					android:onClick="onCustomServingClick" />
+				<Button
+					android:id="@+id/undo_last_serving_button"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/undo_serving_button_label"
+					android:onClick="onUndoClick" />
+			</TableRow>
+		</TableLayout>
+		<TextView
+			android:id="@+id/consumption_textview"
+			android:layout_width="fill_parent" 
+		    android:layout_height="wrap_content"
+		    android:textSize="@dimen/amount_size"
+		    android:textColor="@color/amount_color" 
+		    android:textStyle="bold"
+		    android:gravity="center"
+		    android:paddingTop="@dimen/amount_padding_top"
+		    android:paddingBottom="0dip"
+			android:text="@string/consumption_label" />
+		<TextView
+			android:id="@+id/over_under_textview"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:textSize="@dimen/text_size"
+			android:textStyle="bold"
+			android:gravity="center" />
+		<TextView
+			android:id="@+id/goal_textview"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:textSize="@dimen/text_size"
+			android:textStyle="bold"
+			android:gravity="center" />
+		<TextView
+			android:id="@+id/last_entry_textview"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:textSize="@dimen/text_size"
+			android:textStyle="bold"
+			android:gravity="center"
+			android:text="Last entry: 2012-03-09 xx:mm:ss" />
+	</LinearLayout>
+</LinearLayout>

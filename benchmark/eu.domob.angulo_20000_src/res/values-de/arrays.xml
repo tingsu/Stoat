@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Angulo.  Measure angles and slopes with Android!
+    Copyright (C) 2012-2013  Daniel Kraft <d@domob.eu>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<resources>
+
+  <!-- Values for the sensor rate preference.  -->
+  <string-array name="rate_text">
+    <item name="fastest">Sehr schnell</item>
+    <item name="game">Schnell</item>
+    <item name="ui">Normal</item>
+    <item name="normal">Langsam</item>
+  </string-array>
+
+  <!-- Values for smoothing preference.  -->
+  <string-array name="smoothing_text">
+    <item name="none">Nein</item>
+    <item name="little">Wenig</item>
+    <item name="much">Viel</item>
+  </string-array>
+
+  <!-- Values for orientation preference.  -->
+  <string-array name="orientation_text">
+    <item name="sensor">Automatisch</item>
+    <item name="portrait">Hochformat</item>
+    <item name="landscape">Querformat</item>
+  </string-array>
+
+</resources>

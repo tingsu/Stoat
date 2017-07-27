@@ -1,0 +1,74 @@
+<resources>
+
+    <string name="app_name">YAAB(beta)</string>
+    <string name="title_activity_main">YAAB自动亮度</string>
+    <string name="btn_start_text">启动</string>
+    <string name="btn_stop_text">停止</string>
+    <string name="cb_autostart_text">自动运行</string>
+    <string name="cb_notificon_text">通知栏图标</string>
+    <string name="status_running">正在运行</string>
+    <string name="status_stopped">已停止</string>
+    <string name="status_nosensor">没有光线传感器</string>
+
+    <string name="toast_service_started">YAAB服务已启动</string>
+    <string name="toast_service_stopped">YAAB服务已停止</string>
+
+    <string name="manual_adjust">手动调节</string>
+
+    <string name="txt_howto_use">使用方法: 点击“启动”按钮开启服务，使用“手动调节”滑块调节所需的平均亮度水平。\n\n“自动夜间模式”会在光线传感器读数很低时开启夜间模式。</string>
+    <string name="txt_nolightsensor_sorry">很抱歉，没有找到光线传感器，程序无法正常运行。</string>
+
+    <string name="title_activity_credits">YAAB自动亮度</string>
+    <string name="activity_credits_txt_title">鸣谢</string>
+    <string name="activity_credits_txt_main">This application developed and supported by <a href="http://www.gyrus.biz/">Gyrus Solutions</a>.\nSource code and development builds are available at <a href="https://bitbucket.org/gyrussolutions/yaab/">BitBucket</a>.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+    <string name="activity_credits_btn_close">关闭</string>
+    
+    <string name="preferences">选项</string>
+    <string name="cb_alwaysfg_text">保持在前台</string>
+    <string name="summary_autostart_preference">开机自动启动YAAB服务</string>
+    <string name="summary_fgservice_preference">当服务活动时在通知栏显示图标</string>
+    <string name="summary_always_fgsrv_preference">屏幕关闭后不将服务切换到后台</string>
+    <string name="alert_keepalive_title">使用系统警报</string>
+    <string name="alert_keepalive_summary">保持服务处于活动状态（测试中）</string>
+        
+    <string name="ranges_title">范围</string>
+    <string name="txt_night">夜间</string>
+    <string name="txt_normal">正常</string>
+    <string name="ranges_summary">最小值，最大值，阈值，夜间模式亮度</string>
+    <string name="brightness_range_caption">亮度范围</string>
+    <string name="txt_min">最小亮度</string>
+    <string name="txt_max">最大亮度</string>    
+    <string name="night_reading_caption">夜间模式</string>
+    <string name="cb_autonight_text">自动夜间模式</string>
+    <string name="txt_night_threshold">夜间模式阈值</string>
+    <string name="txt_night_brightness">夜间模式亮度</string>
+    <string name="btn_night_test">测试</string>
+    <string name="txt_sensor_reading">光线传感器数值：</string>
+    <string name="txt_threshold_value">当前阈值：</string>
+    <string name="txt_none">无</string>
+    <string name="brightness_status_off">关闭</string>
+    <string name="brightness_status_auto">自动</string>
+    <string name="brightness_status_manualnight">夜间（手动）</string>
+    <string name="brightness_status_autonight">夜间</string>
+    <string name="txt_not_auto_note">请注意，当前服务不是在自动模式下，您改变的设置可能无法立即生效。</string>
+
+    <string name="cb_smooth_title">平滑亮度</string>
+    <string name="cb_smooth_summary">防止屏幕亮度跳变</string>
+        	
+	<string name="cb_lownmvalues_title">夜间模式值低</string>
+	<string name="cb_lownmvalues_summary">除以10的范围限制</string>
+
+	<string name="cb_nightfalldelay_title">夜间模式延迟</string>
+	<string name="cb_nightfalldelay_summary">〜延迟前5秒自动住一晚</string>
+	
+		<string name="btn_donate_text">捐赠</string>
+	<string name="activity_donate_txt_title">捐赠</string>
+	<string name="activity_donate_btn1_text">~ 1 USD</string>
+	<string name="activity_donate_btn2_text">~ 2 USD</string>
+	<string name="activity_donate_btn3_text">~ 3 USD</string>
+	<string name="activity_donate_status_initializingbilling">初始化谷歌播放计费</string>
+	<string name="activity_donate_status_billingfailed">谷歌播放人迹罕至计费</string>
+	<string name="activity_donate_status_billingok">请继续</string>
+	<string name="activity_donate_btn_yours">谢谢!</string>
+	
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2012-2013 CNRS and University of Strasbourg
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+
+    <string name="app_name">CEToolbox</string>
+    <string name="CapillaryLength">Capillary length</string>
+    <string name="InsideDiameter">Inside diameter</string>
+    <string name="Pressure">Pressure</string>
+    <string name="Time">Time</string>
+    <string name="Viscosity">Viscosity</string>
+    <string name="Calculate">Calculate</string>
+    <string name="Reset">Reset</string>
+    <string name="toWindowLength">Length to window</string>
+    <string name="Concentration">Concentration</string>
+    <string name="MolecularWeight">Molecular weight</string>
+    <string name="Voltage">Voltage</string>
+    <string name="Centimeter">cm</string>
+    <string name="Centipoid">cp</string>
+    <string name="Micrometer">μm</string>
+    <string name="Second">s</string>
+    <string name="Gpermol">g/mol</string>
+    <string name="Vpercm">V/cm</string>
+    <string name="Volt">V</string>
+    <string name="None"></string>
+    <string name="Volume">Volume</string>
+    <string name="Conductivity">Conductivity</string>
+    <string name="Flow">Flow</string>
+    <string name="About">About</string>
+    <string name="HydrodynamicInjection">Hydrodynamic injection: </string>
+    <string name="CapillaryVolume">Capillary volume: </string>
+    <string name="PlugLength">Plug (% of total length): </string>
+    <string name="InjectedAnalyte">Injected analyte: </string>
+    <string name="TimeToReplaceVolume">Time to replace 1 volume: </string>
+    <string name="PlugLengthToWindow">Plug (% of length to window): </string>
+    <string name="InjectionPressure">Injection pressure: </string>
+    <string name="InjectionPlugLength">Injection plug length: </string>
+    <string name="FlowRate">Flow rate: </string>
+    <string name="FieldStrength">Field strength: </string>
+    <string name="CapillaryToWindowVolume">Capillary volume to window: </string>
+
+</resources>

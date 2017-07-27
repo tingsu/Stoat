@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <!--
+  <CheckBoxPreference
+    android:key="checkbox"
+    android:title="Checkbox Preference"
+    android:summary="Check it on, check it off" /> -->
+  <ListPreference
+    android:key="sourcelist"
+    android:title="New Article Source"
+    android:summary="The 'arXiv API' option is recommended. The RSS source does not support the widget and only shows the most recent days articles."
+    android:entries="@array/sourcelistentries"
+    android:entryValues="@array/sourcelistvalues"
+    android:dialogTitle="Choose a source for browsing new articles." />
+</PreferenceScreen>
+

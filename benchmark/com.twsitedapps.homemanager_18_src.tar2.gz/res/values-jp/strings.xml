@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ++++++++++++++++++++++++++++ Multi-language support +++++++++++++++ -->
+    <!-- Japanese Translation -->
+    
+    <string name="set_preferences">設定</string>
+    <string name="not_callable"> び出すん。</string>
+    <string name="market_failed">市場のアプリが起動に失敗しまし</string>
+    <string name="default_set">は、すでに設定されている</string>
+    <string name="please_wait">インストールされたホーム·リストが完了していない</string>
+    <string name="homeapp_info">アべてのアプリケーションが市場にありません</string>
+    <string name="installed"> (インストールされて)</string>
+    <string name="notInstalled"> (インストールされていません)</string>
+    <string name="defaultValue"> (既定)</string>
+    <string name="noDefaultSet">既定設定されていない</string>
+    <string name="homeAppNotCallable">エラーコーリングホームアプリケーション?</string>
+    <string name="securityException">セキュリティ例外: に正しい権限を持っていません</string>
+    <string name="appSelection">選択したアプリケーションは市場に行きます</string>
+    <string name="setDefault">セット</string>
+    <string name="clearDefault">クリア</string>
+    <string name="getHome">得る</string>
+    <string name="startAtBoot">自動実行する</string>
+    <string name="wifi">WiFi</string>
+    <string name="contacts">コンタクト</string>
+    <string name="app">アプリ:</string>
+    <string name="version">バージョン:</string>
+    <string name="permission">パーミッション:</string>
+    
+    <!-- Buttons -->
+    <string name="clearNotification">クリア通知</string>
+    <string name="disableNotification">通知を無</string>
+    
+    <!-- Notification -->
+    <string name="quickSelect">クイック選択</string>
+    <string name="selectHomeApp">ホームアプリを選択</string>
+    
+    <!-- Array -->
+    <string name="Black">ブラック</string>
+    <string name="White">白</string>
+    <string name="Grey">グレー</string>
+    <string name="Cyan">シアン</string>
+    <string name="Green">グリーン</string>
+    <string name="Magenta">マゼンタ</string>
+    
+    <!-- Menu -->
+    <string name="ascending">名前 (+)</string>
+    <string name="descending">名前 (-)</string>
+    <string name="DefaultValue">Default</string>
+    <string name="preferences">環境設定</string>
+    <string name="Installed">インストールされて</string>
+    <string name="NotInstalled">インストールされていません</string>
+    <string name="memory">メモリ</string>
+    
+    <!-- Preferences -->
+    <!-- Standard Options -->
+    <string name="StandardOptions">標準オプション</string>
+    <string name="StandardOptionsText">標準オプションを変更する場合に選択</string>
+    <string name="AppTheme">アプリのテーマ</string>
+    <string name="AppThemeText">新しい色にテーマを設定し</string>
+    <string name="Notification">通知を有効に</string>
+    <string name="NotificationText">クイック選択通知を有効に</string>
+    <!-- About -->
+    <string name="About">約</string>
+    <string name="CopyrightText">Copyright © 2010 Twisted Apps™ LLC</string>
+    <string name="Github">オープンソースサイト</string>
+    <string name="GithubText">オープンソースURL &#8230;</string> 
+    <string name="Blog">ブログ</string>
+    <string name="BlogText">ツイスト·ホーム·マネージャー、バージョン、変更、ヘルプなどについてのブログ &#8230;</string>
+    <string name="Email">電子メール</string>
+    <string name="EmailText">電子メール送信先：提案またはヘルプ</string>
+    <string name="Rollback">ロールバックの</string>
+    <string name="RollbackText">問題があれば以前のバージョンにロールバックします。以前のバージョンをダウンロードしてインストールし</string>
+    <string name="Market">Google Play</string>
+    <string name="MarketText">市場に連れて行く：レート、情報など &#8230;</string>
+    
+</resources>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+ *    Copyright 2011 Twisted Apps LLC
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *  limitations under the License.
+ * 
+ -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <PreferenceCategory
+                android:title="@string/StandardOptions">
+                <PreferenceScreen
+		                android:title="@string/StandardOptions"
+		                android:summary="@string/StandardOptionsText"
+		                android:key="standardOptions" >
+	                <ListPreference
+	                        android:title="@string/AppTheme"
+	                        android:summary="@string/AppThemeText"
+	                        android:key="themeKey"
+	                        android:defaultValue="0"
+	                        android:entries="@array/listTheme"
+	                        android:entryValues="@array/listThemeValues" />
+	                <CheckBoxPreference
+	                        android:title="@string/Notification"
+	                        android:summary="@string/NotificationText"
+	                        android:defaultValue="true"
+	                        android:key="notificationKey" />
+	                <ListPreference
+	                        android:title="Language"
+	                        android:key="listLanguage"
+	                        android:defaultValue="0"
+	                        android:entries="@array/listLanguageArray"
+	                        android:entryValues="@array/listLanguageValues" />
+                </PreferenceScreen>
+        </PreferenceCategory>
+		<PreferenceCategory
+                android:title="@string/About">
+                <Preference
+                        android:title="@string/version_num"
+                        android:summary="@string/CopyrightText"
+                        android:key="version" />
+                <Preference
+                        android:title="@string/Blog"
+                        android:summary="@string/BlogText"
+                        android:key="blog" />
+                <Preference
+                        android:title="@string/Github"
+                        android:summary="@string/GithubText"
+                        android:key="github" />
+                <Preference
+                        android:title="@string/Email"
+                        android:summary="@string/EmailText"
+                        android:key="supportEmail" />
+                <Preference
+                        android:title="@string/Rollback"
+                        android:summary="@string/RollbackText"
+                        android:key="rollback" />
+                <Preference
+                        android:title="@string/Market"
+                        android:summary="@string/MarketText"
+                        android:key="market" />
+		</PreferenceCategory>
+</PreferenceScreen>

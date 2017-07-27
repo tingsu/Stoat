@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <apps.babycaretimer.NumberPickerButton android:id="@+id/increment"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/timepicker_up_btn_pink" />
+    <EditText android:id="@+id/timepicker_input"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:singleLine="true"
+        style="?android:attr/textAppearanceLargeInverse"
+        android:textColor="@android:color/primary_text_light"
+        android:textSize="30sp"
+        android:background="@drawable/timepicker_input_pink" />
+    <apps.babycaretimer.NumberPickerButton android:id="@+id/decrement"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/timepicker_down_btn_pink" />
+</merge>

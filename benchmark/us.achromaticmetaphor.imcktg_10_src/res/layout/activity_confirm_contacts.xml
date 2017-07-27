@@ -1,0 +1,122 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".ConfirmContacts" >
+
+    <SeekBar
+        android:id="@+id/FREQ_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/WPM_prompt"
+        android:layout_below="@+id/FREQ_prompt"
+        android:max="4390"
+        android:progress="780"
+        android:layout_marginTop="20dp" />
+
+    <SeekBar
+        android:id="@+id/WPM_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/WPM_prompt"
+        android:layout_below="@+id/WPM_prompt"
+        android:max="143"
+        android:progress="19"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/WPM_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="20dp"
+        android:text="@string/words_per_minute_prompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/FREQ_prompt"
+        android:layout_below="@id/WPM_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignLeft="@+id/WPM_input"
+        android:layout_marginTop="20dp"
+        android:text="@string/frequency_prompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/FREQ_hint"
+        android:layout_below="@id/WPM_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignRight="@+id/WPM_input"
+        android:layout_marginTop="20dp"
+        android:text="@string/frequency_default"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/WPM_hint"
+        android:layout_above="@id/WPM_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignRight="@+id/WPM_input"
+        android:layout_marginTop="20dp"
+        android:text="@string/wpm_default"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/RC_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/WPM_input"
+        android:layout_alignBaseline="@+id/RC_input"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/rc_prompt" />
+
+    <EditText
+        android:id="@+id/RC_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/FREQ_input"
+        android:layout_alignRight="@+id/WPM_input"
+        android:layout_marginTop="20dp"
+        android:inputType="number"
+        android:text="@string/rc_default" />
+
+    <Spinner
+        android:id="@+id/format_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/RC_prompt"
+        android:layout_below="@+id/RC_input"
+        android:entries="@array/formats" />
+
+    <Button
+        android:id="@+id/WPM_confirm_MorsePCM"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/WPM_input"
+        android:layout_marginTop="20dp"
+        android:layout_below="@id/format_spinner"
+        android:text="@string/toneGenerate"
+        android:onClick="generateAndAssignTones" />
+
+    <Button
+        android:id="@+id/WPM_preview_MorsePCM"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/WPM_confirm_MorsePCM"
+        android:layout_alignRight="@+id/WPM_input"
+        android:layout_marginTop="20dp"
+        android:text="@string/tonePreview"
+        android:onClick="previewTone" />
+
+</RelativeLayout>

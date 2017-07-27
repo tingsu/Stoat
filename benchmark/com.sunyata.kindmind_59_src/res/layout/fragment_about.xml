@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical" >
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+      style="?android:attr/listSeparatorTextViewStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:text="@string/about_version_title"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
+    <TextView
+      android:id="@+id/versionTextView"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <TextView
+      style="?android:attr/listSeparatorTextViewStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:text="@string/about_createdBy_title"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:autoLink="email"
+      android:text="@string/about_createdBy_text" />
+
+    <TextView
+      style="?android:attr/listSeparatorTextViewStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:text="@string/about_price_title"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/about_price_text" />
+
+    <TextView
+      style="?android:attr/listSeparatorTextViewStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:text="@string/about_privacy_title"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/about_privacy_text" />
+
+    <TextView
+      style="?android:attr/listSeparatorTextViewStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:text="@string/about_legal_title"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/about_legal_text" />
+
+    <TextView
+      style="?android:attr/listSeparatorTextViewStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:text="@string/about_photoCredits_title"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:autoLink="web"
+      android:text="@string/about_photoCredits_text" />
+
+    <TextView
+      style="?android:attr/listSeparatorTextViewStyle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:text="@string/about_thanks_title"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/about_thanks_text" />
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp" />
+    
+    <!--
+        <TextView
+            android:id="@+id/openSourceLicensesTitletextView"
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:text="Open Source Licenses"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+        <TextView
+            android:id="@+id/openSourceLicensesHoloColorsTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:text="Android Holo Colors
+\n   http://android-holo-colors.com
+\n   http://creativecommons.org/licenses/by/3.0/" />
+        <TextView
+            android:id="@+id/openSourceLicensesActionBarTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:text="Android Action Bar Style Generator
+\n   http://jgilfelt.github.io/android-actionbarstylegenerator
+\n   http://creativecommons.org/licenses/by/3.0/" />
+    -->
+
+
+    <!--
+		<TextView
+			android:id="@+id/shareTextView"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingTop="20dp"
+			android:textSize="20sp"
+			android:text="Share app with a friend" />
+    -->
+  </LinearLayout>
+
+</ScrollView>

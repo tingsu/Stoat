@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	
+	android:focusable="false"
+	
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	
+	android:background="@color/message_text_background_own"
+	>
+	
+	<LinearLayout 
+		android:layout_width="80dp"
+		android:layout_height="wrap_content"
+		
+		android:layout_margin="5dp"
+		
+		android:gravity="center"
+		>
+	
+		<ProgressBar
+			android:layout_width="wrap_content"
+    		android:layout_height="wrap_content"
+    		android:layout_marginLeft="10dp"
+    		style="?android:attr/progressBarStyleSmallTitle"
+			/>
+	</LinearLayout>
+		
+	<View
+		android:layout_width="1dp"
+		android:layout_height="fill_parent"
+		android:layout_marginLeft="10dp"
+		android:layout_marginRight="10dp"
+		android:background="@color/message_text_divider"
+		
+		android:visibility="invisible"
+		/>
+	
+	<TextView android:id="@+id/text"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="5dp"
+		android:layout_marginBottom="5dp"
+	
+		android:autoLink="web"
+		
+		android:textSize="14sp"
+		android:textColor="@color/main_foreground"
+		android:textColorLink="#2c88b7"
+		
+		android:text="This is a message I said in the Campfire. I love talking into lists. Now let's wrap it to multiple lines."
+		/>
+  	
+</LinearLayout>

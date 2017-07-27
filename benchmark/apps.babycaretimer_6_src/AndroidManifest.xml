@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="apps.babycaretimer"
+      android:versionCode="6"
+      android:versionName="1.5"
+      android:installLocation="auto">
+	<uses-sdk 
+		android:minSdkVersion="8" 
+		android:targetSdkVersion="8" />
+	<supports-screens
+		android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:anyDensity="true" />
+    <application
+    	android:icon="@drawable/ic_launcher_babycaretimer_blue"
+    	android:label="@string/app_name_formatted"
+    	>
+    	
+        <activity  
+    		android:icon="@drawable/ic_launcher_babycaretimer_blue"
+    		android:label="@string/app_name_formatted"
+        	android:name="apps.babycaretimer.TimerActivity"
+			android:screenOrientation="user"
+   			android:launchMode="singleTask"
+ 			android:taskAffinity="apps.babycaretimer">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            	<category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity-alias
+                android:icon="@drawable/ic_launcher_babycaretimer_pink"
+                android:label="@string/app_name_formatted"
+                android:name="TimerActivity_Pink"
+   				android:launchMode="singleTask"
+                android:targetActivity="apps.babycaretimer.TimerActivity"> 
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            	<category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+		
+        <activity 
+        	android:name="apps.babycaretimer.AlarmActivity" 
+   			android:theme="@style/Theme.Transparent"
+			android:screenOrientation="user"
+   			android:launchMode="standard"
+ 			android:taskAffinity="apps.babycaretimer.alarm" />
+
+        <activity
+        	android:name="apps.babycaretimer.SetAlarmActivity" 
+   			android:theme="@style/Theme.Transparent"
+			android:screenOrientation="user"
+   			android:launchMode="singleTask"
+ 			android:taskAffinity="apps.babycaretimer.setalarm" />
+        
+        <activity 
+        	android:name="apps.babycaretimer.preferences.MainPreferenceActivity"
+            android:label="@string/app_name_formatted"
+			android:screenOrientation="user"
+ 			android:taskAffinity="apps.babycaretimer">
+            <intent-filter>
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
+        </activity>
+
+		<service android:name="apps.babycaretimer.services.AlarmBroadcastReceiverService" />
+		<service android:name="apps.babycaretimer.services.AlarmNotificationContentIntentService" />
+		<service android:name="apps.babycaretimer.services.AlarmNotificationDeleteIntentService" />
+		<service android:name="apps.babycaretimer.services.AlarmReceiverService" />
+		<service android:name="apps.babycaretimer.services.OnBootBroadcastReceiverService" />
+		<service android:name="apps.babycaretimer.services.ScreenManagementAlarmBroadcastReceiverService" />
+        
+		<receiver 
+		    android:name="apps.babycaretimer.receivers.AlarmReceiver"
+		    android:exported="true" />
+		<receiver 
+		    android:name="apps.babycaretimer.receivers.OnBootReceiver"
+		    android:exported="true" >
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED" />
+			</intent-filter>
+		</receiver>		
+		<receiver 
+		    android:name="apps.babycaretimer.receivers.ScreenManagementAlarmReceiver"
+		    android:exported="true" />
+
+<receiver android:name="apps.babycaretimer.EmmaInstrument.SMSInstrumentedReceiver">
+<intent-filter>
+<action android:name="edu.gatech.m3.emma.COLLECT_COVERAGE"/>
+</intent-filter>
+</receiver>
+<activity android:label="EmmaInstrumentationActivity" android:name="apps.babycaretimer.EmmaInstrument.InstrumentedActivity"/>
+		
+    </application>
+
+<instrumentation android:handleProfiling="true" android:label="EmmaInstrumentation" android:name="apps.babycaretimer.EmmaInstrument.EmmaInstrumentation" android:targetPackage="apps.babycaretimer"/>
+    
+
+
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	
+</manifest>

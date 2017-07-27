@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	>
+	
+	<include layout="@layout/title" />
+	<include layout="@layout/line" />
+	
+	<ScrollView 
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:fillViewport="true"
+		>
+		
+		<LinearLayout android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:background="@color/main_background"
+			
+			android:padding="10dp"
+			>
+			
+			<TextView android:id="@+id/person"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				
+				android:layout_marginBottom="5dp"
+				
+				android:textSize="14sp"
+				android:textStyle="bold"
+				android:textColor="@color/paste_header"
+				/>
+			
+			<View
+				android:layout_width="fill_parent"
+				android:layout_height="1dp"
+				android:background="@color/paste_divider"
+				/>
+			
+			<TextView android:id="@+id/paste"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				
+				android:autoLink="web"
+				
+				android:textSize="14sp"
+				android:textColor="@color/main_foreground"
+				android:textColorLink="@color/main_foreground_link"
+				/>
+			
+		</LinearLayout>
+	</ScrollView>
+</LinearLayout>

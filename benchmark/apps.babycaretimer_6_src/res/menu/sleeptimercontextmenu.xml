@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item 
+		android:id="@+id/sleep_set_alarm"
+        android:title="@string/set_alarm_text" />
+    <item 
+		android:id="@+id/sleep_cancel_alarm"
+        android:title="@string/cancel_alarm_text" />
+	<item 
+		android:id="@+id/sleep_restart_timer"
+        android:title="@string/restart_timer_text" />
+    <item 
+		android:id="@+id/sleep_stop_timer"
+        android:title="@string/stop_timer_text" />
+</menu>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="#9ba9a7">
+
+    <ImageView
+        android:id="@+id/Logo"
+        android:contentDescription="@string/logo_descr"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo"/>
+
+    <CheckBox
+        android:id="@+id/Sender"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/sender_label"
+        android:textColor="#333333" />
+     
+     <CheckBox
+        android:id="@+id/Read"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="@string/read_label"
+        android:textColor="#333333" />
+     
+    <CheckBox
+        android:id="@+id/Vibrate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="@string/vibrate_label"
+        android:textColor="#333333" />
+    
+    <LinearLayout
+        android:id="@+id/VibrateSpeedWrapper"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.24"
+            android:gravity="center_vertical|right"
+            android:text="@string/speed_label"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#333333" />
+
+        <Spinner
+            android:id="@+id/Speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+        
+    </LinearLayout>
+    
+</LinearLayout>

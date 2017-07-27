@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Angulo.  Measure angles and slopes with Android!
+    Copyright (C) 2012-2013  Daniel Kraft <d@domob.eu>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<resources>
+
+  <!-- Values for the sensor rate preference.  -->
+  <string-array name="rate_text">
+    <item name="fastest">Very fast</item>
+    <item name="game">Fast</item>
+    <item name="ui">Normal</item>
+    <item name="normal">Slow</item>
+  </string-array>
+  <string-array name="rate_values">
+    <item name="fastest">fastest</item>
+    <item name="game">game</item>
+    <item name="ui">ui</item>
+    <item name="normal">normal</item>
+  </string-array>
+
+  <!-- Values for smoothing preference.  -->
+  <string-array name="smoothing_text">
+    <item name="none">None</item>
+    <item name="little">Little</item>
+    <item name="much">Much</item>
+  </string-array>
+  <string-array name="smoothing_values">
+    <item name="none">none</item>
+    <item name="little">little</item>
+    <item name="much">much</item>
+  </string-array>
+
+  <!-- Values for orientation preference.  -->
+  <string-array name="orientation_text">
+    <item name="sensor">Automatic</item>
+    <item name="portrait">Portrait</item>
+    <item name="landscape">Landscape</item>
+  </string-array>
+  <string-array name="orientation_values">
+    <item name="sensor">sensor</item>
+    <item name="portrait">portrait</item>
+    <item name="landscape">landscape</item>
+  </string-array>
+
+</resources>

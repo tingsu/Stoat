@@ -1,0 +1,53 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.threedlite.urforms"
+    android:versionCode="12"
+    android:versionName="1.12" >
+    
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="15" />
+
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".SearchDataActivity"
+            android:label="@string/title_activity_search_data" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            </activity>
+        <activity
+            android:name=".SearchResultsActivity"
+            android:label="@string/title_activity_search_results" >
+        </activity>
+        <activity
+            android:name=".EnterDataActivity"
+            android:label="@string/title_activity_enter_data" >
+        </activity>
+        <activity
+            android:name=".ManageFormsActivity"
+            android:label="@string/title_activity_manage_forms" >
+        </activity>
+        <activity
+            android:name=".BackupRestoreActivity"
+            android:label="@string/title_activity_backup_restore" >
+        </activity>
+        <activity
+            android:name=".UrformsFileChooserActivity"
+            android:label="@string/select_file" >
+            <intent-filter >
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+        </application>
+        
+
+</manifest>

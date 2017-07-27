@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+	<PreferenceCategory 
+	    android:title="@string/preferences_category_display">
+	    <ListPreference
+	        android:entries="@array/preferences_sorting_array"
+			android:entryValues="@array/preferences_sorting_keys"
+	        android:dialogTitle="@string/preferences_sorting_dialogtitle"
+	        android:title="@string/preferences_sorting_title"
+	        android:key="sorting"
+	        android:defaultValue="name" />
+	    <CheckBoxPreference
+	        android:title="@string/preferences_showsystemapps_title"
+	        android:summary="@string/preferences_showsystemapps_summary"
+	        android:key="showsystemapps"
+	        android:defaultValue="true" />
+	</PreferenceCategory>
+	<PreferenceCategory 
+	    android:title="@string/preferences_category_score">
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_coarselocation_dialogmessage"
+	        android:title="@string/preferences_coarselocation_title"
+	        android:key="score_accesscoarselocation"
+	        android:defaultValue="22"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_finelocation_dialogmessage"
+	        android:title="@string/preferences_finelocation_title"
+	        android:key="score_accessfinelocation"
+	        android:defaultValue="50"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_batterystats_dialogmessage"
+	        android:title="@string/preferences_batterystats_title"
+	        android:key="score_batterystats"
+	        android:defaultValue="5"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_bluetooth_dialogmessage"
+	        android:title="@string/preferences_bluetooth_title"
+	        android:key="score_bluetooth"
+	        android:defaultValue="7"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_bluetoothadmin_dialogmessage"
+	        android:title="@string/preferences_bluetoothadmin_title"
+	        android:key="score_bluetoothadmin"
+	        android:defaultValue="13"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_brick_dialogmessage"
+	        android:title="@string/preferences_brick_title"
+	        android:key="score_brick"
+	        android:defaultValue="45"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_callphone_dialogmessage"
+	        android:title="@string/preferences_callphone_title"
+	        android:key="score_callphone"
+	        android:defaultValue="27"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_callprivileged_dialogmessage"
+	        android:title="@string/preferences_callprivileged_title"
+	        android:key="score_callprivileged"
+	        android:defaultValue="30"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_camera_dialogmessage"
+	        android:title="@string/preferences_camera_title"
+	        android:key="score_camera"
+	        android:defaultValue="3"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_getaccounts_dialogmessage"
+	        android:title="@string/preferences_getaccounts_title"
+	        android:key="score_getaccounts"
+	        android:defaultValue="6"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_internet_dialogmessage"
+	        android:title="@string/preferences_internet_title"
+	        android:key="score_internet"
+	        android:defaultValue="10"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_manageaccounts_dialogmessage"
+	        android:title="@string/preferences_manageaccounts_title"
+	        android:key="score_manageaccounts"
+	        android:defaultValue="20"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_readcalendar_dialogmessage"
+	        android:title="@string/preferences_readcalendar_title"
+	        android:key="score_readcalendar"
+	        android:defaultValue="11"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_readcontacts_dialogmessage"
+	        android:title="@string/preferences_readcontacts_title"
+	        android:key="score_readcontacts"
+	        android:defaultValue="13"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_readhistorybookmarks_dialogmessage"
+	        android:title="@string/preferences_readhistorybookmarks_title"
+	        android:key="score_readhistorybookmarks"
+	        android:defaultValue="9"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_readphonestate_dialogmessage"
+	        android:title="@string/preferences_readphonestate_title"
+	        android:key="score_readphonestate"
+	        android:defaultValue="20"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_readsms_dialogmessage"
+	        android:title="@string/preferences_readsms_title"
+	        android:key="score_readsms"
+	        android:defaultValue="23"
+	        android:numeric="integer" />
+	    <EditTextPreference
+	        android:dialogMessage="@string/preferences_sendsms_dialogmessage"
+	        android:title="@string/preferences_sendsms_title"
+	        android:key="score_sendsms"
+	        android:defaultValue="22"
+	        android:numeric="integer" />
+	    <EditTextPreference 
+	        android:dialogMessage="@string/preferences_alertthreshold_dialogmessage"
+	        android:title="@string/preferences_alertthreshold_title"
+	        android:key="score_alertthreshold"
+	        android:defaultValue="40"
+	        android:numeric="integer" />
+	</PreferenceCategory>
+</PreferenceScreen>

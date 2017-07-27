@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<color name="title_background">#91c7fa</color>
+	<color name="title_separator">#40004e75</color>
+	<color name="title_strip_color">#004e75</color>
+	
+	<color name="amount_color">#004e75</color>
+	<color name="positive_delta">#02a621</color>
+	<color name="negative_delta">#cc0000</color>
+	
+	<!-- GlassView colors -->
+	<color name="outline_color">#cccccc</color>
+	<color name="water_color">#6dafe2</color>
+	<color name="white_color">#ffffff</color>
+	<color name="black_color">#000000</color>
+</resources>

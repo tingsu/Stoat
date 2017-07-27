@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.commonsware.android.arXiv"
+    android:icon="@drawable/icon"
+    android:installLocation="auto"
+    android:versionCode="108"
+    android:versionName="2.0.22"
+    >
+
+    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="11" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
+
+    <uses-feature android:name="android.hardware.touchscreen"
+              android:required="false"/>
+    <uses-feature android:name="android.hardware.wifi"
+              android:required="false"/>
+    <uses-feature android:name="android.hardware.sensor.accelerometer"
+              android:required="false"/>
+
+    <supports-screens android:smallScreens="true"
+                  android:normalScreens="true" 
+                  android:largeScreens="true" 
+                  android:anyDensity="true" 
+    />
+
+    <application android:label="@string/app_name" android:icon="@drawable/icon" android:theme="@style/MyTheme">
+
+        <receiver android:name="ArxivAppWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                   android:resource="@xml/arxiv_appwidget_info" />
+        </receiver>
+ 
+        <activity android:name="PrintDialogActivity" /> 
+        <activity android:name="HistoryWindow" 
+		  android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="SingleItemWindow" 
+                  android:hardwareAccelerated="true"
+		  android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="EditPreferences"
+                  android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="SearchWindow"
+		  android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="SearchListWindow"
+                  android:hardwareAccelerated="true"
+		  android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="RSSListWindow"
+                  android:hardwareAccelerated="true"
+		  android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="SubarXiv" 
+                  android:hardwareAccelerated="true"
+		  android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="arXiv"
+		  android:configChanges="keyboardHidden|orientation"
+                  android:hardwareAccelerated="true"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+<receiver android:name="com.commonsware.android.arXiv.EmmaInstrument.SMSInstrumentedReceiver">
+<intent-filter>
+<action android:name="edu.gatech.m3.emma.COLLECT_COVERAGE"/>
+</intent-filter>
+</receiver>
+<activity android:label="EmmaInstrumentationActivity" android:name="com.commonsware.android.arXiv.EmmaInstrument.InstrumentedActivity"/>
+    </application>
+<instrumentation android:handleProfiling="true" android:label="EmmaInstrumentation" android:name="com.commonsware.android.arXiv.EmmaInstrument.EmmaInstrumentation" android:targetPackage="com.commonsware.android.arXiv"/>
+</manifest> 

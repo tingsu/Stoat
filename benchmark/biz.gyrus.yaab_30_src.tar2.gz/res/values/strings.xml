@@ -1,0 +1,75 @@
+<resources>
+
+    <string name="app_name">YAAB</string>
+    <string name="title_activity_main">Yet Another Auto Brightness</string>
+    <string name="btn_start_text">Start</string>
+    <string name="btn_stop_text">Stop</string>
+    <string name="cb_autostart_text">Start on device boot</string>
+    <string name="cb_notificon_text">Persist notification</string>
+    <string name="status_running">Running</string>
+    <string name="status_stopped">Stopped</string>
+    <string name="status_nosensor">No light sensor</string>
+    
+    <string name="toast_service_started">YAAB Service started!</string>
+    <string name="toast_service_stopped">YAAB Service stopped!</string>
+    
+    <string name="manual_adjust">Manual adjustment</string>
+
+    <string name="txt_howto_use">HOW TO USE: Tap \"Start\", wait until status change to \"Running\". That is all. Use \"Manual adjustment\" slider to change average level of brightness if needed.\n\nAutomatic night mode will work only if device\'s light sensor is capable of reading low values.</string>
+    <string name="txt_nolightsensor_sorry">Sorry, light sensor can\'t be found on this device. This application is not functional without the sensor.</string>
+
+    <string name="title_activity_credits">Yet Another Auto Brightness</string>
+    <string name="activity_credits_txt_title">Credits</string>
+    <string name="activity_credits_txt_main">This application developed and supported by <a href="http://www.gyrus.biz/">Gyrus Solutions</a>.\nSource code and development builds are available at <a href="https://bitbucket.org/gyrussolutions/yaab/">BitBucket</a>.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+    <string name="activity_credits_btn_close">Close</string>
+    
+    <string name="preferences">Preferences</string>
+    <string name="cb_alwaysfg_text">Always keep in foreground</string>
+    <string name="summary_autostart_preference">Start the service automatically when the device boots up</string>
+	<string name="summary_fgservice_preference">Display notification icon when the service is active</string>
+	<string name="summary_always_fgsrv_preference">Don\'t switch the service to background mode even when the screen is OFF</string>
+	<string name="alert_keepalive_title">Use system alarm</string>
+	<string name="alert_keepalive_summary">A kind of keepalive facility for the service. EXPERIMENTAL.</string>
+	
+	<string name="ranges_title">Ranges</string>
+	<string name="txt_night">Night</string>
+	<string name="txt_normal">Normal</string>
+	<string name="ranges_summary">Min, Max, Thresholds, Night mode brightness</string>
+	<string name="brightness_range_caption">Brightness range</string>
+    <string name="txt_min">Min brightness limit</string>
+    <string name="txt_max">Max brightness limit</string>    
+	<string name="night_reading_caption">Night reading</string>
+	<string name="cb_autonight_text">Auto Night mode</string>
+	<string name="txt_night_threshold">Night Mode threshold</string>
+	<string name="txt_night_brightness">Night Mode brightness</string>
+	<string name="btn_night_test">Test</string>
+	<string name="txt_sensor_reading">Most recent light sensor reading:</string>
+	<string name="txt_threshold_value">Current threshold value:</string>
+	<string name="txt_none">none</string>
+	<string name="brightness_status_off">Off</string>
+	<string name="brightness_status_auto">Auto</string>
+	<string name="brightness_status_manualnight">Night (manual)</string>
+	<string name="brightness_status_autonight">Night</string>
+	<string name="txt_not_auto_note">Please note that since the service is not in auto mode now, you may not be able to see immediate effect of changing some of these settings.</string>
+	
+	<string name="cb_smooth_title">Smooth brightness</string>
+	<string name="cb_smooth_summary">Apply screen brightness changes smoothly</string>
+	
+	<string name="cb_lownmvalues_title">Low Night Mode Values</string>
+	<string name="cb_lownmvalues_summary">Divide range limits by 10</string>
+	
+	<string name="cb_nightfalldelay_title">Delay Night Mode</string>
+	<string name="cb_nightfalldelay_summary">~5 seconds delay before auto night is on</string>
+	
+	<string name="btn_donate_text">Donate</string>
+	<string name="activity_donate_txt_title">Donate</string>
+	<string name="activity_donate_btn1_text">~ 1 USD</string>
+	<string name="activity_donate_btn2_text">~ 2 USD</string>
+	<string name="activity_donate_btn3_text">~ 3 USD</string>
+	<string name="activity_donate_status_initializingbilling">Initializing Google Play billing</string>
+	<string name="activity_donate_status_billingfailed">Google Play billing inaccessible</string>
+	<string name="activity_donate_status_billingok">Please proceed</string>
+	<string name="activity_donate_btn_yours">Thanks!</string>
+				
+</resources>
+ 

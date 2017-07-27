@@ -1,0 +1,7 @@
+Caring for your newborn just got easier!
+
+Baby Care Timer is a timer for parents to track feedings, diaper changes and other important items.
+
+Feedback is greatly appreciated.
+
+An outline of the application preferences can be found here: http://code.google.com/p/baby-care-timer/wiki/ApplicationPreferences

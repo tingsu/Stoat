@@ -1,0 +1,74 @@
+<resources>
+
+    <string name="app_name">Автояркость</string>
+    <string name="title_activity_main">Еще Одна Автояркость</string>
+    <string name="btn_start_text">Пуск</string>
+    <string name="btn_stop_text">Стоп</string>
+    <string name="cb_autostart_text">Автозапуск</string>
+    <string name="cb_notificon_text">Пост. нотификация</string>
+    <string name="status_running">Активен</string>
+    <string name="status_stopped">Остановлен</string>
+    <string name="status_nosensor">Нет сенсора освещенности</string>
+    
+    <string name="toast_service_started">Сервис автояркости запущен!</string>
+    <string name="toast_service_stopped">Сервис автояркости отсановлен!</string>
+    
+    <string name="manual_adjust">Ручная подстройка</string>
+
+    <string name="txt_howto_use">КАК ПОЛЬЗОВАТЬСЯ: Нажмите \"Пуск\", подождите пока статус обновится до \"Активен\". Это всё. Используя регулятор \"Ручная подстройка\", можно изменять средний уровень яркости.\nГалочка \"Пост. нотификация\" (постоянная нотификация) может быть полезна на устройствах с Андроидом 3.х и новее, в которых мало памяти. Сервис будет реже уничтожаться системой.</string>
+    <string name="txt_nolightsensor_sorry">К сожалению сенсор освещенности не найден в этом устройстве. Данное приложение не может функционировать без этого сенсора.</string>
+    
+    <string name="title_activity_credits">Еще Одна Автояркость</string>
+    <string name="activity_credits_txt_title">Информация</string>
+    <string name="activity_credits_txt_main">Это приложение разработано и поддерживается командой <a href="http://www.gyrus.biz/">Gyrus Solutions</a>.\nИсходные коды и текущие билды доступны на <a href="https://bitbucket.org/gyrussolutions/yaab/">BitBucket</a>.\n\nДАННОЕ ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ ПРЕДОСТАВЛЯЕТСЯ «КАК ЕСТЬ», БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ, ЯВНО ВЫРАЖЕННЫХ ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ, НО НЕ ОГРАНИЧИВАЯСЬ ГАРАНТИЯМИ ТОВАРНОЙ ПРИГОДНОСТИ, СООТВЕТСТВИЯ ПО ЕГО КОНКРЕТНОМУ НАЗНАЧЕНИЮ И ОТСУТСТВИЯ НАРУШЕНИЙ ПРАВ. НИ В КАКОМ СЛУЧАЕ АВТОРЫ ИЛИ ПРАВООБЛАДАТЕЛИ НЕ НЕСУТ ОТВЕТСТВЕННОСТИ ПО ИСКАМ О ВОЗМЕЩЕНИИ УЩЕРБА, УБЫТКОВ ИЛИ ДРУГИХ ТРЕБОВАНИЙ ПО ДЕЙСТВУЮЩИМ КОНТРАКТАМ, ДЕЛИКТАМ ИЛИ ИНОМУ, ВОЗНИКШИМ ИЗ, ИМЕЮЩИМ ПРИЧИНОЙ ИЛИ СВЯЗАННЫМ С ПРОГРАММНЫМ ОБЕСПЕЧЕНИЕМ ИЛИ ИСПОЛЬЗОВАНИЕМ ПРОГРАММНОГО ОБЕСПЕЧЕНИЯ ИЛИ ИНЫМИ ДЕЙСТВИЯМИ С ПРОГРАММНЫМ ОБЕСПЕЧЕНИЕМ.</string>
+    <string name="activity_credits_btn_close">Закрыть</string>
+    
+    <string name="preferences">Настройки</string>
+    <string name="cb_alwaysfg_text">Всегда на переднем плане</string>
+    <string name="summary_autostart_preference">Запускать сервис автоматически при загрузке устройства</string>
+	<string name="summary_fgservice_preference">Показывать иконку в области нотификации, когда сервис активен</string>
+	<string name="summary_always_fgsrv_preference">Не переключать сервис в фоновый режим даже когда экран выключен</string>
+	<string name="alert_keepalive_title">Использовать системный будильник</string>
+	<string name="alert_keepalive_summary">Дает сервису лишний шанс выжить при недостатке памяти. ЭКСПЕРИМЕНТАЛЬНО.</string>
+        
+	<string name="ranges_title">Диапазоны</string>
+	<string name="txt_night">Ночь</string>
+	<string name="txt_normal">Норм.</string>
+	<string name="ranges_summary">Мин., Макс., пороговые значения, яркость ночью</string>
+	<string name="brightness_range_caption">Диапазон яркости</string>
+    <string name="txt_min">Минимум</string>
+    <string name="txt_max">Максимум</string>    
+	<string name="night_reading_caption">Ночной режим</string>
+	<string name="cb_autonight_text">Авто Ночь</string>
+	<string name="txt_night_threshold">Порог ночного режима</string>
+	<string name="txt_night_brightness">Яркость в ночном режиме</string>
+	<string name="btn_night_test">Тест</string>
+	<string name="txt_sensor_reading">Последнее значение датчика:</string>
+	<string name="txt_threshold_value">Текущий предел:</string>
+	<string name="txt_none">нет</string>
+	<string name="brightness_status_off">Выключено</string>
+	<string name="brightness_status_auto">Авто</string>
+	<string name="brightness_status_manualnight">Ночь (ручная)</string>
+	<string name="brightness_status_autonight">Ночь</string>
+	<string name="txt_not_auto_note">Пожалуйста, обратите внимание, что сервис сейчас не находится в режиме Авто, вы не сможете немедленно увидеть эффект от изменения некоторых настроек.</string>
+
+	<string name="cb_smooth_title">Плавная яркость</string>
+	<string name="cb_smooth_summary">Изменять яркость экрана по возможности плавно</string>
+	
+	<string name="cb_lownmvalues_title">Низкие границы ночи</string>
+	<string name="cb_lownmvalues_summary">Поделить границы ночи на 10</string>
+	
+	<string name="cb_nightfalldelay_title">Задержка Ночи</string>
+	<string name="cb_nightfalldelay_summary">~5 сек. перед включением ночи</string>
+	
+		<string name="btn_donate_text">Поддержать</string>
+	<string name="activity_donate_txt_title">Поддержать</string>
+	<string name="activity_donate_btn1_text">~ 1 USD</string>
+	<string name="activity_donate_btn2_text">~ 2 USD</string>
+	<string name="activity_donate_btn3_text">~ 3 USD</string>
+	<string name="activity_donate_status_initializingbilling">Инициализация биллинга</string>
+	<string name="activity_donate_status_billingfailed">Биллинг недоступен</string>
+	<string name="activity_donate_status_billingok">Продолжайте, пожалуйста</string>
+	<string name="activity_donate_btn_yours">Спасибо!</string>
+				
+</resources>

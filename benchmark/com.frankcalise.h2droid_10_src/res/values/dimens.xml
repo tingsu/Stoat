@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<dimen name="title_height">45dip</dimen>
+	<dimen name="title_strip_height">6dip</dimen>
+	<dimen name="layout_padding">6dip</dimen>
+	<dimen name="amount_padding_top">55dip</dimen>
+	
+	<!-- text sizes -->
+	<dimen name="title_text_size">24sp</dimen>
+	<dimen name="listview_header_text_size">12sp</dimen>
+	<dimen name="text_size">18sp</dimen>
+	<dimen name="amount_size">64sp</dimen>
+	<dimen name="widget_text_size">12sp</dimen>
+	
+	<!--  app widget sizes -->
+	<!--  determined by: 
+		  size in dp = cell count * 74dp - 2dp -->
+	<dimen name="one_cell_widget">72dp</dimen>
+	<dimen name="two_cell_widget">146dp</dimen>
+	<dimen name="widget_half_cell">36dp</dimen>
+	<dimen name="widget_margin">5dp</dimen>
+	<dimen name="left_padding">3dp</dimen>
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<PreferenceScreen android:key="ranges_screen" android:title="@string/ranges_title" android:summary="@string/ranges_summary"/>
+    
+    <CheckBoxPreference 
+        android:persistent="false" 
+        android:key="autostart_preference" 
+        android:title="@string/cb_autostart_text" 
+        android:summary="@string/summary_autostart_preference"/>
+    
+    <CheckBoxPreference 
+        android:persistent="false" 
+        android:key="fgservice_preference" 
+        android:title="@string/cb_notificon_text" 
+        android:summary="@string/summary_fgservice_preference"/>
+    
+    <CheckBoxPreference 
+        android:persistent="false" 
+        android:key="always_fgsrv_preference" 
+        android:title="@string/cb_alwaysfg_text" 
+        android:summary="@string/summary_always_fgsrv_preference"
+        android:dependency="fgservice_preference"
+        />
+    
+    <CheckBoxPreference 
+        android:persistent="false"
+        android:key="alert_keepalive_preference"
+        android:title="@string/alert_keepalive_title"
+        android:summary="@string/alert_keepalive_summary"
+        />
+    
+    <CheckBoxPreference 
+        android:persistent="false"
+        android:key="smooth_brightness_preference"
+        android:title="@string/cb_smooth_title"
+        android:summary="@string/cb_smooth_summary"
+        />
+    
+    <CheckBoxPreference 
+        android:persistent="false"
+        android:key="low_nightmode_values_preference"
+        android:title="@string/cb_lownmvalues_title"
+        android:summary="@string/cb_lownmvalues_summary"
+        />
+    
+    <CheckBoxPreference 
+        android:persistent="false"
+        android:key="nightfall_delay_preference"
+        android:title="@string/cb_nightfalldelay_title"
+        android:summary="@string/cb_nightfalldelay_summary"
+        />
+    
+    
+</PreferenceScreen>

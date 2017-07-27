@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string-array name="settings_units_options">
+		<item>Metric</item>
+		<item>US</item>
+	</string-array>
+	<string-array name="settings_units_values">
+		<item>0</item>
+		<item>1</item>
+	</string-array>
+	<string-array name="settings_interval_options">
+		<item>Every hour</item>
+		<item>Every 3 hours</item>
+		<item>Every 6 hours</item>
+	</string-array>
+	<string-array name="settings_interval_values">
+		<item>1</item>
+		<item>3</item>
+		<item>6</item>
+	</string-array>
+	
+	<string-array name="water_facts">
+		<item>+ Eight 8-ounce glasses of water is the recommended amount per day. More water may be necessary if one exercises or sweats heavily.</item>
+		<item>+ Water increases metabolism</item>
+		<item>+ Dehydration keeps one feeling fatigued. Water helps blood move oxygen and nutrients to cells.</item>
+		<item>+ 85% of the brain is water, being hydrated properly helps decrease stress.</item>
+		<item>+ Water helps keep joints lubricated.</item>
+		<item>+ Water aids in digestion by dissolving waste particles.</item>
+	</string-array>
+</resources>

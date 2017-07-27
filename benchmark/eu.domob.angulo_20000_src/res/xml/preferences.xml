@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Angulo.  Measure angles and slopes with Android!
+    Copyright (C) 2012-2013  Daniel Kraft <d@domob.eu>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <PreferenceCategory android:title="@string/category_general">
+    <ListPreference android:key="rate"
+        android:title="@string/rate_pref"
+        android:summary="@string/rate_summary"
+        android:defaultValue="@string/rate_default"
+        android:entries="@array/rate_text"
+        android:entryValues="@array/rate_values" />
+    <ListPreference android:key="smoothing"
+        android:title="@string/smoothing_pref"
+        android:summary="@string/smoothing_summary"
+        android:defaultValue="@string/smoothing_default"
+        android:entries="@array/smoothing_text"
+        android:entryValues="@array/smoothing_values" />
+    <ListPreference android:key="orientation"
+        android:title="@string/orientation_pref"
+        android:summary="@string/orientation_summary"
+        android:defaultValue="@string/orientation_default"
+        android:entries="@array/orientation_text"
+        android:entryValues="@array/orientation_values" />
+  </PreferenceCategory>
+
+  <PreferenceCategory android:title="@string/category_triangulo">
+    <PreferenceScreen
+        android:title="@string/height_pref"
+        android:summary="@string/height_summary">
+      <intent
+          android:action="android.intent.action.MAIN"
+          android:targetPackage="eu.domob.angulo"
+          android:targetClass="eu.domob.angulo.SetHeight" />
+    </PreferenceScreen>
+  </PreferenceCategory>
+
+</PreferenceScreen>

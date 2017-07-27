@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <Spinner android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/sectionSpinner"></Spinner>
+    <GridView
+     	android:id="@+id/gridView" 
+     	android:layout_width="fill_parent" 
+     	android:layout_height="wrap_content" 
+     	android:layout_weight="2"
+     	android:numColumns="auto_fit"
+	    android:verticalSpacing="0dp"
+    	android:horizontalSpacing="0dp"
+    	android:columnWidth="50dp"
+    	android:stretchMode="columnWidth"
+    	android:gravity="center"
+     	>
+    </GridView>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:id="@+id/editArea"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <EditText android:text="" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="2" android:id="@+id/editor"></EditText>
+        <Button android:text="@string/copy_button_label" android:id="@+id/copyButton" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+        
+    </LinearLayout>
+</LinearLayout>

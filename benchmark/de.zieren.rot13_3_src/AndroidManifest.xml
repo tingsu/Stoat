@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="de.zieren.rot13"
+          android:versionCode="3"
+          android:versionName="1.0.2">
+    <uses-sdk android:minSdkVersion="4"
+              android:targetSdkVersion="18" />
+    <application android:icon="@drawable/icon"
+                 android:label="@string/app_name"
+                 android:allowBackup="true">
+        <activity android:name=".TranslatorActivity"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+	<receiver android:name="de.zieren.rot13.EmmaInstrument.SMSInstrumentedReceiver"><intent-filter><action android:name="edu.gatech.m3.emma.COLLECT_COVERAGE"/></intent-filter></receiver>
+	<activity android:label="EmmaInstrumentationActivity" android:name="de.zieren.rot13.EmmaInstrument.InstrumentedActivity"/>
+    </application>
+	<instrumentation android:handleProfiling="true" android:label="EmmaInstrumentation" android:name="de.zieren.rot13.EmmaInstrument.EmmaInstrumentation" android:targetPackage="de.zieren.rot13"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> 
+</manifest>

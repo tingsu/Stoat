@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+	Copyright 2010 Kwok Ho Yin
+
+   	Licensed under the Apache License, Version 2.0 (the "License");
+   	you may not use this file except in compliance with the License.
+   	You may obtain a copy of the License at
+
+    	http://www.apache.org/licenses/LICENSE-2.0
+
+   	Unless required by applicable law or agreed to in writing, software
+   	distributed under the License is distributed on an "AS IS" BASIS,
+   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   	See the License for the specific language governing permissions and
+   	limitations under the License.
+-->
+
+<LinearLayout
+android:id="@+id/main_layout"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:orientation="vertical"
+xmlns:android="http://schemas.android.com/apk/res/android"
+>
+
+<!--  At the beginning, we want to use LinearLayout but 
+      spinner control cannot display at the right position.
+      Thus, we use RelativeLayout instead of LinearLayout.
+-->
+<RelativeLayout
+android:id="@+id/layoutA"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+>
+<Spinner
+android:id="@+id/SpinnerCurrencyA"
+android:layout_width="160dip"
+android:layout_height="50dip" 
+android:layout_weight="1" 
+android:layout_alignParentTop="true" 
+android:layout_alignParentLeft="true"
+>
+</Spinner>
+<EditText
+android:id="@+id/EditTextCurrencyA"
+android:layout_width="160dip"
+android:layout_height="50dip"
+android:text=""
+android:textSize="18sp"
+android:layout_weight="1"
+android:layout_alignParentTop="true"
+android:layout_alignParentRight="true" 
+>
+</EditText>
+</RelativeLayout>
+
+<RelativeLayout
+android:id="@+id/layoutB"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+>
+<Spinner
+android:id="@+id/SpinnerCurrencyB"
+android:layout_width="160dip"
+android:layout_height="50dip" 
+android:layout_weight="1" 
+android:layout_alignParentTop="true" 
+android:layout_alignParentLeft="true"
+>
+</Spinner>
+<EditText
+android:id="@+id/EditTextCurrencyB"
+android:layout_width="160dip"
+android:layout_height="50dip"
+android:text=""
+android:textSize="18sp"
+android:layout_weight="1"
+android:layout_alignParentTop="true"
+android:layout_alignParentRight="true" 
+>
+</EditText>
+
+</RelativeLayout>
+
+<TextView 
+android:layout_height="wrap_content" 
+android:id="@+id/TextView01" 
+android:layout_width="wrap_content"
+android:textStyle="bold"
+android:text="@string/szlatestCurrencyRate">
+</TextView>
+
+<LinearLayout
+android:id="@+id/main_layout"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+>
+<TextView 
+android:layout_height="wrap_content" 
+android:id="@+id/TextView02" 
+android:layout_width="wrap_content"
+android:textStyle="bold"
+android:text="@string/szBaseCurrency">
+</TextView>
+<TextView 
+android:layout_height="wrap_content" 
+android:id="@+id/TextViewBaseCurrency" 
+android:layout_width="wrap_content"
+android:textStyle="bold"
+android:layout_marginLeft="10dip"
+android:text="">
+</TextView>
+</LinearLayout>
+
+<LinearLayout
+android:id="@+id/main_layout2"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+>
+<TextView 
+android:layout_height="wrap_content" 
+android:id="@+id/TextView03" 
+android:layout_width="wrap_content"
+android:textStyle="bold"
+android:text="@string/szLastUpdate">
+</TextView>
+<TextView 
+android:layout_height="wrap_content" 
+android:id="@+id/TextViewLastUpdate" 
+android:layout_width="wrap_content"
+android:textStyle="bold"
+android:layout_marginLeft="10dip"
+android:text="">
+</TextView>
+</LinearLayout>
+
+<ListView
+android:id="@+id/ListViewRate"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:layout_weight="1"
+>
+</ListView>
+</LinearLayout>

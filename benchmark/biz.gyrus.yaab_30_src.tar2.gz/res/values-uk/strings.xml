@@ -1,0 +1,74 @@
+<resources>
+
+    <string name="app_name">Автояскравість</string>
+    <string name="title_activity_main">Ще Одна Автояскравість</string>
+    <string name="btn_start_text">Пуск</string>
+    <string name="btn_stop_text">Стоп</string>
+    <string name="cb_autostart_text">Автозапуск</string>
+    <string name="cb_notificon_text">Пост. нотифікація</string>
+    <string name="status_running">Сервіс активний</string>
+    <string name="status_stopped">Сервіс зупинено</string>
+    <string name="status_nosensor">Нема серсора освітлення</string>
+    
+    <string name="toast_service_started">Сервіс автояскравості запущено!</string>
+    <string name="toast_service_stopped">Сервіс автояскравості зупинено!</string>
+    
+    <string name="manual_adjust">Ручна підстройка</string>
+
+    <string name="txt_howto_use">ЯК КОРИСТУВАТИСЬ: Натисніть \"Пуск\", зачекайте доки статус оновиться до \"Сервіс активний\". Це все. Користуючись ручкою \"Ручна підстройка\", можливо корегувати середній рівень яскравості.\nГалочка \"Пост. нотифікація\" (постійна нотифікація) може бути корисною на пристроях за Андроїдом 3.х та новішими, в якіх встановлено мало пам\'яті. Сервіс буде рідше видалятися з пам\'яті.</string>
+    <string name="txt_nolightsensor_sorry">Нажаль сенсор освітлення не найдено в цьому пристрої. Ця програма не може працювати без сенсора.</string>
+
+    <string name="title_activity_credits">Ще Одна Автояскравість</string>
+    <string name="activity_credits_txt_title">Інформація</string>
+    <string name="activity_credits_txt_main">Ця програма розроблена та підтримується командою <a href="http://www.gyrus.biz/">Gyrus Solutions</a>.\nКод програми та поточні білди доступні на <a href="https://bitbucket.org/gyrussolutions/yaab/">BitBucket</a>.\n\nПрограмне забезпечення надається \"як є\", без гарантій будь-якого виду, виражених або домислених, у тому числі, але не обмежуючись гарантіями комерційної вигоди, придатності для конкретної мети і можливих помилок. Ні в якому разі автори або власники авторських прав не повинні нести відповідальність за будь-які претензії, збитки або іншу відповідальність за будь-які дії які виникають у зв\'язку цім з програмним забезпеченням або застосуванням його або інших операцій з ним.</string>
+    <string name="activity_credits_btn_close">Close</string>
+    
+    <string name="preferences">Налаштування</string>
+    <string name="cb_alwaysfg_text">Завжди на першому плані</string>
+    <string name="summary_autostart_preference">Запускати сервіс автоматично, коли пристрій запускається</string>
+	<string name="summary_fgservice_preference">Відображати іконку в області нотифікацій, якщо сервіс активний</string>
+	<string name="summary_always_fgsrv_preference">Не переходити в фоновий режим навіть коли екран вимкнено</string>
+	<string name="alert_keepalive_title">Використовувати системний будильник</string>
+	<string name="alert_keepalive_summary">Дає сервісу ще один шанс вижити при нестачі пам\'яті. ЕКСПЕРИМЕНТАЛЬНО.</string>
+        
+	<string name="ranges_title">Діапазони</string>
+	<string name="txt_night">Ніч</string>
+	<string name="txt_normal">Норм.</string>
+	<string name="ranges_summary">Мін., Макс., Порогові значення, Яскравість в ночному режимі</string>
+	<string name="brightness_range_caption">Діапазон яскравості</string>
+    <string name="txt_min">Мінімум</string>
+    <string name="txt_max">Максимум</string>    
+	<string name="night_reading_caption">Нічний режим</string>
+	<string name="cb_autonight_text">Авто Ніч</string>
+	<string name="txt_night_threshold">Поріг нічного режиму</string>
+	<string name="txt_night_brightness">Яскравість в нічному режимі</string>
+	<string name="btn_night_test">Тест</string>
+	<string name="txt_sensor_reading">Останнє значення датчика:</string>
+	<string name="txt_threshold_value">Поточний поріг:</string>
+	<string name="txt_none">нема</string>
+	<string name="brightness_status_off">Вимкнено</string>
+	<string name="brightness_status_auto">Авто</string>
+	<string name="brightness_status_manualnight">Ніч (ручн.)</string>
+	<string name="brightness_status_autonight">Ніч</string>
+	<string name="txt_not_auto_note">Будь ласка, зверніть увагу, що сервіс не знаходиться в режимі Авто, тому ви не зможете миттєво побачити еффект від зміни деяких параметрів.</string>
+	
+	<string name="cb_smooth_title">Повільна яскравість</string>
+	<string name="cb_smooth_summary">Змінювати яскравість поступово, повільно</string>
+	
+	<string name="cb_lownmvalues_title">Низьки межі ночі</string>
+	<string name="cb_lownmvalues_summary">Поділити межі ночі на 10</string>
+			
+	<string name="cb_nightfalldelay_title">Затримка нічного режиму</string>
+	<string name="cb_nightfalldelay_summary">~5 сек. перед ввімкненням ночі</string>
+	
+		<string name="btn_donate_text">Підтримати</string>
+	<string name="activity_donate_txt_title">Підтримати</string>
+	<string name="activity_donate_btn1_text">~ 1 USD</string>
+	<string name="activity_donate_btn2_text">~ 2 USD</string>
+	<string name="activity_donate_btn3_text">~ 3 USD</string>
+	<string name="activity_donate_status_initializingbilling">Ініціалізація білінгу</string>
+	<string name="activity_donate_status_billingfailed">Білінг не доступний</string>
+	<string name="activity_donate_status_billingok">Будь ласка продовжуйте</string>
+	<string name="activity_donate_btn_yours">Дякуємо!</string>
+				
+</resources>

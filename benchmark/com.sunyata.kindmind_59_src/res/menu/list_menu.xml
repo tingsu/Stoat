@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <!-- 
+    <item
+        android:id="@+id/menu_item_new_listitem"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="@string/listFragment_menu_newAction"
+        android:showAsAction="always" />
+	-->
+    <item
+        android:id="@+id/menu_item_save_pattern"
+        android:icon="@drawable/ic_action_accept"
+        android:title="@string/listFragment_menu_savePattern"
+        android:showAsAction="always" />
+    <item
+        android:id="@+id/menu_item_sort_alphabetically"
+        android:icon="@android:drawable/ic_menu_sort_alphabetically"
+        android:title="@string/listFragment_menu_sortAlphabetically"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_item_kindsort"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="@string/listFragment_menu_sortByRank"
+        android:showAsAction="never" />
+    <!-- clear_all_list_selections: android:icon="@drawable/ic_menu_clear_playlist" -->
+    <item
+        android:id="@+id/menu_item_clear_all_list_selections"
+        android:title="@string/listFragment_menu_clearAllSelections"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_item_send_as_text_all"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:title="@string/listFragment_menu_sendAllAsText"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_item_about"
+        android:title="@string/listFragment_menu_about"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_item_help"
+        android:title="@string/listFragment_menu_help"
+        android:showAsAction="never" />
+    
+    <!-- The following are only used when debuggning -->
+    <item
+        android:id="@+id/menu_item_backup_database"
+        android:title="@string/listFragment_menu_backupDatabase_debug"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_item_reset_database"
+        android:title="@string/listFragment_menu_resetDatabase_debug"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_item_share_experience"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/listFragment_menu_shareExperience_debug"
+        android:showAsAction="never" />
+    
+</menu>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+	Copyright 2010 Kwok Ho Yin
+
+   	Licensed under the Apache License, Version 2.0 (the "License");
+   	you may not use this file except in compliance with the License.
+   	You may obtain a copy of the License at
+
+    	http://www.apache.org/licenses/LICENSE-2.0
+
+   	Unless required by applicable law or agreed to in writing, software
+   	distributed under the License is distributed on an "AS IS" BASIS,
+   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   	See the License for the specific language governing permissions and
+   	limitations under the License.
+-->
+
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  
+<PreferenceCategory 
+android:key="UI_Options" 
+android:title="User Interface Options"
+>
+
+<ListPreference
+android:summary="Number of display digit" 
+android:key="precision" 
+android:title="Precision"
+android:dialogTitle="Number of display digit"
+android:entries="@array/entries_precision_preference"
+android:entryValues="@array/entriesvalue_precision_preference"
+>
+</ListPreference>
+
+<ListPreference 
+android:entries="@array/entries_listviewclick_preference" 
+android:entryValues="@array/entriesvalue_listviewclick_preference" 
+android:key="listviewclick" 
+android:summary="How to show currency editbox" 
+android:title="Edit option"
+>
+</ListPreference>
+
+</PreferenceCategory>
+
+<PreferenceCategory 
+android:key="Service_Options" 
+android:title="Service Options"
+>
+
+<CheckBoxPreference 
+android:summaryOff="Background update disabled" 
+android:key="service_option" 
+android:title="Background Update" 
+android:summaryOn="Background update enabled"
+>
+</CheckBoxPreference>
+
+<CheckBoxPreference 
+android:summaryOff="Disable background update during roaming" 
+android:summaryOn="Enable background during roaming" 
+android:key="roaming_option" 
+android:title="Roaming"
+>
+</CheckBoxPreference>
+
+</PreferenceCategory>
+
+</PreferenceScreen>

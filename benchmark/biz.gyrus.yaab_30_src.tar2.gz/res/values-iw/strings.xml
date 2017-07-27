@@ -1,0 +1,74 @@
+<resources>
+
+    <string name="app_name">עב\'\'א</string>
+    <string name="title_activity_main">עוד בהירות אוטומטית</string>
+    <string name="btn_start_text">התחל</string>
+    <string name="btn_stop_text">להפסיק</string>
+    <string name="cb_autostart_text">פתח באתחול מכשיר</string>
+    <string name="cb_notificon_text">הודעה עיקשת</string>
+    <string name="status_running">פעיל</string>
+    <string name="status_stopped">לא פעיל</string>
+    <string name="status_nosensor">אין חיישן אור</string>
+    
+    <string name="toast_service_started">עב\'\'א השירות התחיל!</string>
+    <string name="toast_service_stopped">עב\'\'א השירות הפסיק!</string>
+    
+    <string name="manual_adjust">כיוונון ידני</string>
+
+  	<string name="txt_howto_use">אופן שימוש: הקש \"התחל\", ולהמתין עד לשינוי המצב ל\"פעיל\". זה הכל. דמצב הלילה אוטומטי יפעל רק אם חיישן אור של המכשיר הוא מסוגל לקרוא ערכים נמוכים.</string>
+    <string name="txt_nolightsensor_sorry">.מצטער, חיישן אור לא ניתן למצוא בהמכשיר הזה. יישום זה לא פונקציונלי ללא החיישן</string>
+
+    <string name="title_activity_credits">עוד בהירות אוטומטית</string>
+    <string name="activity_credits_txt_title">מידע</string>
+    <string name="activity_credits_txt_main">This application developed and supported by <a href="http://www.gyrus.biz/">Gyrus Solutions</a>.\nSource code and development builds are available at <a href="https://bitbucket.org/gyrussolutions/yaab/">BitBucket</a>.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+    <string name="activity_credits_btn_close">לסגור</string>
+    
+    <string name="preferences">העדפות</string>
+    <string name="cb_alwaysfg_text">שמור תמיד בחזית</string>
+    <string name="summary_autostart_preference">התחל באופן אוטומטי כאשר מגפי המכשיר את השירות</string>
+	<string name="summary_fgservice_preference">הצגת סמל הודעה כאשר מדוברים בשירות פעיל</string>
+	<string name="summary_always_fgsrv_preference">אל תפעיל את השירות למצב רקע גם כאשר המסך כבוי</string>
+	<string name="alert_keepalive_title">השתמש במערכת התראה</string>
+	<string name="alert_keepalive_summary">סוג של מתקן משך חיים עבור השירות. ניסיוני.</string>
+        
+	<string name="ranges_title">טווחים</string>
+	<string name="txt_night">הלילה</string>
+	<string name="txt_normal">נורמלי</string>
+	<string name="ranges_summary">מקסימום, מינימום, ספים, בהירות מצב הלילה</string>
+	<string name="brightness_range_caption">טווח בהירות</string>
+    <string name="txt_min">גבול בהירות מינימאלי</string>
+    <string name="txt_max">גבול בהירות מקסימאלי</string>    
+	<string name="night_reading_caption">מצב הלילה</string>
+	<string name="cb_autonight_text">מצב הלילה אוטומטי</string>
+	<string name="txt_night_threshold">גבול מצב הלילה</string>
+	<string name="txt_night_brightness">בהירות מצב הלילה</string>
+	<string name="btn_night_test">תבחין</string>
+	<string name="txt_sensor_reading">ערך חיישן האור האחרון:</string>
+	<string name="txt_threshold_value">ערך סף נוכחי:</string>
+	<string name="txt_none">אף לא אחד</string>
+	<string name="brightness_status_off">כבוי</string>
+	<string name="brightness_status_auto">אוטומטי</string>
+	<string name="brightness_status_manualnight">הלילה (ידני)</string>
+	<string name="brightness_status_autonight">הלילה</string>
+	<string name="txt_not_auto_note">שים לב שמכיוון שהשירות אינו במצב אוטומטי עכשיו, ייתכן שלא תוכל לראות את ההשפעה מיידית של שינוי חלק מהגדרות אלה.</string>
+	
+	<string name="cb_smooth_title">בהירות הדרגתית</string>
+	<string name="cb_smooth_summary">החל שינויי בהירות מסך בצורה חלקה</string>
+
+	<string name="cb_lownmvalues_title">ערכים נמוכים מצב לילה</string>
+	<string name="cb_lownmvalues_summary">לחלק את גבולות טווח של 10</string>
+	
+	<string name="cb_nightfalldelay_title">עיכוב מצב הלילה</string>
+	<string name="cb_nightfalldelay_summary">~ עיכוב 5 שניות לפני שהלילה אוטומטי הוא על</string>
+	
+	<string name="btn_donate_text">לתרום</string>
+	<string name="activity_donate_txt_title">לתרום</string>
+	<string name="activity_donate_btn1_text">~ 1 USD</string>
+	<string name="activity_donate_btn2_text">~ 2 USD</string>
+	<string name="activity_donate_btn3_text">~ 3 USD</string>
+	<string name="activity_donate_status_initializingbilling">אתחול Google Play חיוב</string>
+	<string name="activity_donate_status_billingfailed">Google Play חיוב נגיש</string>
+	<string name="activity_donate_status_billingok">אנא המשך</string>
+	<string name="activity_donate_btn_yours">תודה</string>
+		
+</resources>

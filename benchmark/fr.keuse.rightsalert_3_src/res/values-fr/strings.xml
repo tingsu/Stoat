@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+  <string name="app_name">Rights alert</string>
+  <string name="menu_settings">Paramètres</string>
+  <string name="menu_about">À propos</string>
+  <string name="preferences_category_display">Affichage</string>
+  <string name="preferences_sorting_title">Classement</string>
+  <string name="preferences_sorting_dialogtitle">Trier par…</string>
+  <string-array name="preferences_sorting_array">
+    <item>Nom</item>
+    <item>Score</item>
+  </string-array>
+  <string name="preferences_showsystemapps_title">Applications système</string>
+  <string name="preferences_showsystemapps_summary">Afficher les applications système</string>
+  <string name="preferences_category_score">Calcul du score</string>
+  <string name="preferences_coarselocation_dialogmessage">Autorise une application à accéder à votre position approximative (par exemple via le réseau ou le WiFi)</string>
+  <string name="preferences_coarselocation_title">Accès à la position approximative</string>
+  <string name="preferences_finelocation_dialogmessage">Autorise une application à accéder à votre position précise (par exemple via le GPS)</string>
+  <string name="preferences_finelocation_title">Accès à la position précise</string>
+  <string name="preferences_batterystats_dialogmessage">Autorise une application à collecter des statistiques sur la batterie</string>
+  <string name="preferences_batterystats_title">Statistiques sur la batterie</string>
+  <string name="preferences_bluetooth_dialogmessage">Autorise les applications à se connecter aux périphériques bluetooth appairés</string>
+  <string name="preferences_bluetooth_title">Bluetooth</string>
+  <string name="preferences_bluetoothadmin_dialogmessage">Autorise les applications à découvrir et à s\'appareiller aux périphériques bluetooth</string>
+  <string name="preferences_bluetoothadmin_title">Administration bluetooth</string>
+  <string name="preferences_brick_dialogmessage">Nécessaire pour pouvoir désactiver l\'appareil (très dangereux !)</string>
+  <string name="preferences_brick_title">Bricker</string>
+  <string name="preferences_callphone_dialogmessage">Autorise une application à démarrer un appel téléphonique sans devoir passer par l\'interface de numérotation, sans intervention de l\'utilisateur.</string>
+  <string name="preferences_callphone_title">Appel téléphonique</string>
+  <string name="preferences_callprivileged_dialogmessage">Autorise une application à appeler n\'importe quel numéro, y compris les numéros d\'urgence, sans devoir passer par l\'interface de numérotation, sans intervention de l\'utilisateur.</string>
+  <string name="preferences_callprivileged_title">Appels privilégiés</string>
+  <string name="preferences_camera_dialogmessage">Nécessaire pour pouvoir accéder à la caméra</string>
+  <string name="preferences_camera_title">Caméra</string>
+  <string name="preferences_getaccounts_dialogmessage">Autorise l\'accès à la liste des comptes du Service des Comptes</string>
+  <string name="preferences_getaccounts_title">Obtenir les comptes</string>
+  <string name="preferences_internet_dialogmessage">Autorise les applications à ouvrir des connexions réseaux</string>
+  <string name="preferences_internet_title">Internet</string>
+  <string name="preferences_manageaccounts_dialogmessage">Autorise une application à gérer la liste des comptes du Service des Comptes</string>
+  <string name="preferences_manageaccounts_title">Gérer les comptes</string>
+  <string name="preferences_readcalendar_dialogmessage">Autorise une application à lire les données du calendrier de l\'utilisateur.</string>
+  <string name="preferences_readcalendar_title">Lire le calendrier</string>
+  <string name="preferences_readcontacts_dialogmessage">Autorise une application à lire les données des contacts de l\'utilisateur.</string>
+  <string name="preferences_readcontacts_title">Lire les contacts</string>
+  <string name="preferences_readhistorybookmarks_dialogmessage">Autorise une application à lire (mais pas écrire) les favoris et l\'historique de navigation de l\'utilisateur.</string>
+  <string name="preferences_readhistorybookmarks_title">Lire l\'historique et les favoris</string>
+  <string name="preferences_readphonestate_dialogmessage">Autorise l\'accès en lecture seul à l\'état du téléphone.</string>
+  <string name="preferences_readphonestate_title">Lire l\'état du téléphone</string>
+  <string name="preferences_readsms_dialogmessage">Autorise une application à lire les SMS.</string>
+  <string name="preferences_readsms_title">Lire les SMS</string>
+  <string name="preferences_sendsms_dialogmessage">Autorise une application à envoyer des SMS.</string>
+  <string name="preferences_sendsms_title">Envoyer des SMS</string>
+  <string name="preferences_alertthreshold_dialogmessage">Quantité de points à atteindre pour qu\'une application soit considérée comme dangereuse.</string>
+  <string name="preferences_alertthreshold_title">Seuil de danger</string>
+  <string name="about_version">Version 0.3a</string>
+  <string name="about_createdby">Créé par Cyril Glapa</string>
+  <string name="about_codesite"><a href="https://github.com/cglapa/rights-alert">Code source</a></string>
+  <string name="about_translation"><a href="https://www.transifex.com/projects/p/rights-alert/">Plate-forme de traduction</a></string>
+  <string name="applist_loading">Chargement des applications…</string>
+  <string name="applist_cancel">Annuler</string>
+  <string name="applist_count">Il y a %1$d applications dangereuses.</string>
+</resources>

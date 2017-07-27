@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Angulo.  Measure angles and slopes with Android!
+    Copyright (C) 2011,2013  Daniel Kraft <d@domob.eu>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!-- Layout file for the main layout of "Angulo Classic".  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+  <LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+    <Button android:id="@+id/buttonSetReference"
+      android:layout_weight="1"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:text="@string/setReference" />
+    <Button android:id="@+id/buttonFreeze"
+      android:layout_weight="1"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent" />
+    <Button android:id="@+id/buttonLevel"
+      android:layout_weight="1"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:text="@string/setLevel" />
+
+  </LinearLayout>
+
+  <TableLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:stretchColumns="0,1">
+    <TableRow>
+      <TextView
+        android:text="@string/gravity"
+        android:textSize="30dip" />
+      <TextView
+        android:text="@string/magnetic"
+        android:textSize="30dip" />
+    </TableRow>
+    <TableRow>
+      <TextView android:id="@+id/gravityDegree"
+        android:gravity="right"
+        android:textSize="60dip" />
+      <TextView android:id="@+id/magneticDegree"
+        android:gravity="right"
+        android:textSize="60dip" />
+    </TableRow>
+    <TableRow>
+      <TextView android:id="@+id/gravityPercent"
+        android:gravity="right"
+        android:textSize="40dip" />
+      <TextView android:id="@+id/magneticPercent"
+        android:gravity="right"
+        android:textSize="40dip" />
+    </TableRow>
+  </TableLayout>
+
+  <TextView android:id="@+id/combinedDegree"
+    android:text="100d"
+    android:gravity="center"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textSize="80dip"
+    android:textColor="#0a0" />
+  <TextView android:id="@+id/combinedPercent"
+    android:text="100%"
+    android:gravity="center"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textSize="60dip"
+    android:textColor="#0a0" />
+
+</LinearLayout>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+	Copyright 2010-2012 Kwok Ho Yin
+
+   	Licensed under the Apache License, Version 2.0 (the "License");
+   	you may not use this file except in compliance with the License.
+   	You may obtain a copy of the License at
+
+    	http://www.apache.org/licenses/LICENSE-2.0
+
+   	Unless required by applicable law or agreed to in writing, software
+   	distributed under the License is distributed on an "AS IS" BASIS,
+   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   	See the License for the specific language governing permissions and
+   	limitations under the License.
+-->
+
+<resources>    
+    <string name="app_name">Currency Converter</string>
+    <string name="szlatestCurrencyRate">Latest Currency Rate:</string>
+    <string name="szBaseCurrency">Base Currency:</string>
+    <string name="szEUR">Euro</string>
+    <string name="szUSD">US dollar</string>
+	<string name="szJPY">Japanese yen</string>
+	<string name="szBGN">Bulgarian lev</string>
+	<string name="szCZK">Czech koruna</string>
+	<string name="szDKK">Danish krone</string>
+	<string name="szEEK">Estonian kroon</string>
+	<string name="szGBP">Pound sterling</string>
+	<string name="szHUF">Hungarian forint</string>
+	<string name="szLTL">Lithuanian litas</string>
+	<string name="szLVL">Latvian lats</string>
+	<string name="szPLN">Polish zloty</string>
+	<string name="szRON">New Romanian leu</string>
+	<string name="szSEK">Swedish krona</string>
+	<string name="szCHF">Swiss franc</string>
+	<string name="szNOK">Norwegian krone</string>
+	<string name="szHRK">Croatian kuna</string>
+	<string name="szRUB">Russian rouble</string>
+	<string name="szTRY">Turkish lira</string>
+	<string name="szAUD">Australian dollar</string>
+	<string name="szBRL">Brasilian real</string>
+	<string name="szCAD">Canadian dollar</string>
+	<string name="szCNY">Chinese yuan renminbi</string>
+	<string name="szHKD">Hong Kong dollar</string>
+	<string name="szIDR">Indonesian rupiah</string>
+	<string name="szILS">Israeli shekel</string>
+	<string name="szINR">Indian rupee</string>
+	<string name="szKRW">South Korean won</string>
+	<string name="szMXN">Mexican peso</string>
+	<string name="szMYR">Malaysian ringgit</string>
+	<string name="szNZD">New Zealand dollar</string>
+	<string name="szPHP">Philippine peso</string>
+	<string name="szSGD">Singapore dollar</string>
+	<string name="szTHB">Thai baht</string>
+	<string name="szZAR">South African rand</string>
+	<string name="szMenu_About">About</string>
+	<string name="szMenu_Preference">Setting</string>
+	<string name="CurrencyEditTitle">Edit Currency</string>
+	<string name="CurrencyEditInputMsg">Input new rate:</string>
+	<string name="CurrencyEditCheckBox">Set as default currency</string>
+	<string name="preferences_name">Preferences</string>
+	<string name="Dialog_OK">OK</string>
+	<string name="Dialog_Cancel">Cancel</string>
+	<string name="szLastUpdate">Last Update:</string>
+	
+</resources>

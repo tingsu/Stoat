@@ -1,0 +1,9 @@
+ROT13 Translator Privacy Policy
+-------------------------------
+
+The application does not collect any user data. It does not have network
+permissions.
+
+Please note that the Android OS may keep the application in memory, so the last
+translated text may be visible to other users that have access to your phone. To
+avoid this, press the "Clear" button before leaving the application.

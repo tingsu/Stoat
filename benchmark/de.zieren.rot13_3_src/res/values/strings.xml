@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">ROT13 Translator</string>
+<string name="input">Input:</string>
+<string name="translation">Translation:</string>
+<string name="copy">Copy</string>
+<string name="paste">Paste</string>
+<string name="clear">Clear</string>
+<string name="exit">Exit</string>
+<string name="ok">OK</string>
+<string name="translation_copied">Translation copied to clipboard.</string>
+<string name="clipboard_empty">Clipboard is empty.</string>
+<string name="about_menuitem">About</string>
+<string name="about_title">ROT13 Translator</string>
+<string name="about_text">Version: 1.0.2\n© 2013 Jörg Zieren\nhttp://zieren.de\nLicense: GPL</string>
+<string name="help_menuitem">Help</string>
+<string name="help_title">ROT13 Translator Help</string>
+<string name="help_text">Enter the text to be translated in the upper box
+labeled <b>Input</b>. As you type, the ROT13 translation will automatically be
+shown in the lower box labeled <b>Translation</b>.
+\n\nClick the <b>Paste</b> button to paste the current clipboard contents into
+the <b>Input</b> box. Click <b>Copy</b> to copy the contents of the
+<b>Translation</b> box to the clipboard.
+</string>
+</resources>

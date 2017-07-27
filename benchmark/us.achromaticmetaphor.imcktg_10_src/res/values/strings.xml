@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IMCKTG</string>
+    <string name="for_contacts">Generate tones for contacts</string>
+    <string name="title_activity_select_contacts">Select Contacts</string>
+    <string name="for_default">Generate default tone</string>
+    <string name="title_activity_default_tone_input">Default Tone</string>
+    <string name="confirm">OK</string>
+    <string name="title_activity_confirm_contacts">Select Tone Parameters</string>
+    <string name="words_per_minute_prompt">Rate</string>
+    <string name="def_ringtone_text_hint">Ringtone Text Here</string>
+    <string name="ringtone">use for Ring</string>
+    <string name="notification_tone">use for Notification</string>
+    <string name="toneGenerate">Generate</string>
+    <string name="tonePreview">Preview</string>
+    <string name="frequency_default">800 Hz / G1</string>
+    <string name="wpm_default">20 wpm</string>
+    <string name="frequency_prompt">Pitch</string>
+    <string name="rc_default">0</string>
+    <string name="rc_prompt">Repeat Count</string>
+    <string name="filename_text_hint">Filename Here</string>
+    <string name="for_tofile">Generate tone to file</string>
+    <string name="title_activity_choose_filename">Choose Filename</string>
+    <string name="title_activity_about">About</string>
+    <string name="about_text">
+Copyright (c) 2013, 2014 Charles Cagle
+\n\n
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+\n\n
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+\n\n
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+\n\n
+Some icons are reproduced from work created and shared by the Android Open Source Project and used according to terms described in the Creative Commons 2.5 Attribution License.
+\n\n
+Some icons are modifications based on work created and shared by the Android Open Source Project and used according to terms described in the Creative Commons 2.5 Attribution License.
+    </string>
+    <string-array name="formats">
+      <item>Morse (WAV)</item>
+      <item>Morse (iMelody)</item>
+      <item>Speech</item>
+    </string-array>
+</resources>

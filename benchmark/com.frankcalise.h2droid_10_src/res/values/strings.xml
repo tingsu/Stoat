@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hydrate</string>
+    
+    <!-- main_menu strings -->
+    <string name="menu_add_label">Add Entry</string>
+    <string name="menu_add_shortcut">a</string>
+    <string name="menu_facts_label">Hydration Facts</string>
+    <string name="menu_facts_shortcut">f</string>
+    <string name="menu_history_label">History</string>
+    <string name="menu_history_shortcut">h</string>
+    <string name="menu_reset_label">Reset Today\'s Data</string>
+    <string name="menu_reset_shortcut">r</string>
+    <string name="menu_settings_label">Settings</string>
+    <string name="menu_settings_shortcut">s</string>
+    <string name="settings_units_label">Unit system</string>
+    <string name="settings_reminder_label">Enable reminders</string>
+    <string name="settings_reminder_label_summary">Hydrate will remind you throughout the day to drink water</string>
+    <string name="settings_reminder_interval">Interval</string>
+    <string name="settings_reminder_interval_summary">Number of minutes after last entry to remind you to drink</string>
+    <string name="settings_reminder_light">Light</string>
+    <string name="settings_reminder_light_summary">Blink LED after interval expires</string>
+    <string name="settings_reminder_sound">Sound</string>
+    <string name="settings_reminder_vibrate">Vibrate</string>
+    <string name="settings_reminder_sleep_time">Sleep Time</string>
+    <string name="settings_reminder_wake_time">Wake Time</string>
+    <string name="settings_disable_on_goal">Disable when goal met</string>
+    <string name="settings_disable_on_goal_summary">Reminders will be disabled if your daily goal has been reached</string>
+    <string name="settings_goal_label">Daily goal</string>
+    <string name="settings_goal_summary">Amount of water needed to reach your goal</string>
+    <string name="settings_fav_one">Favorite amount 1</string>
+    <string name="settings_fav_two">Favorite amount 2</string>
+    <string name="settings_fav_three">Favorite amount 3</string>
+    <string name="settings_fav_four">Favorite amount 4</string>
+    <string name="settings_fav_five">Favorite amount 5</string>
+    <string name="settings_toasts">Enable toasts</string>
+    <string name="settings_toasts_summary">Show message confirming add/undo of entries</string>
+    <string name="settings_convert_large">Convert to large units</string>
+    <string name="settings_convert_large_summary">Display in form of fl oz/cp/pt/qt/gal or mL/L</string>
+    <string name="settings_quick_action">Quick action settings</string>
+    <string name="settings_vol_up">Override volume up</string>
+    <string name="settings_vol_up_summary">Add custom amount when volume up is pressed</string>
+    <string name="settings_vol_down">Override volume down</string>
+    <string name="settings_vol_down_summary">Undo last entry when volume down is pressed</string>
+    <string name="settings_vol_up_amount">Volume up amount</string>
+    <string name="settings_vol_up_amount_summary">Amount of water to add when volume up is pressed</string>
+    <string name="settings_amount_category">Amount settings</string>
+    <string name="settings_one_srv">One serving amount</string>
+    
+    <!-- main layout strings -->
+    <string name="one_serving_button_label">+1 srv</string>
+    <string name="two_serving_button_label">+Fav</string>
+    <string name="custom_serving_button_label">+N oz</string>
+    <string name="undo_serving_button_label">Undo</string>
+    <string name="consumption_label">Today\'s water consumption: 0 oz</string>
+    
+    <!-- about activity -->
+    <string name="about_title">About Hydrate</string>
+    <string name="about_text">Version: 1.5\n\n
+    	Developed by Frank Calise\n
+		fcalise@gmail.com\n
+		http://frankcalise.com\n
+		http://twitter.com/frankcalise
+    </string>
+    <string name="about_close_label">Close</string>
+    <string name="about_version">Version 1.5</string>
+    <string name="about_dev_name">Frank Calise</string>
+    <string name="about_dev_contact">e: fcalise@gmail.com\nt: @frankcalise\nu: frankcalise.com</string>
+    
+    <!-- add custom entry activity -->
+    <string name="custom_entry_title">Add new entry</string>
+    <string name="custom_entry_metric_label">Metric</string>
+    <string name="custom_entry_non_metric_label">US</string>
+    <string name="custom_entry_save_label">Save</string>
+    <string name="custom_entry_cancel_label">Cancel</string>
+    <string name="custom_entry_type_of_units_label">Type of units:</string>
+    <string name="custom_entry_historical_entry">Insert as historical entry</string>
+    <string name="custom_entry_amount_hint">Amount</string>
+    
+    <!-- history activity -->
+    <string name="history_activity_title">History</string>
+    <string name="menu_delete_day_label">Delete this day\'s entries</string>
+    <string name="menu_delete_single_label">Delete single entry</string>
+    <string name="disclosure_indicator">&#160;&#160;&#160;&gt;</string>
+    <string name="menu_delete_cancel">Cancel</string>
+    <string name="menu_add_to_day">Add historical entry</string>
+    
+    <!-- widget strings -->
+    <string name="one_cell_widget_label">Hydrate (1 Cell)</string>
+    <string name="two_cell_widget_label">Hydrate (2 Cells)</string>
+    <string name="default_widget_amount">0.0 fl oz</string>
+    <string name="default_widget_percent">0.0%</string>
+    <string name="two_cell_widget_add">Add</string>
+    
+    <!--  water facts activity -->
+    <string name="facts_title">Hydration Facts</string>
+    <string name="facts_disclaimer">* Any water consumption tips are recommendations only. If you have any medical conditions or are unsure of how much water to drink, make certain to consult your physician.</string>
+    <string name="facts_source">(Facts provided by WebMD.com) </string>
+</resources>

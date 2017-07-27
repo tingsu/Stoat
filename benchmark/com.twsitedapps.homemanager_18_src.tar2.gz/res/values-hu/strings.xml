@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- ++++++++++++++++++++++++++++ Multi-language support +++++++++++++++ -->
+    <!-- Hungarian -->
+    
+    <string name="set_preferences">Lehetőségek</string>
+    <string name="not_callable"> ist nicht kompatibel</string>
+    <string name="market_failed">Google Play app-ot nem sikerült elindítani</string>
+    <string name="default_set">Már ez az alapértelmezett</string>
+    <string name="please_wait">Várjon a telepített home-lista véglegesítéséig</string>
+    <string name="homeapp_info">Néhány Home App nem jelenik meg a GP-en</string>
+    <string name="installed"> (Telepített)</string>
+    <string name="notInstalled"> (Nem telepített)</string>
+    <string name="defaultValue"> (Alapért)</string>
+    <string name="noDefaultSet">Nincs alapért. beállítva</string>
+    <string name="homeAppNotCallable">App nem lehívható hiba?</string>
+    <string name="securityException">"Biztonsági kivétel" : THM nem rendelkezik a megfelelő engedélyekke</string>
+    <string name="appSelection">App kiválasztás elviszi a Google Play</string>
+    <string name="setDefault">Beállít</string>
+    <string name="clearDefault">Beáll. töröl</string>
+    <string name="getHome">Válasszon</string>
+    <string name="startAtBoot">Autorun</string>
+    <string name="wifi">WiFi</string>
+    <string name="contacts">Elérhetőségek</string>
+    <string name="app">App:</string>
+    <string name="version">változat:</string>
+    <string name="permission">beleegyezés:</string>
+    
+    <!-- Buttons -->
+    <string name="clearNotification">Tiszta Értesítési</string>
+    <string name="disableNotification">Értesítések letiltása</string>
+    
+    <!-- Notification -->
+    <string name="quickSelect">Gyors kijelölés</string>
+    <string name="selectHomeApp">Válassza otthoni app</string>
+    
+    <!-- Array -->
+    <string name="Black">Fekete</string>
+    <string name="White">Fehér</string>
+    <string name="Grey">Szürke</string>
+    <string name="Cyan">Cián</string>
+    <string name="Green">Zöld</string>
+    <string name="Magenta">Bíborvörös</string>
+    
+    <!-- Menu -->
+    <string name="ascending">Név (+)</string>
+    <string name="descending">Név (-)</string>
+    <string name="DefaultValue">Alapért.</string>
+    <string name="preferences">Lehetőségek</string>
+    <string name="Installed">Telepített</string>
+    <string name="NotInstalled">Nem telepített</string>
+    <string name="memory">Memória</string>
+    
+    <!-- Preferences -->
+    <!-- Standard Options -->
+    <string name="StandardOptions">Standard beállítások</string>
+    <string name="StandardOptionsText">Válassza a normál beállítások módosításait</string>
+    <string name="AppTheme">App Téma</string>
+    <string name="AppThemeText">Beállíthat egy új színű témát</string>
+    <string name="Notification">Értesítés engedélyezése</string>
+    <string name="NotificationText">Engedélyezze a Gyors kijelölés értesítést</string>
+    <!-- About -->
+    <string name="About">Rólunk</string>
+    <string name="CopyrightText">Copyright © 2010 Twisted Apps™ LLC</string>
+    <string name="Github">Open Source oldal</string>
+    <string name="GithubText">Open source url &#8230;</string> 
+    <string name="Blog">Blog</string>
+    <string name="BlogText">Blog mintegy Twisted Kezdőlap Manager, verzió, változások, segítség, stb &#8230;</string>
+    <string name="Email">E-mail</string>
+    <string name="EmailText">Küldjön e-mailt: javaslatok vagy segítség</string>
+    <string name="Rollback">Visszaállítás</string>
+    <string name="RollbackText">Visszaállítás egy korábbi verzióra. Töltse le a korábbi verziót és telepítse.</string>
+    <string name="Market">Google Play</string>
+    <string name="MarketText">Elviszi a GP-re a Twisted Home Managerhez: értékelés, infó, stb &#8230;</string>
+
+</resources>

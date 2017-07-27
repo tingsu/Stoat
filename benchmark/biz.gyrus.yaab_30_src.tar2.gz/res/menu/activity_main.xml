@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/miPreferences" android:titleCondensed="@string/preferences" android:title="@string/preferences" android:icon="@android:drawable/ic_menu_preferences"/>
+    <item android:id="@+id/miCredits" android:titleCondensed="@string/activity_credits_txt_title" android:title="@string/activity_credits_txt_title" android:icon="@android:drawable/ic_menu_info_details"/>
+    <item android:id="@+id/miDonate" android:titleCondensed="@string/activity_donate_txt_title" android:title="@string/activity_donate_txt_title" android:icon="@android:drawable/ic_menu_agenda"/>
+    
+
+</menu>

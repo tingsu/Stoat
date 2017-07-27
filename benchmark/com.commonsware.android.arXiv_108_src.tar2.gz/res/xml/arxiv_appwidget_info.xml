@@ -1,0 +1,6 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="144dp"
+    android:minHeight="144dp"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/arxiv_appwidget">
+</appwidget-provider>

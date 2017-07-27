@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:droidnotify="http://schemas.android.com/apk/res/apps.droidnotify"
+	android:key="preference_screen">      	  	
+	<PreferenceCategory
+		android:key="basic_settings_category"
+		android:title="@string/basic_settings_text">
+		<ListPreference
+			android:key="app_theme"
+			android:title="@string/preference_app_theme_title"
+			android:summary="@string/preference_app_theme_summary"
+			android:entries="@array/app_theme_options"
+			android:entryValues="@array/app_theme_options_values"
+			android:defaultValue="0"/>
+		<CheckBoxPreference
+			android:key="display_seconds_enabled" 
+			android:title="@string/preference_display_seconds_enabled_title" 
+			android:summaryOn="@string/preference_display_seconds_enabled_summaryOn" 
+			android:summaryOff="@string/preference_display_seconds_enabled_summaryOff" 
+			android:defaultValue="true" />
+		<CheckBoxPreference
+			android:key="blink_colon_enabled" 
+			android:title="@string/preference_blink_colon_enabled_title" 
+			android:summaryOn="@string/preference_blink_colon_enabled_summaryOn" 
+			android:summaryOff="@string/preference_blink_colon_enabled_summaryOff" 
+			android:defaultValue="false" />
+		<ListPreference
+			android:key="alarm_max_hours_settings"
+			android:title="@string/preference_alarm_max_hours_title"
+			android:summary="@string/preference_alarm_max_hours_summary"
+			android:defaultValue="48"
+			android:entries="@array/alarm_max_hours_options"
+			android:entryValues="@array/alarm_max_hours_options_values" />
+		<CheckBoxPreference
+			android:key="landscape_screen_enabled" 
+			android:title="@string/preference_landscape_screen_enabled_title" 
+			android:summaryOn="@string/preference_landscape_screen_enabled_summaryOn" 
+			android:summaryOff="@string/preference_landscape_screen_enabled_summaryOff" 
+			android:defaultValue="false" />
+  	</PreferenceCategory>
+  	<PreferenceCategory
+		android:key="alarm_settings_category"
+		android:title="@string/alarm_settings_text">
+		<PreferenceScreen
+			android:key="alarm_settings_screen"
+			android:title="@string/alarm_settings_text">
+			<ListPreference
+				android:key="snooze_amount"
+				android:title="@string/preference_snooze_amount_title"
+				android:summary="@string/preference_snooze_amount_summary"
+				android:defaultValue="10"
+				android:entries="@array/snooze_amount_options"
+				android:entryValues="@array/snooze_amount_options_values" />
+			<CheckBoxPreference 
+				android:key="status_bar_notifications_enabled" 
+				android:title="@string/preference_notifications_enabled_title" 
+				android:summaryOn="@string/preference_notifications_enabled_summaryOn" 
+				android:summaryOff="@string/preference_notifications_enabled_summaryOff" 
+				android:defaultValue="true" />		
+			<PreferenceScreen
+				android:key="notification_settings_screen"
+				android:title="@string/preference_notification_settings"
+				android:summary="@string/preference_notification_settings_summary"
+				android:dependency="status_bar_notifications_enabled">	
+		  		<PreferenceCategory
+					android:key="notification_sound_settings_category"
+					android:title="@string/preference_notification_sound_settings_text">
+					<RingtonePreference
+             			android:key="notification_sound"
+						android:title="@string/preference_notification_sound_title"
+						android:summary="@string/preference_notification_sound_summary"
+						android:ringtoneType="alarm"
+						android:showDefault="true"
+						android:showSilent="true"
+						android:defaultValue="content://settings/system/alarm_alert" />
+				</PreferenceCategory>
+				<PreferenceCategory
+					android:key="notification_vibrate_settings_category"
+					android:title="@string/preference_notification_vibrate_settings_text">	
+					<ListPreference
+						android:key="notification_vibrate_setting"
+						android:title="@string/preference_vibrate_setting_title"
+						android:summary="@string/preference_vibrate_setting_summary"
+						android:defaultValue="0"
+						android:entries="@array/vibrate_setting_options"
+						android:entryValues="@array/vibrate_setting_options_values" />
+					<apps.babycaretimer.preferences.VibratePatternListPreference
+						android:key="notification_vibrate_pattern"
+						android:title="@string/preference_vibrate_pattern_title"
+						android:summary="@string/preference_vibrate_pattern_summary"
+						android:entries="@array/preference_vibrate_pattern_options"
+						android:entryValues="@array/preference_vibrate_pattern_options_values"
+						android:defaultValue="0,800,200,800,200,800,200" />
+				</PreferenceCategory>	
+		  		<PreferenceCategory
+					android:key="notification_led_settings_category"
+					android:title="@string/preference_notification_led_settings_text">
+					<CheckBoxPreference 
+						android:key="notification_led_enabled" 
+						android:title="@string/preference_led_enabled_title" 
+						android:summaryOn="@string/preference_led_enabled_summaryOn" 
+						android:summaryOff="@string/preference_led_enabled_summaryOff" 
+						android:defaultValue="true" />
+					<apps.babycaretimer.preferences.LEDColorListPreference
+						android:key="notification_led_color"
+						android:title="@string/preference_led_color_title"
+						android:summary="@string/preference_led_color_summary"
+						android:entries="@array/preference_led_color_options"
+						android:entryValues="@array/preference_led_color_options_values"
+						android:defaultValue="yellow"
+						android:dependency="notification_led_enabled" />
+					<apps.babycaretimer.preferences.LEDPatternListPreference
+						android:key="notification_led_pattern"
+						android:title="@string/preference_led_pattern_title"
+						android:summary="@string/preference_led_pattern_summary"
+						android:entries="@array/preference_led_pattern_options"
+						android:entryValues="@array/preference_led_pattern_options_values"
+						android:defaultValue="1000,1000"
+						android:dependency="notification_led_enabled" />
+				</PreferenceCategory>
+		  		<PreferenceCategory
+					android:key="notification_in_call_settings_category"
+					android:title="@string/preference_notification_in_call_settings_text">
+					<CheckBoxPreference 
+							android:key="notification_in_call_sound_enabled" 
+							android:title="@string/preference_notification_in_call_sound_enable_title" 
+							android:summaryOn="@string/preference_notification_in_call_sound_enable_summaryOn" 
+							android:summaryOff="@string/preference_notification_in_call_sound_enable_summaryOff" 
+							android:defaultValue="false" />
+					<CheckBoxPreference 
+							android:key="notification_in_call_vibrate_enabled" 
+							android:title="@string/preference_notification_in_call_vibrate_enable_title" 
+							android:summaryOn="@string/preference_notification_in_call_vibrate_enable_summaryOn" 
+							android:summaryOff="@string/preference_notification_in_call_vibrate_enable_summaryOff" 
+							android:defaultValue="false" />
+				</PreferenceCategory>	
+			</PreferenceScreen>	
+			<PreferenceScreen
+				android:key="screen_settings_screen"
+				android:title="@string/preference_screen_settings">	
+				<CheckBoxPreference 
+					android:key="blur_screen_background_enabled" 
+					android:title="@string/preference_blur_screen_background_enabled_title" 
+					android:summaryOn="@string/preference_blur_screen_background_enabled_summaryOn" 
+					android:summaryOff="@string/preference_blur_screen_background_enabled_summaryOff" 
+					android:defaultValue="false" />
+				<CheckBoxPreference 
+					android:key="dim_screen_background_enabled" 
+					android:title="@string/preference_dim_screen_background_enabled_title" 
+					android:summaryOn="@string/preference_dim_screen_background_enabled_summaryOn" 
+					android:summaryOff="@string/preference_dim_screen_background_enabled_summaryOff" 
+					android:defaultValue="true" />
+				<ListPreference
+					android:key="dim_screen_background_amount_settings"
+					android:title="@string/preference_dim_screen_background_amount_title"
+					android:summary="@string/preference_dim_screen_background_amount_summary"
+					android:defaultValue="50"
+					android:entries="@array/dim_screen_background_amount_options"
+					android:entryValues="@array/dim_screen_background_amount_options_values"
+					android:dependency="dim_screen_background_enabled" />		
+				<CheckBoxPreference 
+					android:key="screen_enabled" 
+					android:title="@string/preference_screen_enabled_title" 
+					android:summaryOn="@string/preference_screen_enabled_summaryOn" 
+					android:summaryOff="@string/preference_screen_enabled_summaryOff" 
+					android:defaultValue="true" />
+				<CheckBoxPreference 
+					android:key="screen_dim_enabled" 
+					android:title="@string/preference_screen_dim_enabled_title" 
+					android:summaryOn="@string/preference_screen_dim_enabled_summaryOn" 
+					android:summaryOff="@string/preference_screen_dim_enabled_summaryOff" 
+					android:defaultValue="true"
+					android:dependency="screen_enabled" />
+				<CheckBoxPreference 
+					android:key="keyguard_enabled" 
+					android:title="@string/preference_keyguard_enabled_title" 
+					android:summaryOn="@string/preference_keyguard_enabled_summaryOn" 
+					android:summaryOff="@string/preference_keyguard_enabled_summaryOff" 
+					android:defaultValue="true"
+					android:dependency="screen_enabled" />
+				</PreferenceScreen>		
+			</PreferenceScreen>
+  	</PreferenceCategory>   
+	<PreferenceCategory
+		android:key="advanced_settings_category"
+		android:title="@string/advanced_settings_text">
+		<PreferenceScreen
+			android:key="advanced_settings_screen"
+			android:title="@string/advanced_settings_text">
+			<CheckBoxPreference
+				android:key="haptic_feedback_enabled" 
+        		android:title="@string/preference_haptic_feedback_title" 
+        		android:summaryOn="@string/preference_haptic_feedback_summaryOn" 
+        		android:summaryOff="@string/preference_haptic_feedback_summaryOff" 
+        		android:defaultValue="true" />
+        	<CheckBoxPreference
+				android:key="confirm_reset_counters_enabled" 
+				android:title="@string/preference_confirm_reset_counters_enabled_title" 
+				android:summaryOn="@string/preference_confirm_reset_counters_enabled_summaryOn" 
+				android:summaryOff="@string/preference_confirm_reset_counters_enabled_summaryOff" 
+				android:defaultValue="true" />
+			<ListPreference
+				android:key="screen_timeout_settings"
+				android:title="@string/preference_screen_timeout"
+				android:summary="@string/preference_screen_timeout_summary"
+				android:defaultValue="300"
+				android:entries="@array/screen_timeout_options"
+				android:entryValues="@array/screen_timeout_options_values" />
+			<Preference
+            	android:key="export_preferences"
+        		android:title="@string/preference_export_preferences_title"
+          		android:summary="@string/preference_export_preferences_summary" />
+			<Preference
+            	android:key="import_preferences"
+        		android:title="@string/preference_import_preferences_title"
+          		android:summary="@string/preference_import_preferences_summary" />
+		</PreferenceScreen>	
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:key="rate_app_category"
+		android:title="@string/rate_app_text">
+		<Preference
+            android:key="rate_app"
+        	android:title="@string/rate_app_text"
+          	android:summary="@string/rate_app_summary" />
+    </PreferenceCategory>       	
+	<PreferenceCategory
+		android:key="app_feedback_category"
+		android:title="@string/feedback_text">
+		<Preference
+            android:key="email_developer"
+        	android:title="@string/email_developer_text"
+          	android:summary="@string/email_developer_summary" />
+    </PreferenceCategory>        
+	<PreferenceCategory
+		android:key="app_info_category"
+		android:title="@string/about_text">
+  		<Preference
+            android:key="application_about"
+        	android:title="@string/about_text"
+          	android:summary="@string/preference_about_summary" />
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:key="app_license_category"
+		android:title="@string/license_info">
+  		<Preference
+            android:key="application_license" 
+        	android:title="@string/license"
+          	android:summary="@string/app_license" />
+	</PreferenceCategory>
+</PreferenceScreen>

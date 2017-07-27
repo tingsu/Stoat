@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:initialLayout="@layout/two_cell_widget"
+  android:minWidth="@dimen/two_cell_widget"
+  android:maxHeight="@dimen/one_cell_widget"
+  android:label="@string/two_cell_widget_label">
+</appwidget-provider>

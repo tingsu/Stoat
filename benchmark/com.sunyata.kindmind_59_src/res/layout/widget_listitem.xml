@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_listitem_textView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="40dp"
+    android:layout_gravity="center_vertical"
+	android:paddingLeft="4dp"
+    android:textSize="18sp" >
+</TextView>

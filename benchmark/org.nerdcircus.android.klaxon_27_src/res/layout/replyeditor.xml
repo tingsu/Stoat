@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <ImageView android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        />
+    <EditText android:id="@+id/subject"
+        android:layout_weight="1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="reply title"
+        android:textSize="20px"
+        android:textStyle="bold"
+        android:layout_toRightOf="@id/icon"
+        />
+    <EditText android:id="@+id/body"
+        android:layout_weight="0.5"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="reply text"
+        android:layout_toRightOf="@id/icon"
+        android:layout_below="@id/subject"
+        />
+    <CheckBox android:id="@+id/show_in_menu"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Show this item in the menu?"
+        android:layout_below="@id/body"
+    />
+    <Spinner android:id="@+id/ack_status_spinner"
+        android:layout_below="@id/show_in_menu"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+    />
+    <LinearLayout
+        android:layout_below="@id/ack_status_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <Button android:id="@+id/save_button"
+            android:text="Save"
+            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            />
+        <Button android:id="@+id/cancel_button"
+            android:text="Cancel"
+            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            />
+        <Button android:id="@+id/delete_button"
+            android:text="Delete"
+            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            />
+    </LinearLayout>
+</RelativeLayout>
+

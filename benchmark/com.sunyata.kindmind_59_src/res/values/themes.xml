@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Documentation: https://developer.android.com/guide/topics/ui/themes.html -->
+<resources>
+
+  <!-- @android:style/Theme.Holo -->
+  <style name="AppThemeKindMind" parent="AppTheme">
+<!--         <item name="android:background">@color/kindmind_background</item> -->
+  </style>
+
+</resources>

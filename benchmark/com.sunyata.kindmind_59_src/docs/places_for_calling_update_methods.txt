@@ -1,0 +1,9 @@
+clearing all active
+saving
+
+sorting
+
+checkbox check/uncheck
+
+adding item
+removing item

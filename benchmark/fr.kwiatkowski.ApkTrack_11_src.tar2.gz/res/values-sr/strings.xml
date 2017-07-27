@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">Апктрак</string>
+
+    <!-- Menu bar strings -->
+    <string name="refresh_menu_desc">Поново откриј инсталиране апликације</string>
+    <string name="check_all_apps_desc">Провери надоградње за све апликације</string>
+    <string name="show_system_apps">Прикажи системске апликације</string>
+    <string name="hide_system_apps">Сакриј системске апликације</string>
+    <string name="sort_type_alpha">Поређај по имену</string>
+    <string name="sort_type_updated">Поређај по стању</string>
+    <string name="settings">Поставке</string>
+
+    <!-- Refresh installed apps button strings. Please mind the leading space and trailing line feed! -->
+    <string name="new_apps_detected"> %1$d нових апликација откривено\n</string>
+    <string name="apps_updated"> %1$d апликација надограђено\n</string>
+    <string name="apps_deleted">%1$d апликација обрисано</string>
+
+    <!-- Notification strings -->
+    <string name="app_updated_notification">%1$s је надограђена.</string>
+    <string name="app_version_available">Издање %1$s је доступно!</string>
+    <string name="app_can_be_updated">%1$s има надоградњу!</string>
+
+    <!-- Application status strings -->
+    <string name="no_data_found">Нема података о надоградњи</string>
+    <string name="network_error">Проблем са везом</string>
+    <string name="current">Текућа:</string>
+    <string name="generic_exception">Грешка: %1$s</string>
+    <string name="last_check">Последња провера:</string>
+    <string name="never">никад</string>
+
+    <!-- Update source chooser dialog -->
+    <string name="available_update_sources">Извори за проверу надоградњи</string>
+    <string name="ok">У реду</string>
+    <string name="cancel">Одустани</string>
+
+    <!-- Settings strings -->
+    <string name="general">Опште поставке</string>
+    <string name="preferred_search_engine">Пожељни мотор претраге</string>
+    <string name="preferred_search_engine_desc">Који мотор претраге ће бити коришћен за тражење АПК фајлова\nИзабран: %s</string>
+    <string name="enable_background_checks">Омогући провере у позадини</string>
+    <string name="enable_background_checks_desc">Извршавај аутоматске провере надоградњи повремено за све апликације.</string>
+
+    <string name="appearance">Изглед</string>
+    <string name="hide_unknown_apps">Сакриј непознате апликације</string>
+    <string name="hide_unknown_apps_desc">Не приказуј апликације за које нема података о надоградњи</string>
+
+</resources>

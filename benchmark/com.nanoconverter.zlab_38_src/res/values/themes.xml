@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MyTheme" parent="@android:style/Theme.NoTitleBar">
+        <!-- Any customizations for your app running on pre-3.0 devices here -->
+   </style>
+   <style name="MyTheme2" parent="@android:style/Theme">
+        <!-- Any customizations for your app running on devices with Theme.Holo here -->
+    </style>
+</resources>

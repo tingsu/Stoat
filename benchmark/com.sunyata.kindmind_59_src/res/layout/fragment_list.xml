@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent" >
+
+  <LinearLayout
+    android:id="@+id/loadingLinearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <ProgressBar
+      style="@android:style/Widget.ProgressBar"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content" >
+    </ProgressBar>
+    <!--
+  	<TextView
+  	    android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="20dp"
+          android:textAlignment="center"
+          style="@android:style/TextAppearance.DeviceDefault"
+          android:text="KindSort algorithm updating list" >
+  	</TextView>
+    -->
+    <!--
+      The space below has been added so that the user can see both the Toast text as well as the sorting
+  	text in the above TextView
+    -->
+
+    <Space
+      android:layout_width="0dp"
+      android:layout_height="100dp" />
+  </LinearLayout>
+
+  <!--
+  Please note "@id/android:list" below which means that we are using the default android listview id.
+  We need to avoid this problem:
+  java.lang.RuntimeException: Your content must have a ListView whose id attribute is 'android.R.id.list'
+  -->
+
+  <ListView
+    android:id="@id/android:list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+  </ListView>
+
+  
+  <!-- Empty list -->
+  
+  <!--
+  PLEASE NOTE: If LinearLayout is used below for the empty view only the first view will be shown
+  -->
+  <RelativeLayout
+    android:id="@android:id/empty"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+    <TextView
+      android:id="@+id/listFragment_empty_textView"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:autoLink="web"
+      android:textSize="16sp"
+      android:text="@string/listFragment_empty" >
+    </TextView>
+    <Button
+      android:id="@+id/listFragment_empty_addFirstItem_button"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/listFragment_empty_textView"
+      android:text="@string/listFragment_firstKindnessItem" >
+    </Button>
+  </RelativeLayout>
+
+</FrameLayout>

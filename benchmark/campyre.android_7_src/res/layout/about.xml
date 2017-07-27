@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	
+	android:fillViewport="true"
+	android:background="@color/main_background"
+	>
+	<LinearLayout 
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:padding="10dp"
+		
+		android:orientation="vertical"
+		>
+		
+		<TextView android:id="@+id/about_main_1"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			
+			android:textSize="16sp"
+			android:textColor="@color/main_foreground"
+			android:textColorLink="@color/main_foreground_link"
+			/>
+			
+		<TextView android:id="@+id/about_main_2"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			
+			android:textSize="16sp"
+			android:textColor="@color/main_foreground"
+			android:text="@string/about_main_2"
+			/>
+		
+		<TextView android:id="@+id/about_links"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			
+			android:textSize="14sp"
+			android:textColor="@color/main_foreground"
+			android:textColorLink="@color/main_foreground_link"
+			android:text="@string/about_links"
+			/>
+			
+		<TextView android:id="@+id/about_version"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			
+			android:textColor="@color/main_foreground"
+			android:textSize="14sp"
+			/>
+	</LinearLayout>
+</ScrollView>

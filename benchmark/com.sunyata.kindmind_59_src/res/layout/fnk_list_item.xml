@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+Lower layout weight increases space
+Please note this important property below for the checkbox: android:clickable
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:descendantFocusability="blocksDescendants"
+  android:orientation="horizontal" >
+
+  <CheckBox
+    android:id="@+id/list_item_activeCheckBox"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="10dp"
+    android:layout_weight="0"
+    android:clickable="false"
+    android:enabled="true"
+    android:focusable="false"
+    android:gravity="center"
+    android:paddingRight="12dp"
+    android:textColorHighlight="#ffffff" />
+
+  <TextView
+    android:id="@+id/list_item_titleTextView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:gravity="center_vertical"
+    android:minHeight="48dp"
+    android:paddingBottom="2dp"
+    android:textSize="20sp" />
+
+  <LinearLayout
+    android:id="@+id/list_item_indicatorRectangle"
+    android:layout_width="16dp"
+    android:layout_height="match_parent"
+    android:layout_weight="0"
+    android:orientation="horizontal" />
+
+</LinearLayout>

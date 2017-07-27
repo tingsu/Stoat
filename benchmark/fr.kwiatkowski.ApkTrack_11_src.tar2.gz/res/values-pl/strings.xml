@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">ApkTrack</string>
+
+    <!-- Menu bar strings -->
+    <string name="refresh_menu_desc">Odśwież listę aplikacji</string>
+    <string name="check_all_apps_desc">Sprawdź aktualizacje dla wszystkich aplikacji</string>
+    <string name="show_system_apps">Pokaż aplikacje systemowe</string>
+    <string name="hide_system_apps">Ukryj aplikacje systemowe</string>
+    <string name="sort_type_alpha">Sortuj alfabetycznie</string>
+    <string name="sort_type_updated">Sortuj według statusu</string>
+    <string name="settings">Ustawienia</string>
+
+    <!-- Refresh installed apps button strings. Please mind the leading space and trailing line feed! -->
+    <string name="new_apps_detected"> %1$d nowych aplikacji\n</string>
+    <string name="apps_updated"> %1$d zaktualizowanych aplikacji\n</string>
+    <string name="apps_deleted">%1$d usuniętych aplikacji</string>
+
+    <!-- Notification strings -->
+    <string name="app_updated_notification">%1$s zaktualizowano.</string>
+    <string name="app_version_available">Wersja %1$s jest dostępna!</string>
+    <string name="app_can_be_updated">%1$s może zostać zaktualizowana!</string>
+
+    <!-- Application status strings -->
+    <string name="no_data_found">Brak informacji o aktualizacjach</string>
+    <string name="network_error">Problem z połączeniem</string>
+    <string name="current">Obecna:</string>
+    <string name="generic_exception">Błąd: %1$s</string>
+    <string name="last_check">Ostatnio sprawdzane:</string>
+    <string name="never">nigdy</string>
+    
+    <!-- Update source chooser dialog -->
+    <string name="available_update_sources">Dostępne źródła aktualizacji</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Anuluj</string>
+    
+    <!-- Settings strings -->
+    <string name="general">Ustawienia</string>
+    <string name="preferred_search_engine">Preferowany silnik wyszukiwania</string>
+    <string name="preferred_search_engine_desc">Wybierz silnik, który będzie używany do wyszukiwania aplikacji\nObecny wybór: %s</string>
+    <string name="enable_background_checks">Zezwól na pracę w tle</string>
+    <string name="enable_background_checks_desc">Automatycznie sprawdza dostępność zaktualizowanych aplikacji.</string>
+    
+</resources>

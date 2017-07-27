@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical" >
+
+  <TextView
+    style="@style/myRadioButtonStyle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="12dp"
+    android:layout_marginTop="12dp"
+    android:text="@string/widgetConfig_text"
+    android:textSize="18sp" />
+
+  <RadioGroup
+    android:id="@+id/widgetConfig_radioGroup"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RadioButton
+      android:id="@+id/widgetConfigFeelings_radioButton"
+      style="@style/myRadioButtonStyle"
+      android:text="@string/feelings_title" />
+
+    <RadioButton
+      android:id="@+id/widgetConfigNeeds_radioButton"
+      style="@style/myRadioButtonStyle"
+      android:text="@string/needs_title" />
+
+    <RadioButton
+      android:id="@+id/widgetConfigKindness_radioButton"
+      style="@style/myRadioButtonStyle"
+      android:text="@string/kindness_title" />
+  </RadioGroup>
+
+  <Space
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp" />
+
+  <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+    <Button
+      android:id="@+id/widgetConfigCancel_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:padding="8dp"
+      android:text="@string/widgetConfig_cancel" />
+    
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="12dp" />
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="12dp" />
+
+    <Button
+      android:id="@+id/widgetConfigOk_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:padding="8dp"
+      android:text="@string/widgetConfig_ok" />
+    
+  </LinearLayout>
+
+</LinearLayout>

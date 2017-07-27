@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- <item android:id="@+id/menu_add"
+		  android:title="@string/menu_add_label"
+		  android:alphabeticShortcut="@string/menu_add_shortcut"
+		  android:icon="@android:drawable/ic_menu_add" /> -->
+	<item android:id="@+id/menu_history"
+		  android:title="@string/menu_history_label"
+		  android:alphabeticShortcut="@string/menu_history_shortcut"
+		  android:icon="@android:drawable/ic_menu_recent_history" />
+	<!-- <item android:id="@+id/menu_reset"
+		  android:title="@string/menu_reset_label"
+		  android:alphabeticShortcut="@string/menu_reset_shortcut"
+		  android:icon="@android:drawable/ic_menu_close_clear_cancel" /> -->
+	 <item android:id="@+id/menu_facts"
+		  android:title="@string/menu_facts_label"
+		  android:alphabeticShortcut="@string/menu_facts_shortcut"
+		  android:icon="@android:drawable/ic_menu_info_details" /> -->
+	<item android:id="@+id/menu_settings"
+		  android:title="@string/menu_settings_label"
+		  android:alphabeticShortcut="@string/menu_settings_shortcut"
+		  android:icon="@android:drawable/ic_menu_preferences" />
+</menu>

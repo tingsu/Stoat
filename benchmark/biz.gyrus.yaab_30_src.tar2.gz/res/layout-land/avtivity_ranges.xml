@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+    
+    <TextView
+        android:id="@+id/txtCap1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center_horizontal"
+        android:text="@string/brightness_range_caption"
+        android:layout_marginTop="5dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TableLayout
+        android:id="@+id/rangesBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+		android:layout_below="@+id/txtCap1"
+        >
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" 
+            >
+            
+		    <TextView
+		        android:id="@+id/txtMin"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+				android:textStyle="bold"
+				android:layout_gravity="center_vertical"        
+				android:paddingRight="8dip"        
+		        android:text="@string/txt_min" />
+
+		    <SeekBar
+		        android:id="@+id/sbMin"
+		        android:layout_weight="2"
+		        android:layout_height="wrap_content" />
+    
+		</TableRow>
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            
+		    <TextView
+		        android:id="@+id/txtMax"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+				android:textStyle="bold"        
+				android:layout_gravity="center_vertical"
+				android:paddingRight="8dip"        
+		        android:text="@string/txt_max" />
+
+		    <SeekBar
+		        android:id="@+id/sbMax"
+		        android:layout_weight="2"
+		        android:layout_height="wrap_content" />
+    
+		    </TableRow>
+
+    </TableLayout>
+    
+    <TextView
+        android:id="@+id/txtCap2"
+        android:layout_below="@+id/rangesBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_horizontal"
+        android:text="@string/night_reading_caption"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+	<LinearLayout
+	    android:id="@+id/thresholdBox"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentLeft="true"
+	    android:layout_below="@+id/txtCap2"
+	    android:orientation="horizontal" >
+
+		    <TextView
+		        android:id="@+id/txtNightThreshold"
+		        android:layout_height="wrap_content"
+		        android:layout_width="wrap_content"
+				android:textStyle="bold"
+				android:paddingRight="8dip"
+				android:layout_gravity="center_vertical"        
+		        android:text="@string/txt_night_threshold" />
+            
+		    <SeekBar
+		        android:id="@+id/sbNightThreshold"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+				/>
+
+	</LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/thresholdBox"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:id="@+id/tlReadings"
+        >
+        <LinearLayout
+	        android:orientation="horizontal"
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dip"
+	        android:layout_weight="1"
+            >
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_sensor_reading" android:paddingRight="10dp"/>
+            <TextView android:id="@+id/txtLastReading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_none"/>
+        </LinearLayout>
+        <LinearLayout
+	        android:orientation="horizontal"
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dip"
+	        android:layout_weight="1"
+			>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_threshold_value" android:paddingRight="10dp"/>
+            <TextView android:id="@+id/txtCurrentThreshold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_none"/>
+        </LinearLayout>
+    </LinearLayout>
+	
+
+    <TextView
+        android:id="@+id/txtNightBrightness"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+		android:textStyle="bold"        
+		android:layout_alignBaseline="@id/btnTestBrightness"
+		android:paddingRight="8dip"
+		android:layout_below="@id/tlReadings"        
+        android:text="@string/txt_night_brightness" />
+
+    <Button
+        android:id="@+id/btnTestBrightness"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:minWidth="70dp"
+        android:layout_below="@id/tlReadings"
+        android:text="@string/btn_night_test" />
+    
+    <SeekBar
+        android:id="@+id/sbNightBrightness"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tlReadings"
+        android:layout_marginTop="8dip"
+        android:layout_toLeftOf="@+id/btnTestBrightness"
+        android:layout_toRightOf="@+id/txtNightBrightness" />
+    
+    <TextView
+        android:id="@+id/txtNotAutoWarn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/btnTestBrightness"
+        android:text="@string/txt_not_auto_note" />
+
+</RelativeLayout>

@@ -1,0 +1,14 @@
+
+... för text som är för lång (5-delsserie)
+
+action bar generator
+
+context drawer
+top level navigation
+access till context drawer från alla fyra mainvyer (genom att trycka på appikonen eller
+ om man är på den mainvy som är längst till vänster så kan man dra) 
+
+custom action views
+
+colours (theme)
+

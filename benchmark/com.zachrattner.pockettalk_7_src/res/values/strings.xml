@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+    This file is part of Pocket Talk, an Android application that reads text 
+    messages aloud, and vibrates them in International Morse Code.
+
+    Pocket Talk was released in January 2012 by Zach Rattner 
+    (info@zachrattner.com).
+
+    Pocket Talk is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Pocket Talk is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Pocket Talk.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources>
+    
+    <!-- Application title -->
+    <string name="app_name">Pocket Talk</string>
+    
+    <!-- Vibrate enable GUI label -->
+    <string name="vibrate_label">Vibrate messages in Morse code</string>
+    
+    <!-- "Prepend sender" GUI label -->
+    <string name="sender_label">Include sender before message body</string>
+    
+    <!-- "Read text messages aloud" GUI label -->
+    <string name="read_label">Read messages aloud</string>
+    
+    <!-- Vibration speed spinner GUI label -->
+    <string name="speed_label">Speed:</string>
+    
+    <!-- Logo accessibility text -->
+    <string name="logo_descr">Logo</string>
+</resources>

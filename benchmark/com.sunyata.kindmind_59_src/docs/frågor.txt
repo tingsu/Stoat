@@ -1,0 +1,8 @@
+Frågor till Gustaf:
+1. Ska man spara lokalt eller är det bäst att ha allt i databasen hela tiden? Med andra ord: Räknas Databasklasserna som modellen eller har man separata klasser för det?
+1.1 Alt 1: I Vogellas tutorial så sparas allting i "Controller"-klassen
+1.2 Alt 2: Som jag gjort tidigare själv så har jag sparat allting i en modellklass
+>>>1.3 Hur gör de i Nerd Ranch-boken?
+2. Hur gör man om man inte vill använda en enum för att spara typen?
+3. Hur gör man om man _vill_ använda en enum?
+4. 

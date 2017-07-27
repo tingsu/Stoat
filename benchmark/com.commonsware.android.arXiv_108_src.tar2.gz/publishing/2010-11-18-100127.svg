@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!-- \chi
+
+ -->
+
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+<svg version="1.1" baseProfile="full" id="body" width="4in" height="5.14285714286in" viewBox="0 0 7 9" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events">
+<title>SVG drawing</title>
+
+<desc>This was produced by version 4.4 of GNU libplot, a free library for exporting 2-D vector graphics.</desc>
+
+<g id="content" transform="scale(1,-1) translate(-302,-650)" xml:space="preserve" stroke="black" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10.433" stroke-dasharray="none" stroke-dashoffset="0" stroke-opacity="1" fill="none" fill-rule="evenodd" fill-opacity="1" font-style="normal" font-variant="normal" font-weight="normal" font-stretch="normal" font-size-adjust="none" letter-spacing="normal" word-spacing="normal" text-anchor="start">
+<path d="M305.87,646.05 H305.77 L304.87,647.97 C304.79,648.16,304.68,648.32,304.54,648.47 C304.43,648.58,304.29,648.65,304.14,648.65 C303.89,648.65,303.64,648.56,303.45,648.41 L302.82,647.93 L302.97,647.73 C303.16,647.88,303.44,648.09,303.62,648.09 C303.73,648.09,303.85,648.04,303.93,647.97 C304.05,647.84,304.19,647.65,304.27,647.48 C304.62,646.76,305.35,645.34,305.35,645.34 C304.61,644.38,303.93,643.39,303.25,642.4 L303.75,642.1 L303.92,642.16 C304.07,642.55,304.29,642.93,304.5,643.31 C304.8,643.82,305.11,644.32,305.45,644.83 H305.55 C305.81,644.21,306.13,643.44,306.33,643.03 C306.46,642.77,306.59,642.5,306.8,642.28 C306.93,642.16,307.07,642.04,307.24,642.04 C307.43,642.04,307.61,642.1,307.79,642.19 C308.08,642.3,308.35,642.45,308.62,642.6 L308.54,642.84 C308.33,642.73,308.09,642.68,307.85,642.68 C307.72,642.68,307.58,642.73,307.49,642.82 C307.02,643.29,306.44,644.61,306.01,645.55 C306.16,645.76,306.33,645.95,306.49,646.14 L308.27,648.2 L308.26,648.27 L307.93,648.58 L307.73,648.54 Z " stroke-width="0" fill="black" />
+
+</g>
+
+</svg>
+

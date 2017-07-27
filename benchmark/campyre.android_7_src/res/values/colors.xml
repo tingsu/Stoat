@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="header_line">#888888</color>
+	
+	<color name="main_background">#2c4854</color>
+	<color name="main_foreground">#ffffff</color>
+	<color name="main_foreground_link">#4c88b7</color>
+	<color name="title_background">#235e6f</color>
+	<color name="title_foreground">#ffffff</color>
+	
+	<color name="message_text_divider">#999999</color>
+	
+	<color name="message_text_background">#2c4854</color>
+	<color name="message_text_background_own">#2c4854</color>
+	<color name="message_timestamp_foreground">#999999</color>
+	<color name="message_error_foreground">#eeeeee</color>
+	<color name="message_error_background">#982323</color>
+	<color name="message_entry_background">#063355</color>
+	<color name="message_topic_border">#461605</color>
+	<color name="message_topic_background">#762a16</color>
+	
+	<color name="paste_header">#dddddd</color>
+	<color name="paste_divider">#555555</color>
+	
+	<color name="tab_edges">#04081a</color>
+	<color name="tab_top">#04081a</color>
+	
+	<color name="tab_pressed_top">#f58525</color>
+	<color name="tab_pressed_bottom">#c56520</color>
+	
+	<color name="tab_selected_top">#235e6f</color>
+	<color name="tab_selected_bottom">#094555</color>
+	<color name="tab_dim_top">#084048</color>
+	<color name="tab_dim_bottom">#02252f</color>
+	
+	<color name="tab_text_deselected">#aaaaaa</color>
+	<color name="tab_text_selected">#f5f5f5</color>
+</resources>

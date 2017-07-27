@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerInParent="true"
+    android:padding="8dp"
+    android:orientation="horizontal" >
+
+    <ListView
+        android:id="@+id/widget_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#40000000"
+    	android:textColor="#FFFFFF" >
+    </ListView>
+    
+    <!-- Used when there is no data to load -->
+    <TextView 
+        android:id="@+id/widget_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:text="@string/widgetList_empty" >
+    </TextView>
+ 
+</LinearLayout>

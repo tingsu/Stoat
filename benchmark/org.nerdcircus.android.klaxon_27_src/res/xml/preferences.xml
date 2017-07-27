@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:key="klaxon_prefs"
+  >
+    <CheckBoxPreference android:key="is_oncall" 
+      android:title="@string/pref_oncall"
+      android:defaultValue="true"
+      android:summary="@string/pref_oncall_summary"
+      />
+    <RingtonePreference 
+      android:key="alert_sound"
+      android:ringtoneType="all"
+      android:showDefault="true"
+      android:showSilent="true"
+      android:title="@string/pref_alertsound"
+      android:defaultValue="content://settings/system/notification_sound"
+      />
+    <CheckBoxPreference android:key="use_alarm_stream" 
+      android:title="@string/pref_alarmstream"
+      android:defaultValue="false"
+      android:summary="@string/pref_alarmstream_summary"
+      />
+    <CheckBoxPreference android:key="vibrate" 
+      android:title="@string/pref_vibrate"
+      android:defaultValue="true"
+      />  
+    <PreferenceScreen
+      android:key="message_prefs"
+      android:title="@string/pref_smssettings"
+      android:summary="@string/pref_smssettings_summary" >
+        <PreferenceCategory android:key="receive settings"
+          android:title="Incoming Message Settings"
+          >
+            <EditTextPreference android:key="sender_match"
+              android:title="@string/pref_sms_sender"
+              android:defaultValue=""
+              android:summary="@string/pref_sms_sender_summary"
+              />
+            <ListPreference android:key="pageparser"
+              android:title="Page Parser Type"
+              android:entries="@array/pageparser"
+              android:entryValues="@array/pageparser"
+              android:defaultValue="Standard"
+              />
+            <CheckBoxPreference android:key="consume_sms_message" 
+              android:title="@string/pref_sms_consumesms"
+              android:summary="@string/pref_sms_consumesms_summary"
+              android:defaultValue="false"
+              />
+            <CheckBoxPreference android:key="also_match_body" 
+              android:title="@string/pref_match_message_body"
+              android:summary="@string/pref_match_message_body_summary"
+              android:defaultValue="false"
+              />
+        </PreferenceCategory>
+        <PreferenceCategory android:key="reply settings"
+          android:title="Reply Settings"
+          >
+            <CheckBoxPreference android:key="include_subject" 
+              android:title="@string/pref_sms_subject"
+              android:summary="@string/pref_sms_subject_summary"
+              android:defaultValue="false"
+              />
+            <CheckBoxPreference android:key="use_received_service_center" 
+              android:title="@string/pref_sms_servicecenter"
+              android:summary="@string/pref_sms_servicecenter_summary"
+              android:defaultValue="false"
+              />
+            <CheckBoxPreference android:key="include_dest_address" 
+              android:title="@string/pref_sms_send_dest"
+              android:summary="@string/pref_sms_send_dest_summary"
+              android:defaultValue="false"
+              />
+        </PreferenceCategory>
+        </PreferenceScreen> 
+    <Preference
+      android:key="edit_replies"
+      android:title="@string/pref_editreplies"
+      android:summary="@string/pref_editreplies_summary"
+      />
+    <ListPreference android:key="notification_interval" 
+      android:title="@string/pref_notificationtime"
+      android:summary="@string/pref_notificationtime"
+      android:defaultValue="20000"
+      android:entries="@array/intervals"
+      android:entryValues="@array/intervals_in_ms"
+      />
+    <Preference
+      android:key="changelog"
+      android:title="@string/pref_changelog"
+      android:summary="@string/pref_changelog_summary"
+      />
+    <Preference
+      android:key="version"
+      android:title="@string/pref_version"
+      />
+</PreferenceScreen>
+

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  
+    <!-- ++++++++++++++++++++++++++++ Multi-language support +++++++++++++++ -->
+    <!-- Huge thank you to ilko!!!! -->
+    <!-- French by ilko -->
+    <!-- http://ilkos-home.blogspot.fr/ -->
+    <!-- ilkoweb@hotmail.fr -->
+   
+    <string name="set_preferences">Paramètres</string>
+    <string name="not_callable"> est indisponible</string>
+    <string name="market_failed">L\'app n\'a pu démarrer</string>
+    <string name="default_set">Déjà définie</string>
+    <string name="please_wait">Listing en cours &#8230;</string>
+    <string name="homeapp_info">Certaines apps n\'apparaîtront pas sur le Play Store</string>
+    <string name="installed">(installée)</string>
+    <string name="notInstalled">(Non Installée)</string>
+    <string name="defaultValue">(Par Défaut)</string>
+    <string name="noDefaultSet">Aucune Home définie</string>
+    <string name="homeAppNotCallable">Erreur de disponibilité ?</string>
+    <string name="securityException">Erreur de sécurité : THM ne possède pas les droits requis</string>
+    <string name="appSelection">Cette sélection vous redirigera vers le Play Store</string>
+    <string name="setDefault">Définir</string>
+    <string name="clearDefault">Réinitialiser</string>
+    <string name="getHome">Obtenir</string>
+    <string name="startAtBoot">Autorun</string>
+    <string name="wifi">WiFi</string>
+    <string name="contacts">Contacts</string>
+    <string name="app">Nom:</string>
+    <string name="version">Version:</string>
+    <string name="permission">Permission:</string>
+    
+    <!-- Buttons -->
+    <string name="clearNotification">Effacer notification</string>
+    <string name="disableNotification">Désactiver la notification</string>
+    <string name="next">Suivant</string>
+    <string name="previous">Précédent</string>
+    
+    <!-- Notification -->
+    <string name="quickSelect">Sélection rapide</string>
+    <string name="selectHomeApp">Sélectionnez une domicile de application</string>
+   
+    <!-- Array -->
+    <string name="Black">Noir</string>
+    <string name="White">Blanc</string>
+    <string name="Grey">Gris</string>
+    <string name="Cyan">Cyan</string>
+    <string name="Green">Vert</string>
+    <string name="Magenta">Magenta</string>
+   
+    <!-- Menu -->
+    <string name="ascending">Tri Ascendant</string>
+    <string name="descending">Tri Descendant</string>
+    <string name="DefaultValue">Par défaut</string>
+    <string name="preferences">Paramètres</string>
+    <string name="Installed">installée</string>
+    <string name="NotInstalled">Non Installée</string>
+    <string name="memory">Mémoire</string>
+   
+    <!-- Preferences -->
+    <!-- Standard Options -->
+    <string name="StandardOptions">Paramètres généraux</string>
+    <string name="StandardOptionsText">Modifie des paramètres basiques</string>
+    <string name="AppTheme">Thèmes</string>
+    <string name="AppThemeText">Modifie la couleur du thème</string>
+    <string name="Notification">Activer la notification</string>
+    <string name="NotificationText">Activer la notification de sélection rapide</string>
+    <!-- About -->
+    <string name="About">À propos</string>
+    <string name="CopyrightText">Copyright © 2010 Twisted Apps™ LLC</string>
+    <string name="Github">Page GitHub</string>
+    <string name="GithubText">Comunauté Open Source &#8230;</string>
+    <string name="Blog">Blog</string>
+    <string name="BlogText">Blog sur Twisted Home Manager, versions, changements, aide, etc &#8230;</string>
+    <string name="Email">Contact</string>
+    <string name="EmailText">Propositions, aide</string>
+    <string name="Rollback">Rétrogradage</string>
+    <string name="RollbackText">Permet d\'installer une version antérieure en cas de problème</string>
+    <string name="Market">Play Store</string>
+    <string name="MarketText">Affiche la page Play Store de l\'application : infos, vote, etc &#8230;</string>
+    
+</resources>

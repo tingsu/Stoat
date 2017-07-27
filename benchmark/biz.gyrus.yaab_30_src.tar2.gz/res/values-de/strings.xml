@@ -1,0 +1,75 @@
+<resources>
+
+    <string name="app_name">YAAB</string>
+    <string name="title_activity_main">Yet Another Auto Brightness</string>
+    <string name="btn_start_text">Start</string>
+    <string name="btn_stop_text">Stop</string>
+    <string name="cb_autostart_text">Autostart</string>
+    <string name="cb_notificon_text">Dauerhafte Benachrichtigung</string>
+    <string name="status_running">Ausgeführt</string>
+    <string name="status_stopped">Angehalten</string>
+    <string name="status_nosensor">kein Lichtsensor</string>
+    
+    <string name="toast_service_started">YAAB Service wurde gestartet!</string>
+    <string name="toast_service_stopped">YAAB Service wurde gestoppt!</string>
+    
+    <string name="manual_adjust">Manuelle Anpassung</string>
+
+    <string name="txt_howto_use">Kurzanleitung: \"Start\" drücken und warten bis der Status auf \"Ausgeführt\" wechselt. Das war\'s schon. Mittels des \"Manuelle Anpassung\" Schiebers lässt sich bei Bedarf die durchschnittliche Helligkeit verändern.\n\nDer automatische Nacht Modus funktioniert nur auf Geräten deren Lichtsensoren sehr niedrige Werte ermitteln können.</string>
+    <string name="txt_nolightsensor_sorry">Es tut uns leid, auf diesem Gerät ist kein Lichtsensor auslesbar. Ohne Lichtsensor kann die Anwendung nicht funktionieren.</string>
+
+    <string name="title_activity_credits">Yet Another Auto Brightness</string>
+    <string name="activity_credits_txt_title">Credits</string>
+    <string name="activity_credits_txt_main">Diese Anwendung wird entwickelt und unterstützt von <a href="http://www.gyrus.biz/">Gyrus Solutions</a>.\nQuellcode und Entwicklerversionen sind auf <a href="https://bitbucket.org/gyrussolutions/yaab/">BitBucket</a> verfügbar.\n\nDIE SOFTWARE WIRD OHNE JEDE AUSDRÜCKLICHE ODER IMPLIZIERTE GARANTIE BEREITGESTELLT, EINSCHLIESSLICH DER GARANTIE ZUR BENUTZUNG FÜR DEN VORGESEHENEN ODER EINEM BESTIMMTEN ZWECK SOWIE JEGLICHER RECHTSVERLETZUNG, JEDOCH NICHT DARAUF BESCHRÄNKT. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHTINHABER FÜR JEGLICHEN SCHADEN ODER SONSTIGE ANSPRÜCHE HAFTBAR ZU MACHEN, OB INFOLGE DER ERFÜLLUNG EINES VERTRAGES, EINES DELIKTES ODER ANDERS IM ZUSAMMENHANG MIT DER SOFTWARE ODER SONSTIGER VERWENDUNG DER SOFTWARE ENTSTANDEN.</string>
+    <string name="activity_credits_btn_close">Beenden</string>
+    
+    <string name="preferences">Einstellungen</string>
+    <string name="cb_alwaysfg_text">Immer im Vordergrund</string>
+    <string name="summary_autostart_preference">Startet den Dienst automatisch beim Anschalten des Geräts</string>
+	<string name="summary_fgservice_preference">Zeigt ein Benachrichtungssymbol wenn der Dienst aktiv ist</string>
+	<string name="summary_always_fgsrv_preference">Nicht in den Hintergrundmodus schalten, auch wenn der Bildschirm AUS ist</string>
+	<string name="alert_keepalive_title">System Alarm benutzen</string>
+	<string name="alert_keepalive_summary">Eine Art lebenserhaltende Maßnahme für den Dienst. EXPERIMENTELL.</string>
+	
+	<string name="ranges_title">Bereiche</string>
+	<string name="txt_night">Nacht</string>
+	<string name="txt_normal">Normal</string>
+	<string name="ranges_summary">Min, Max, Grenzwerte, Helligkeit des Nacht Modus</string>
+	<string name="brightness_range_caption">Helligkeits-Bereich</string>
+    <string name="txt_min">Minimale Helligkeit</string>
+    <string name="txt_max">Maximale Helligkeit</string>    
+	<string name="night_reading_caption">Nacht Modus Grenzwert</string>
+	<string name="cb_autonight_text">Autom. Night Mode</string>
+	<string name="txt_night_threshold">Nacht Modus Grenzwert</string>
+	<string name="txt_night_brightness">Nacht Modus Helligkeit</string>
+	<string name="btn_night_test">Test</string>
+	<string name="txt_sensor_reading">Zuletzt gemessener Sensorwert:</string>
+	<string name="txt_threshold_value">Aktueller Grenzwert:</string>
+	<string name="txt_none">nichts</string>
+	<string name="brightness_status_off">Aus</string>
+	<string name="brightness_status_auto">Auto</string>
+	<string name="brightness_status_manualnight">Night (manuell)</string>
+	<string name="brightness_status_autonight">Nacht</string>
+	<string name="txt_not_auto_note">Der Service ist momentan nicht im automatischen Modus, die Änderungen der Einstellungen könnten sich nicht unmittelbar auswirken.</string>
+
+	<string name="cb_smooth_title">Sanfte Helligkeit</string>
+	<string name="cb_smooth_summary">Helligkeitsänderung mit sanfterem Verlauf anwenden</string>
+	
+	<string name="cb_lownmvalues_title">Niedrige Werte Nachtmodus</string>
+	<string name="cb_lownmvalues_summary">Teilen Bereichsgrenzen von 10</string>
+	
+	<string name="cb_nightfalldelay_title">Nachtmodus Verzögerung</string>
+	<string name="cb_nightfalldelay_summary">~ 5 Sekunden Verzögerung, bevor Auto Nacht auf</string>
+	
+		<string name="btn_donate_text">Spenden</string>
+	<string name="activity_donate_txt_title">Spenden</string>
+	<string name="activity_donate_btn1_text">~ 1 USD</string>
+	<string name="activity_donate_btn2_text">~ 2 USD</string>
+	<string name="activity_donate_btn3_text">~ 3 USD</string>
+	<string name="activity_donate_status_initializingbilling">Initialisieren Google Play Abrechnung</string>
+	<string name="activity_donate_status_billingfailed">Google Play Abrechnung unzugänglich</string>
+	<string name="activity_donate_status_billingok">Bitte gehen</string>
+	<string name="activity_donate_btn_yours">Dank!</string>
+				
+</resources>
+ 

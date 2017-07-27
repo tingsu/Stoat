@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">ApkTrack</string>
+
+    <!-- Menu bar strings -->
+    <string name="refresh_menu_desc">Redétecter les applications installées</string>
+    <string name="check_all_apps_desc">Vérifier les mises à jour pour toutes les applications</string>
+    <string name="show_system_apps">Afficher les applications système</string>
+    <string name="hide_system_apps">Masquer les applications système</string>
+    <string name="sort_type_alpha">Trier par ordre alphabétique</string>
+    <string name="sort_type_updated">Trier par statut</string>
+    <string name="settings">Paramètres</string>
+
+    <!-- Refresh installed apps button strings -->
+    <string name="new_apps_detected"> %1$d nouvelle(s) application(s) détectée(s)\n</string>
+    <string name="apps_updated"> %1$d application(s) mise(s) à jour\n</string>
+    <string name="apps_deleted"> %1$d application(s) supprimée(s)</string>
+
+    <!-- Notification strings -->
+    <string name="app_updated_notification">%1$s mis à jour.</string>
+    <string name="app_version_available">Version %1$s disponible !</string>
+    <string name="app_can_be_updated">%1$s peut être mis à jour !</string>
+
+    <!-- Application status strings -->
+    <string name="no_data_found">Informations de version introuvables</string>
+    <string name="network_error">Problème de connectivité</string>
+    <string name="generic_exception">Erreur : %1$s</string>
+    
+    <!-- Settings strings -->
+    <string name="general">Paramètres généraux</string>
+    <string name="preferred_search_engine">Moteur de recherche favori</string>
+    <string name="preferred_search_engine_desc">Sélectionner quel moteur de recherche doit être utilisé pour rechercher des APKs\nSélection actuelle : %s</string>
+    <string name="enable_background_checks">Activer les vérifications en arrière-plan</string>
+    <string name="enable_background_checks_desc">Effectuer périodiquement des vérifications de mises à jour automatiques pour toutes les applications.</string>
+    
+    <string name="appearance">Apparence</string>
+    <string name="hide_unknown_apps">Masquer les applications inconnues</string>
+    <string name="hide_unknown_apps_desc">Ne pas montrer les applications pour lesquelles aucune information de mise à jour n\'a pu être trouvée</string>
+    <string name="never">jamais</string>
+    <string name="last_check">Dernière vérification :</string>
+    <string name="current">Actuelle :</string>
+    <string name="available_update_sources">Sources d\'informations de mise à jour</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuler</string>
+    <string name="apps_updated_notification">Nouvelles mises à jour détectées.</string>
+    <string name="apps_updated_notification_summary">%1$s et %2$d autre(s) application(s) mise(s) à jour.</string>
+    <string name="background_checks_on_wifi_only">Seulement en WiFi</string>
+    <string name="background_checks_on_wifi_only_desc">Ne pas utiliser la data pour les vérifications en arrière-plan.</string>
+    <string name="search">Rechercher des applications</string>
+    <string name="search_no_result">Aucun résultat trouvé.</string>
+</resources>

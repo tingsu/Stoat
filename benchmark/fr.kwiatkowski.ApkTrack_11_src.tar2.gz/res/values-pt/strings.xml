@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">ApkTrack</string>
+
+    <!-- Menu bar strings -->
+    <string name="refresh_menu_desc">Pesquisando aplicativos instalados</string>
+    <string name="check_all_apps_desc">Verificando atualizações para todos os aplicativos</string>
+    <string name="show_system_apps">Mostrar aplicativos de Sistema</string>
+    <string name="hide_system_apps">Esconder aplicativos de Sistema</string>
+    <string name="sort_type_alpha">Ordenar alfabeticamente</string>
+    <string name="sort_type_updated">Ordenar por Status</string>
+
+    <!-- Refresh installed apps button strings. Please mind the leading space and trailing line feed! -->
+    <string name="new_apps_detected"> %1$d novo(s) aplicativo(s) encontrados\n</string>
+    <string name="apps_updated"> %1$d aplicativo(s) atualizados\n</string>
+    <string name="apps_deleted">%1$d aplicativo(s) deletado</string>
+
+    <!-- Notification strings -->
+    <string name="app_updated_notification">%1$s atualizado.</string>
+    <string name="app_version_available">Version %1$s disponivel!</string>
+    <string name="app_can_be_updated">%1$s pode ser atualizado!</string>
+
+    <!-- Application status strings -->
+    <string name="no_data_found">Sem informação de atualizações</string>
+    <string name="network_error">Problema ao conectar</string>
+    <string name="generic_exception">Erro: %1$s</string>
+</resources>

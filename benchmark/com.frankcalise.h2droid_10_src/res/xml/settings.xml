@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="General settings">
+		<EditTextPreference
+					 	android:key="SETTING_GOAL"
+						android:title="@string/settings_goal_label"
+						android:summary="@string/settings_goal_summary"
+						android:defaultValue="64"
+						android:inputType="numberDecimal" />
+		<ListPreference 
+						android:key="SETTING_UNITS"
+					    android:title="@string/settings_units_label"
+					    android:entries="@array/settings_units_options"
+					    android:entryValues="@array/settings_units_values"
+					    android:dialogTitle="@string/settings_units_label"
+					    android:defaultValue="1" />
+		<CheckBoxPreference
+						android:key="SETTING_LARGE_UNITS"
+						android:title="@string/settings_convert_large"
+						android:summary="@string/settings_convert_large_summary"
+						android:defaultValue="false" />
+		<CheckBoxPreference
+						android:key="SETTING_TOASTS"
+						android:title="@string/settings_toasts"
+						android:summary="@string/settings_toasts_summary"
+						android:defaultValue="true" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/settings_amount_category">
+	    <EditTextPreference 
+	        			android:key="ONE_SRV_AMOUNT"
+						android:title="@string/settings_one_srv"
+						android:defaultValue="8"
+						android:inputType="numberDecimal" />/>
+		<EditTextPreference
+					 	android:key="FAV_AMOUNT_ONE"
+						android:title="@string/settings_fav_one"
+						android:defaultValue="8"
+						android:inputType="numberDecimal" />
+		<EditTextPreference
+					 	android:key="FAV_AMOUNT_TWO"
+						android:title="@string/settings_fav_two"
+						android:defaultValue="16"
+						android:inputType="numberDecimal" />
+		<EditTextPreference
+					 	android:key="FAV_AMOUNT_THREE"
+						android:title="@string/settings_fav_three"
+						android:defaultValue="16.9"
+						android:inputType="numberDecimal" />
+		<EditTextPreference
+					 	android:key="FAV_AMOUNT_FOUR"
+						android:title="@string/settings_fav_four"
+						android:defaultValue="20"
+						android:inputType="numberDecimal" />
+		<EditTextPreference
+					 	android:key="FAV_AMOUNT_FIVE"
+						android:title="@string/settings_fav_five"
+						android:defaultValue="33.8"
+						android:inputType="numberDecimal" />
+	</PreferenceCategory>
+
+	<PreferenceCategory android:title="Reminder settings">
+		<CheckBoxPreference
+							android:key="SETTING_ENABLE_REMINDERS"
+							android:title="@string/settings_reminder_label"
+							android:summary="@string/settings_reminder_label_summary"
+							android:defaultValue="false" />
+			<EditTextPreference
+						 	android:key="SETTING_REMINDER_INTERVAL"
+							android:title="Reminder interval"
+							android:defaultValue="60"
+							android:summary="@string/settings_reminder_interval_summary"
+							android:inputType="number"
+							android:dependency="SETTING_ENABLE_REMINDERS" />
+			<CheckBoxPreference
+							android:key="SETTING_REMINDER_LIGHT"
+							android:title="@string/settings_reminder_light"
+							android:summary="@string/settings_reminder_light_summary"
+							android:defaultValue="false"
+							android:dependency="SETTING_ENABLE_REMINDERS" />
+			<RingtonePreference
+							android:key="SETTING_REMINDER_SOUND"
+							android:title="@string/settings_reminder_sound"
+							android:ringtoneType="notification|alarm"
+							android:showDefault="true"
+							android:showSilent="true"
+							android:dependency="SETTING_ENABLE_REMINDERS" />
+			<CheckBoxPreference
+							android:key="SETTING_REMINDER_VIB"
+							android:title="@string/settings_reminder_vibrate"
+							android:defaultValue="false"
+							android:dependency="SETTING_ENABLE_REMINDERS" />
+			<com.frankcalise.h2droid.TimePickerPreference
+							android:key="SETTING_REMINDER_SLEEP_TIME"
+							android:title="@string/settings_reminder_sleep_time"
+							android:dependency="SETTING_ENABLE_REMINDERS" />
+			<com.frankcalise.h2droid.TimePickerPreference
+							android:key="SETTING_REMINDER_WAKE_TIME"
+							android:title="@string/settings_reminder_wake_time"
+							android:dependency="SETTING_ENABLE_REMINDERS" />
+			<!-- <CheckBoxPreference
+							android:key="SETTING_REMINDER_DISABLE_ON_GOAL"
+							android:title="@string/settings_disable_on_goal"
+							android:summary="@string/settings_disable_on_goal_summary"
+							android:dependency="SETTING_ENABLE_REMINDERS"
+							android:defaultValue="false" /> -->
+	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/settings_quick_action">
+		<CheckBoxPreference
+						android:title="@string/settings_vol_up"
+						android:key="SETTING_ENABLE_VOL_UP"
+						android:summary="@string/settings_vol_up_summary"
+						android:defaultValue="false" />
+		<EditTextPreference
+					 	android:key="SETTING_VOL_UP_AMOUNT"
+						android:title="@string/settings_vol_up_amount"
+						android:summary="@string/settings_vol_up_amount_summary"
+						android:defaultValue="8"
+						android:inputType="numberDecimal"
+						android:dependency="SETTING_ENABLE_VOL_UP" />
+		<CheckBoxPreference
+						android:title="@string/settings_vol_down"
+						android:key="SETTING_ENABLE_VOL_DOWN"
+						android:summary="@string/settings_vol_down_summary"
+						android:defaultValue="false" />
+	</PreferenceCategory>	
+	<PreferenceCategory android:title="@string/about_title">
+		<Preference
+			android:title="@string/about_version" />
+		<Preference
+			android:title="@string/about_dev_name"
+			android:summary="@string/about_dev_contact" />
+	</PreferenceCategory>
+</PreferenceScreen>

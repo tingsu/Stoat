@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+	<include layout="@layout/title_strip"/>
+	
+	<LinearLayout style="@style/TitleBar">
+        <TextView
+        	style="@style/TitleBarText"
+        	android:textColor="@color/amount_color"
+        	android:text="@string/facts_title" />    
+    	<View style="@style/TitleBarSpacer" />
+    </LinearLayout>
+        <ScrollView
+	    	android:layout_height="fill_parent"
+	    	android:layout_width="fill_parent">
+	<LinearLayout
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:padding="@dimen/layout_padding" >
+	
+		   	<TextView
+	    		android:id="@+id/facts_tv"
+	    		android:layout_width="wrap_content"
+	    		android:layout_height="wrap_content" />
+	    	<TextView
+	    		android:text="@string/facts_disclaimer"
+	    		android:textStyle="bold"
+	    		android:layout_width="wrap_content"
+	    		android:layout_height="wrap_content" />
+			<TextView
+	    		android:text="@string/facts_source"
+	    		android:textStyle="italic"
+	    		android:layout_width="wrap_content"
+	    		android:layout_height="wrap_content" />
+   	
+	</LinearLayout>
+		</ScrollView>
+</LinearLayout>

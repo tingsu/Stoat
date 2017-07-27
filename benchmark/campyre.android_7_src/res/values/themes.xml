@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MainList" parent="RootList">
+    </style>
+    
+    <style name="MainTheme" parent="RootTheme">
+        <item name="android:listViewStyle">@style/MainList</item>
+    </style>
+    
+    <style name="MainDialog" parent="RootDialog">
+    </style>
+    
+</resources>

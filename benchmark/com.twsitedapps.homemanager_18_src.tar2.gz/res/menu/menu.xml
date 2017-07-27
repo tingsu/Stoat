@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sortName"
+          android:title="@string/ascending"
+          android:icon="@drawable/ic_menu_sort_alphabetically" />
+    <item android:id="@+id/sortNameDec"
+          android:title="@string/descending"
+          android:icon="@drawable/ic_menu_sort_alphabeticallydesc" />
+    <item android:id="@+id/sortDefault"
+          android:title="@string/DefaultValue"
+          android:icon="@drawable/ic_menu_sort_alphabetically" />
+    <item android:id="@+id/sortMemory"
+          android:title="@string/memory"
+          android:icon="@drawable/ic_menu_sort_by_size" />
+    <item android:id="@+id/preferences"
+          android:title="@string/preferences"
+          android:icon="@drawable/ic_menu_preferences" />
+</menu>

@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- ++++++++++++++++++++++++++++ Multi-language support +++++++++++++++ -->
+    <!-- German -->
+    
+    <string name="set_preferences">Einstellungen</string>
+    <string name="not_callable"> ist nicht aufrufbar</string>
+    <string name="market_failed">Markt App konnte nicht gestartet werden</string>
+    <string name="default_set">Voreinstellung bereits festgelegt</string>
+    <string name="please_wait">Bitte warten Sie bis die Home Liste gestartet ist</string>
+    <string name="homeapp_info">Einige Home-Apps werden nicht auf Google play erscheinen</string>
+    <string name="installed"> (Installiert)</string>
+    <string name="notInstalled"> (Nicht Installiert)</string>
+    <string name="defaultValue"> (Voreinstellung)</string>
+    <string name="noDefaultSet">Voreinstellung nicht festgelegt</string>
+    <string name="homeAppNotCallable">Fehler: Home-App nicht aufrufbar?</string>
+    <string name="securityException">Schutzverletzung : THM hat nicht die richtigen Berechtigungen</string>
+	<string name="appSelection">Auswählen der App bringt Sie auf Google play</string>
+    <string name="setDefault">Voreinstellungen setzen</string>
+    <string name="clearDefault">Voreinstellungen löschen</string>
+    <string name="getHome">Get Home</string>
+    <string name="startAtBoot">Autorun</string>
+    <string name="wifi">WiFi</string>
+    <string name="contacts">Kontakte</string>
+    <string name="app">App:</string>
+    <string name="version">Version:</string>
+    <string name="permission">Erlaubnis:</string>
+    
+    <!-- Buttons -->
+    <string name="clearNotification">klare Benachrichtigung</string>
+    <string name="disableNotification">Deaktivieren Benachrichtigung</string>
+    
+    <!-- Notification -->
+    <string name="quickSelect">Quick Select</string>
+    <string name="selectHomeApp">Wählen Sie ein Haus App</string>
+    
+    <!-- Array -->
+    <string name="Black">Schwarz</string>
+    <string name="White">Weiß</string>
+    <string name="Grey">Grau</string>
+    <string name="Cyan">Cyan</string>
+    <string name="Green">Grün</string>
+    <string name="Magenta">Magenta</string>
+        
+    <!-- Menu -->
+    <string name="ascending">Aufsteigend</string>
+    <string name="descending">Absteigend</string>
+    <string name="DefaultValue">Default</string>
+    <string name="preferences">Einstellungen</string>
+    <string name="Installed">Installiert</string>
+    <string name="NotInstalled">Nicht Installiert</string>
+    <string name="memory">Speicher</string>
+    
+    <!-- Standard Options -->
+    <string name="StandardOptions">Standard Optionen</string>
+    <string name="StandardOptionsText">Auswählen um Standard Optionen zu ändern</string>
+    <string name="AppTheme">App Theme</string>
+    <string name="AppThemeText">Setzt das Thema zu einer neuen Farbe</string>
+    <string name="Notification">Notifizierung zu ermöglichen</string>
+    <string name="NotificationText">Aktivieren Sie die Schnellauswahl</string>
+    <!-- About -->
+    <string name="About">About</string>
+    <string name="CopyrightText">Urheberrecht © 2010 Twisted Apps LLC</string>
+    <string name="Github">Open Source-Website</string>
+    <string name="GithubText">Open-Source-url &#8230;</string> 
+    <string name="Blog">Blog</string>
+    <string name="BlogText">Blog about Twisted Home Manager, Version, Änderungen, Hilfe, etc &#8230;</string>
+    <string name="Email">E-mail</string>
+    <string name="EmailText">Senden Sie eine E-Mail: Anregungen oder Hilfe</string>
+    <string name="Rollback">Rollback</string>
+    <string name="RollbackText">Rollback zu einer früheren Version, wenn es Probleme gibt. Downloade frühere Version und installiere.</string>
+    <string name="Market">Markt</string>
+    <string name="MarketText">Bringt Sie zu dem Markt für Twisted-Home-Manager: Bewerten, Information, etc &#8230;</string>
+
+</resources>

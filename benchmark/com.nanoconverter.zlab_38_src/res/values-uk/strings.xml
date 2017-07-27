@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <string name="hello">Введите величину:</string>
+    <string name="app_name">nanoConverter</string>
+    <color name="color">#770000</color>
+    <string name="FROM">Из валюты:</string>
+    <string name="TO">В валюту:</string>
+    <string name="OfflineCourses">Курсы:</string>
+    <string name="curentamount"></string>
+    <string name="eq">=</string>
+    <string name="UpdateButtonText">Обновить вручную!</string>
+    <string name="forceUpdate">Предварительно</string>
+    <string name="result">Результат:</string>
+    <string name="exit">Выход</string>
+    <string name="conversetab">Конверсия</string>
+    <string name="settingstab">Настройки</string>
+    <string name="Coursestab">Курсы</string>
+    <string name="checkinternet">Проверьте доступ в интернет.</string>
+    <string name="updatecomplete">Курсы обновлены!</string>
+    <string name="updateinprogress">Обновление курсов валют . . .</string>
+    <string name="wait">Подождите . . .</string>
+    <string name="ratessource">Источник курсов</string>
+    <string name="ratessourcedis">Откуда брать курсы валют?</string>
+    <string name="settings">Настройки</string>
+    <string name="about">О программе</string>
+    <string name="course">Курсы валют</string>
+    <string name="Update">Обновления</string>
+    <string name="Updatedis">Выбрать способ обновления курсов</string>
+    <string name="setcur">Валюты</string>
+    <string name="defaultcurrency">Валюта по-умолчанию</string>
+    <string name="defaultcurrencydis">Валюта значение которой будет = 1.00</string>
+    <string name="curlist">Список валют</string>
+    <string name="curlistdis">Валюты доступные для конвертации</string>
+    <string name="sources">Источники</string>
+    <string name="other">Прочее</string>
+    <string name="bkg">Фон приложения</string>
+    <string name="bkgdis">Выбрать фоновое оформление</string>
+    <string name="zerocheck">Нет данных о валюте по-умолчанию, использую USD. Обновите курсы или смените источник обновления.</string>
+    <string name="revrates">Обратный стиль</string>
+    <string name="revratess">Инверсно</string>
+    <string name="revratesdis">Обратные курсы на вкладке курсов</string>
+    <string name="devzero">Деление на ноль!</string>
+    <string name="devnull">Пустое поле курсов!</string>
+    <string name="bank">Банк</string>
+    <string name="inverse">Инверсия</string>
+    <string name="loadfrombank">Пресеты</string>
+    <string name="abouttap">Нажми чтобы узнать детали!</string>
+    <string name="abouttext">Спасибо за флаги:\n- http://famfamfam.com\n\nСпасибо за паттерны:\n- http://noqta.it\n- http://dinpattern.com\n- http://squidfingers.com\n- http://pattrnapp.com\n\nСпасибо за иконки:\n- http://adamwhitcroft.com/batch\n\nСпасибо за how to:\n- http://stackoverflow.com\n- http://habrahabr.ru\n\nОсобая благодарность:\n- jadis100, Ant-ON, ramallah, spardaev.\n\nWTFPL:\nDo What The Fuck You Want To Public License.</string>
+    <string name="from_this">из этой:</string>
+    <string name="to_this">в эту:</string>
+    <string name="bank_is_this">Источник</string>
+    <string name="circle_or_not">Круглый виджет</string>
+    <string name="rounded_corner_not">Скругленные углы</string>
+    <string name="show_bank">Показывать Источник</string>
+    <string name="show_update">Показывать Обновить</string>
+    <string name="show_cur">Показывать валюты</string>
+    <string name="show_onlyFrom">Только первую</string>
+    <string name="show_onlyTo">Только вторую</string>
+    <string name="presets">Курсы</string>
+    <string name="presets_disc">Скопировать курсы</string>
+</resources>

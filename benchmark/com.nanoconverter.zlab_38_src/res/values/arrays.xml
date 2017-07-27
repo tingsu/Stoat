@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string-array name="listArray">
+   <item>USD</item>
+   <item>EUR</item>
+   <item>CHF</item>
+   <item>GBP</item>
+   <item>JPY</item>
+   <item>UAH</item>
+   <item>RUB</item>
+   <item>MDL</item>
+   <item>BYR</item>
+   <item>PLN</item>
+   <item>LTL</item>
+   <item>LVL</item>
+   <item>AZN</item>
+   <item>AUD</item>
+   <item>AMD</item>
+   <item>BGN</item>
+   <item>BRL</item>
+   <item>HUF</item>
+   <item>DKK</item>
+   <item>INR</item>
+   <item>KZT</item>
+   <item>CAD</item>
+   <item>KGS</item>
+   <item>CNY</item>
+   <item>NOK</item>
+   <item>RON</item>
+   <item>XDR</item>
+   <item>SGD</item>
+   <item>TJS</item>
+   <item>TRY</item>
+   <item>TMT</item>
+   <item>UZS</item>
+   <item>CZK</item>
+   <item>SEK</item>
+   <item>ZAR</item>
+   <item>KRW</item>
+</string-array>
+ 
+<string-array name="listValues">
+   <item>0</item>
+   <item>1</item>
+   <item>2</item>
+   <item>3</item>
+   <item>4</item>
+   <item>5</item>
+   <item>6</item>
+   <item>7</item>
+   <item>8</item>
+   <item>9</item>
+   <item>10</item>
+   <item>11</item>
+   <item>12</item>
+   <item>13</item>
+   <item>14</item>
+   <item>15</item>
+   <item>16</item>
+   <item>17</item>
+   <item>18</item>
+   <item>19</item>
+   <item>20</item>
+   <item>21</item>
+   <item>22</item>
+   <item>23</item>
+   <item>24</item>
+   <item>25</item>
+   <item>26</item>
+   <item>27</item>
+   <item>28</item>
+   <item>29</item>
+   <item>30</item>
+   <item>31</item>
+   <item>32</item>
+   <item>33</item>
+   <item>34</item>
+   <item>35</item>
+</string-array>
+
+<string-array name="listsourceArray">
+        <item >Central Bank of Russia</item>
+        <item >User data</item>
+        <item >National Bank of Ukraine</item>
+        <item >National Bank of Belarus</item>
+        <item >National Bank of Moldova</item>
+        <item >Central Bank of Azerbaijan</item>
+        <item >European Central Bank</item>
+        <item >Forex</item>
+</string-array>
+ 
+<string-array name="listsourceValues">
+   <item>0</item>
+   <item>1</item>
+   <item>2</item>
+   <item>3</item>
+   <item>4</item>
+   <item>5</item>
+   <item>6</item>
+   <item>7</item>
+</string-array>
+
+<string-array name="listsourceConfig">
+        <item >Central Bank of Russia</item>
+        <item >National Bank of Ukraine</item>
+        <item >National Bank of Belarus</item>
+        <item >National Bank of Moldova</item>
+        <item >Central Bank of Azerbaijan</item>
+        <item >European Central Bank</item>
+        <item >Forex</item>
+</string-array>
+
+<string-array name="listBankID">
+        <item >CBR</item>
+        <item >USER_DATA</item>
+        <item >NBU</item>
+        <item >NBRB</item>
+        <item >BNM</item>
+        <item >AZ</item>
+        <item >ECB</item>
+        <item >FOREX</item>
+</string-array>
+
+<string-array name="listupdateArray">
+        <item >Manual</item>
+        <item >In background</item>
+        <item >Pre-update</item>
+        <item >Once Per day</item>
+</string-array>
+ 
+<string-array name="listupdateValues">
+   <item>0</item>
+   <item>1</item>
+   <item>2</item>
+   <item>3</item>
+</string-array>
+
+<string-array name="listBKG">
+        <item >ICS</item>
+        <item >Black</item>
+        <item >Gray (flat)</item>
+        <item >System</item>
+        <item >Cube</item>
+        <item >Gray Dot</item>
+        <item >Violet Fabric</item>
+        <item >Black Dot</item>
+        <item >ICS 2</item>
+		<item >Flowers</item>
+</string-array>
+
+<string-array name="listwidgettheme">
+        <item >Black</item>
+        <item >White</item>
+</string-array>
+ 
+<string-array name="listBKGValues">
+   <item>0</item>
+   <item>1</item>
+   <item>2</item>
+   <item>3</item>
+   <item>4</item>
+   <item>5</item>
+   <item>6</item>
+   <item>7</item>
+   <item>8</item>
+   <item>9</item>
+</string-array>
+
+</resources>

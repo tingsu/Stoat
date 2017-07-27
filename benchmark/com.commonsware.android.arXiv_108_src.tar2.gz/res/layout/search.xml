@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    arXiv mobile - a free Android app for arXiv.org
+    
+    Copyright (C) 2010 Jack Deslippe
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+-->
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/back4"
+    android:layout_weight="1">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+
+        <TextView  
+            android:id="@+id/theaderse"
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content" 
+            android:paddingBottom="3sp"
+            android:paddingTop="3sp"
+            android:paddingLeft="5sp"
+            android:text="@string/search"
+            android:textSize="36sp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/back1"
+        />
+
+        <TextView  
+            android:id="@+id/txt"
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content" 
+            android:paddingTop="4sp"
+            android:paddingBottom="1sp"
+            android:paddingLeft="5sp"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp"
+            android:text="@string/search_fields"
+        />
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2sp"
+            android:paddingTop="3sp"
+            >
+
+            <Spinner android:id="@+id/spinner1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawSelectorOnTop="true"
+                android:paddingBottom="5sp"
+            />
+
+            <EditText xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/field1"
+                android:gravity="center_vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:singleLine="true"
+            />
+        </LinearLayout>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2sp"
+            android:paddingTop="3sp"
+            >
+
+            <Spinner android:id="@+id/spinner2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawSelectorOnTop="true"
+                android:paddingBottom="5sp"
+            />
+
+            <EditText xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/field2"
+                android:gravity="center_vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:singleLine="true"
+            />
+
+        </LinearLayout>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="2sp"
+            android:paddingTop="3sp"
+            >
+
+            <Spinner android:id="@+id/spinner3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawSelectorOnTop="true"
+                android:paddingBottom="5sp"
+            />
+
+            <EditText xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/field3"
+                android:gravity="center_vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:singleLine="true"
+            />
+
+        </LinearLayout>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5sp"
+            >
+
+            <TextView  
+                android:id="@+id/tsearchdate"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:text="@string/search_from"
+                android:paddingTop="11sp"
+                android:paddingLeft="8sp"
+                android:paddingRight="4sp"
+                android:textSize="17sp"
+                android:textColor="#FFFFFF"
+            />
+
+            <Button xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/datebtn"
+                android:text="@string/today"
+                android:onClick="pressedDateButton"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+            />
+
+        </LinearLayout>
+
+        <Button xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/seachbutton"
+            android:text="@string/search"
+            android:onClick="pressedSearchButton"
+            android:padding="5sp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+        />
+
+    </LinearLayout>
+
+</ScrollView>

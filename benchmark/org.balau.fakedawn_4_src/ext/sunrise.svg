@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="96"
+   height="96"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="sunrise.svg">
+  <title
+     id="title3101">Android FakeDawn Brightness Icon</title>
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3781">
+      <stop
+         id="stop3783"
+         offset="0"
+         style="stop-color:#808080;stop-opacity:1;" />
+      <stop
+         id="stop3785"
+         offset="1"
+         style="stop-color:#ffffff;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3839">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3841" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3843" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3781"
+       id="radialGradient3845"
+       cx="36.609806"
+       cy="91.417686"
+       fx="36.609806"
+       fy="91.417686"
+       r="17.153845"
+       gradientTransform="matrix(1.7759335,0.12911866,-0.0742506,1.021263,-23.459537,-9.4346635)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3781"
+       id="radialGradient3853"
+       cx="858.18115"
+       cy="478.21292"
+       fx="858.18115"
+       fy="478.21292"
+       r="12.454742"
+       gradientTransform="matrix(1.5724415,0.15649182,-0.17226214,1.7309038,-414.09984,-488.03468)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3781"
+       id="radialGradient3861"
+       cx="504.47476"
+       cy="863.51752"
+       fx="504.47476"
+       fy="863.51752"
+       r="12.454742"
+       gradientTransform="matrix(0.9862233,1.1386691,-0.9741725,0.84374944,844.16305,-439.28035)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3781"
+       id="radialGradient3869"
+       cx="977.66998"
+       cy="-34.472649"
+       fx="977.66998"
+       fy="-34.472649"
+       r="12.454742"
+       gradientTransform="matrix(1.5629697,0.12082957,-0.07677493,0.9931086,-557.89382,-127.44189)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3781"
+       id="radialGradient3885"
+       cx="-823.91437"
+       cy="537.27191"
+       fx="-823.91437"
+       fy="537.27191"
+       r="12.454742"
+       gradientTransform="matrix(-1.4765346,-0.0563766,0.03098847,-0.8116063,-2044.6992,937.25188)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3781"
+       id="radialGradient3893"
+       cx="-445.13947"
+       cy="897.11456"
+       fx="-445.13947"
+       fy="897.11456"
+       r="12.454742"
+       gradientTransform="matrix(0.03932225,1.3850528,-0.96246569,0.02732486,438.67166,1497.7022)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="6.5"
+     inkscape:cx="3.6347165"
+     inkscape:cy="48"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1588"
+     inkscape:window-height="841"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Android FakeDawn Brightness Icon</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:date>2012-07-29</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Francesco Balducci</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Francesco Balducci</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Francesco Balducci</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-956.36218)">
+    <rect
+       style="fill:url(#radialGradient3869);fill-opacity:1.0;stroke:#000000;stroke-width:1.78192759000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2987"
+       width="28.17181"
+       height="9.8551855"
+       x="966.87549"
+       y="-53.283142"
+       ry="4.9275928"
+       transform="matrix(0,1,-1,0,0,0)" />
+    <rect
+       style="fill:url(#radialGradient3885);fill-opacity:1.0;stroke:#000000;stroke-width:1.78192759000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2987-9"
+       width="28.171808"
+       height="9.8551855"
+       x="-834.95782"
+       y="548.3382"
+       ry="4.9275928"
+       transform="matrix(0.5,-0.8660254,0.8660254,0.5,0,0)" />
+    <rect
+       style="fill:url(#radialGradient3893);fill-opacity:1.0;stroke:#000000;stroke-width:1.78192759000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2987-6"
+       width="28.171808"
+       height="9.8551855"
+       x="-445.68674"
+       y="905.19983"
+       ry="4.9275928"
+       transform="matrix(0.8660254,-0.5,0.5,0.8660254,0,0)" />
+    <rect
+       style="fill:url(#radialGradient3861);fill-opacity:1.0;stroke:#000000;stroke-width:1.78192759000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2987-7"
+       width="28.171808"
+       height="9.8551855"
+       x="500.4942"
+       y="857.71887"
+       ry="4.9275928"
+       transform="matrix(0.8660254,0.5,-0.5,0.8660254,0,0)" />
+    <rect
+       style="fill:url(#radialGradient3853);fill-opacity:1.0;stroke:#000000;stroke-width:1.78192759000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect2987-2"
+       width="28.171808"
+       height="9.8551855"
+       x="854.15607"
+       y="464.44052"
+       ry="4.9275928"
+       transform="matrix(0.5,0.8660254,-0.8660254,0.5,0,0)" />
+    <path
+       sodipodi:type="arc"
+       style="fill:url(#radialGradient3845);fill-opacity:1.0;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path3837"
+       sodipodi:cx="50.615383"
+       sodipodi:cy="76.692307"
+       sodipodi:rx="16.153845"
+       sodipodi:ry="17.76923"
+       d="m 66.769228,76.692307 c 0,9.813674 -7.232323,17.769229 -16.153845,17.769229 -8.921522,0 -16.153845,-7.955555 -16.153845,-17.769229 0,-10e-7 0,-10e-7 0,-10e-7 l 16.153845,10e-7 z"
+       transform="matrix(1.2025033,0,0,-1.2025033,-12.878845,1111.5716)"
+       sodipodi:start="0"
+       sodipodi:end="3.1415927" />
+  </g>
+</svg>

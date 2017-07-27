@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme"/>
+    <style name="Theme.Transparent">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+    	<item name="android:windowIsTranslucent">true</item>
+    	<item name="android:windowNoTitle">true</item>
+    	<item name="android:windowIsFloating">true</item>
+    	<item name="android:backgroundDimEnabled">false</item>
+    	<item name="android:windowBackground">@drawable/transparent</item>
+	</style>
+	<style name="GreySeekBar">
+    	<item name="android:indeterminateOnly">false</item>
+    	<item name="android:progressDrawable">@drawable/progress_horizontal</item>
+    	<item name="android:indeterminateDrawable">@drawable/progress_horizontal</item>
+    	<item name="android:minHeight">20dip</item>
+    	<item name="android:maxHeight">20dip</item>
+    	<item name="android:thumb">@drawable/seek_thumb</item>
+    	<item name="android:thumbOffset">8px</item>
+    	<item name="android:focusable">true</item>
+  	</style>	
+</resources>

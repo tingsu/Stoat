@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (C) 2011 Nephoapp
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <string name="hello">Hello World, anarxiv!</string>
+    <string name="app_name">aNarXiv</string>
+	<string name="tabstr_Category">Category</string>
+	<string name="tabstr_Recent">Recent</string>
+	<string name="tabstr_Favorite">Favorite</string>
+
+	<string name="error_dialog_title">Error</string>
+	<string name="confirm_btn_caption">OK</string>
+	<string name="loading_please_wait">Loading, please wait...</string>
+
+	<string name="menu_paperdetail_view">View</string>
+	<string name="menu_paperdetail_share">Share</string>
+	<string name="error_no_pdf_viewer">No available PDF view found.</string>
+	<string name="loading_file_size">Loading file size...</string>
+	<string name="loading_file">Loading file...</string>
+	<string name="file_deleted">File deleted.</string>
+	<string name="tabid_Category">category</string>
+	<string name="tabid_Recent">recent</string>
+	<string name="tabid_Favorite">fav</string>
+	<string name="loading">Loading</string>
+	
+	<string name="ctxmenu_title_delete">Delete</string>
+	<string name="ctxmenu_title_add_to_favorite">Add to Favorite</string>
+</resources>

@@ -1,0 +1,24 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="AppTheme" parent="android:Theme.Light" />
+    <style name="AppThemeNight" parent="android:Theme.Black" />
+    
+    <style name="Theme.Transparent" parent="android:Theme">  
+		<item name="android:windowIsTranslucent">true</item>  
+		<item name="android:windowBackground">@android:color/transparent</item>  
+		<item name="android:windowContentOverlay">@null</item>  
+		<item name="android:windowNoTitle">true</item>  
+		<item name="android:windowIsFloating">true</item>  
+		<item name="android:backgroundDimEnabled">false</item>  
+	</style> 
+    
+    <color name="StatusError">#FF0000</color>
+    <color name="StatusHealthy">#00A000</color>
+    
+    <style name="brightnessIndicator" parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:minHeight">6dip</item>
+        <item name="android:maxHeight">6dip</item>
+    </style>
+        
+</resources>

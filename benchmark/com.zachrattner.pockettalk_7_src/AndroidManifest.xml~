@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+    This file is part of Pocket Talk, an Android application that reads text 
+    messages aloud, and vibrates them in International Morse Code.
+
+    Pocket Talk was released in January 2012 by Zach Rattner 
+    (info@zachrattner.com).
+
+    Pocket Talk is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Pocket Talk is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Pocket Talk.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.zachrattner.pockettalk"
+    android:versionCode="7"
+    android:versionName="2.5" >
+
+    <!--  Froyo or higher -->
+    <uses-sdk android:minSdkVersion="8" />
+    
+    <!-- For reading text messages as they arrive -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    
+    <!-- For vibrating in Morse code -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    
+    <!-- For resolving phone numbers into contact names -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    
+    <!-- For keeping the device awake while vibrating or speaking -->
+	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+	
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name">
+        
+        <!-- Start the Main class when the application is launched by the user. -->
+        <activity
+            android:name="com.zachrattner.pockettalk.gui.Main"
+            android:configChanges="orientation|keyboard|keyboardHidden"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Start the SMSReader when a text message is received. -->
+        <receiver android:name="com.zachrattner.pockettalk.util.SMSReader"> 
+            <intent-filter> 
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" /> 
+            </intent-filter> 
+        </receiver>
+        
+    </application>
+
+</manifest>

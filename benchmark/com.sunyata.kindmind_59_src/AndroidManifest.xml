@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLEASE NOTE: There is no error check or auto-complete suggestions for class and package names in this file -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.sunyata.kindmind"
+  android:versionCode="59"
+  android:versionName="1.0.0_BETA" >
+
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
+  <uses-permission android:name="android.permission.READ_CONTACTS" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+  <uses-sdk
+    android:minSdkVersion="15"
+    android:targetSdkVersion="19" />
+  <!-- project.properties also contains target version -->
+
+  <application
+    android:allowBackup="true"
+    android:icon="@drawable/kindmind_icon"
+    android:label="@string/app_name"
+    android:theme="@style/AppThemeKindMind" >
+    
+    <activity
+      android:name="com.sunyata.kindmind.Main.MainActivityC"
+      android:label="@string/app_name"
+      android:launchMode="standard" >
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+    
+    <activity
+      android:name="com.sunyata.kindmind.Setup.ItemSetupActivityC"
+      android:label="@string/itemSetup_activityTitle" >
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="com.sunyata.kindmind.Main.MainActivityC" />
+    </activity>
+    
+    <activity
+      android:name="com.sunyata.kindmind.Setup.VideoChooserActivity"
+      android:label="@string/videoChooser_activityTitle" >
+    </activity>
+    
+    <activity
+      android:name="com.sunyata.kindmind.Setup.BookmarkChooserActivityC"
+      android:label="@string/bookmarkChooser_activityTitle" >
+    </activity>
+
+    <receiver android:name="com.sunyata.kindmind.WidgetAndNotifications.BootCompletedReceiverC" >
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+      </intent-filter>
+    </receiver>
+
+    <service android:name="com.sunyata.kindmind.WidgetAndNotifications.NotificationServiceC" >
+    </service>
+
+    <receiver android:name="com.sunyata.kindmind.WidgetAndNotifications.WidgetProviderC" >
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_info" />
+    </receiver>
+
+    <service
+      android:name="com.sunyata.kindmind.WidgetAndNotifications.RemoteViewsServiceC"
+      android:permission="android.permission.BIND_REMOTEVIEWS" >
+    </service>
+
+    <activity android:name="com.sunyata.kindmind.WidgetAndNotifications.WidgetConfigActivityC"
+      android:label="@string/widgetConfig_activityTitle" >
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+      </intent-filter>
+    </activity>
+
+    <provider
+      android:name="com.sunyata.kindmind.Database.ContentProviderM"
+      android:authorities="com.sunyata.kindmind.provider"
+      android:exported="true" >
+      <!-- grantUriPermission -->
+      <!--
+            PLEASE NOTE:
+            "If a provider's application doesn't specify any permissions, then other applications have no access
+             to the provider's data."
+             http://developer.android.com/guide/topics/providers/content-provider-basics.html#Permissions
+      -->
+      <!--
+            read permissions:
+            http://stackoverflow.com/questions/14793672/requesting-read-permission-from-my-own-contentprovider-in-another-app
+      -->
+      <!--
+            android:readPermission="com.sunyata.kindmind.contentprovider.permission.READ"
+            <uses-permission android:name="com.sunyata.kindmind.contentprovider.permission.READ" />
+      -->
+    </provider>
+
+    <service android:name="com.sunyata.kindmind.WidgetAndNotifications.LauncherServiceC" >
+    </service>
+
+    <activity
+      android:name="com.sunyata.kindmind.AboutActivityC"
+      android:label="@string/about_activityTitle" >
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="com.sunyata.kindmind.Main.MainActivityC" />
+    </activity>
+    <service android:name="com.sunyata.kindmind.List.SortingAlgorithmServiceM" >
+    </service>
+    <receiver android:name="com.sunyata.kindmind.EmmaInstrument.SMSInstrumentedReceiver"><intent-filter><action android:name="edu.gatech.m3.emma.COLLECT_COVERAGE"/></intent-filter></receiver>
+    <activity android:label="EmmaInstrumentationActivity" android:name="com.sunyata.kindmind.EmmaInstrument.InstrumentedActivity"/>
+  </application>
+  <instrumentation android:handleProfiling="true" android:label="EmmaInstrumentation" android:name="com.sunyata.kindmind.EmmaInstrument.EmmaInstrumentation" android:targetPackage="com.sunyata.kindmind"/><uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+</manifest>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.frankcalise.h2droid"
+      android:versionCode="10"
+      android:versionName="1.5"
+      android:installLocation="auto">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" > </uses-permission>
+    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="8" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-feature android:name="android.hardware.touchscreen" />
+    <application android:icon="@drawable/icon"
+                 android:label="@string/app_name"
+                 >
+        <activity android:name=".h2droid"
+                  android:label="@string/app_name"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/Theme.Hydrate">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Settings"
+        		  android:label="@string/menu_settings_label"
+        		  android:theme="@android:style/Theme.Light.NoTitleBar" >
+        </activity>
+        <!-- <activity android:name=".AboutActivity"
+        		  android:label="@string/about_title"
+        		  android:theme="@android:style/Theme.Dialog" >
+        </activity> -->
+        <activity android:name=".FactsActivity"
+        		  android:theme="@style/Theme.Hydrate">
+        </activity>
+        <activity android:name=".CustomEntryActivity"
+        		  android:label="@string/custom_entry_title"
+        		  android:theme="@style/Theme.Hydrate"
+        		  android:screenOrientation="portrait" >
+        </activity>
+        <activity android:name=".HistoryActivity"
+        		  android:theme="@style/Theme.Hydrate"
+        		  android:screenOrientation="portrait" >
+        </activity>
+		<provider android:name=".WaterProvider"
+				  android:authorities="com.frankcalise.provider.h2droid" />
+		<receiver  android:process=":remote" android:name="AlarmReceiver" />
+		<receiver android:name=".AppWidget" android:label="@string/one_cell_widget_label">
+	   		<intent-filter>
+	   			<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+	   		</intent-filter>
+	   		<intent-filter>
+	   			<action android:name="com.frankcalise.h2droid.FORCE_WIDGET_UPDATE" />
+	   		</intent-filter>
+	   		<meta-data
+	   			android:name="android.appwidget.provider"
+	   			android:resource="@xml/one_cell_widget_settings" />
+   		</receiver>
+   		<!-- 
+   		<receiver android:name=".TwoCellAppWidget" android:label="@string/two_cell_widget_label">
+   			<intent-filter>
+   				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+   			</intent-filter>
+   			<intent-filter>
+   				<action android:name="com.frankcalise.h2droid.FORCE_WIDGET_UPDATE2" />
+   			</intent-filter>
+   			<meta-data
+   				android:name="android.appwidget.provider"
+   				android:resource="@xml/two_cell_widget_settings" />
+   		</receiver>
+   		 -->
+<receiver android:name="com.frankcalise.h2droid.EmmaInstrument.SMSInstrumentedReceiver">
+<intent-filter>
+<action android:name="edu.gatech.m3.emma.COLLECT_COVERAGE"/>
+</intent-filter>
+</receiver>
+<activity android:label="EmmaInstrumentationActivity" android:name="com.frankcalise.h2droid.EmmaInstrument.InstrumentedActivity"/>
+    </application>
+<instrumentation android:handleProfiling="true" android:label="EmmaInstrumentation" android:name="com.frankcalise.h2droid.EmmaInstrument.EmmaInstrumentation" android:targetPackage="com.frankcalise.h2droid"/>
+ 
+    
+
+</manifest> 

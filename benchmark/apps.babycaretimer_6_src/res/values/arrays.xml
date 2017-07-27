@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Theme Preferences Arrays --> 
+    <string-array name="app_theme_options">
+		<item name="0">@string/baby_boy_blue</item>
+		<item name="1">@string/baby_girl_pink</item>
+	</string-array>
+	<string-array name="app_theme_options_values">
+		<item name="0">0</item>
+		<item name="1">1</item>
+	</string-array>
+
+    <!-- Alarm Preferences Arrays --> 
+    <string-array name="alarm_max_hours_options">
+		<item name="0">@string/s1_hour_text</item>
+		<item name="1">@string/s2_hours_text</item>
+		<item name="2">@string/s3_hours_text</item>
+		<item name="3">@string/s4_hours_text</item>
+		<item name="4">@string/s5_hours_text</item>
+		<item name="5">@string/s6_hours_text</item>
+		<item name="6">@string/s7_hours_text</item>
+		<item name="7">@string/s8_hours_text</item>
+		<item name="8">@string/s9_hours_text</item>
+		<item name="9">@string/s10_hours_text</item>
+		<item name="10">@string/s11_hours_text</item>
+		<item name="11">@string/s12_hours_text</item>
+		<item name="12">@string/s24_hours_text</item>
+		<item name="13">@string/s48_hours_text</item>
+		<item name="14">@string/s72_hours_text</item>
+		<item name="15">@string/s96_hours_text</item>
+	</string-array>
+	<string-array name="alarm_max_hours_options_values">
+		<item name="0">1</item>
+		<item name="1">2</item>
+		<item name="2">3</item>
+		<item name="3">4</item>
+		<item name="4">5</item>
+		<item name="5">6</item>
+		<item name="6">7</item>
+		<item name="7">8</item>
+		<item name="8">9</item>
+		<item name="9">10</item>
+		<item name="10">11</item>
+		<item name="11">12</item>
+		<item name="12">24</item>
+		<item name="13">48</item>
+		<item name="14">72</item>
+		<item name="15">96</item>
+	</string-array>
+	
+	<!-- Screen Arrays --> 
+	<string-array name="dim_screen_background_amount_options">
+		<item name="0">0</item>
+		<item name="1">10</item>
+		<item name="2">20</item>
+		<item name="3">30</item>
+		<item name="4">40</item>
+		<item name="5">50</item>
+		<item name="6">60</item>
+		<item name="7">70</item>
+		<item name="8">80</item>
+		<item name="9">90</item>
+		<item name="10">100</item>
+	</string-array>
+	<string-array name="dim_screen_background_amount_options_values">
+		<item name="0">0</item>
+		<item name="1">10</item>
+		<item name="2">20</item>
+		<item name="3">30</item>
+		<item name="4">40</item>
+		<item name="5">50</item>
+		<item name="6">60</item>
+		<item name="7">70</item>
+		<item name="8">80</item>
+		<item name="9">90</item>
+		<item name="10">100</item>
+	</string-array>	
+	
+	<string-array name="screen_timeout_options">
+		<item name="0">@string/s10_seconds_text</item>
+		<item name="1">@string/s15_seconds_text</item>
+		<item name="2">@string/s20_seconds_text</item>
+		<item name="3">@string/s25_seconds_text</item>
+		<item name="4">@string/s30_seconds_text</item>
+		<item name="5">@string/s45_seconds_text</item>
+		<item name="6">@string/s1_minute_text</item>
+		<item name="7">@string/s2_minutes_text</item>
+		<item name="8">@string/s3_minutes_text</item>
+		<item name="9">@string/s4_minutes_text</item>
+		<item name="10">@string/s5_minutes_text</item>
+		<item name="11">@string/s10_minutes_text</item>
+		<item name="12">@string/s15_minutes_text</item>
+		<item name="13">@string/s30_minutes_text</item>
+	</string-array>
+	<string-array name="screen_timeout_options_values">
+		<item name="0">10</item>
+		<item name="1">15</item>
+		<item name="2">20</item>
+		<item name="3">25</item>
+		<item name="4">30</item>
+		<item name="5">45</item>
+		<item name="6">60</item>
+		<item name="7">120</item>
+		<item name="8">180</item>
+		<item name="9">240</item>
+		<item name="10">300</item>
+		<item name="11">600</item>
+		<item name="12">9000</item>
+		<item name="13">1800</item>
+	</string-array>
+			
+    <!-- Alarm Snooze Arrays --> 
+    <string-array name="snooze_amount_options">
+		<item name="0">@string/s5_minutes_text</item>
+		<item name="1">@string/s10_minutes_text</item>
+		<item name="2">@string/s15_minutes_text</item>
+		<item name="3">@string/s20_minutes_text</item>
+		<item name="4">@string/s25_minutes_text</item>
+		<item name="5">@string/s30_minutes_text</item>
+	</string-array>
+	<string-array name="snooze_amount_options_values">
+		<item name="0">5</item>
+		<item name="1">10</item>
+		<item name="2">15</item>
+		<item name="3">20</item>
+		<item name="4">25</item>
+		<item name="5">30</item>
+	</string-array>
+
+	<string-array name="preference_vibrate_pattern_options">
+		<item name="0">@string/multiple_short_text</item>
+    	<item name="1">@string/multiple_long_text</item>
+	    <item name="2">@string/custom_text</item>
+	</string-array>
+	
+	<string-array name="preference_vibrate_pattern_options_values">
+	    <item>0,300,100,300,100,300,100</item>
+	    <item>0,800,200,800,200,800,200</item>
+	    <item>custom</item>
+	</string-array>
+
+	<string-array name="preference_led_pattern_options">
+	   	<item name="fast_text">@string/fast_text</item>
+	    <item name="normal_text">@string/normal_text</item>
+	    <item name="slow_text">@string/slow_text</item>
+	    <item name="3">@string/custom_text</item>
+	</string-array>
+		
+	<string-array name="preference_led_pattern_options_values">
+	    <item name="0">300,300</item>
+	    <item name="1">1000,1000</item>
+	    <item name="2">3000,3000</item>
+	    <item name="3">custom</item>
+	</string-array>
+  
+  	<string-array name="preference_led_color_options">
+	   	<item name="0">@string/red_text</item>
+	    <item name="1">@string/blue_text</item>
+	    <item name="2">@string/green_text</item>
+	    <item name="3">@string/cyan_text</item>
+	    <item name="4">@string/magenta_text</item>
+	    <item name="5">@string/yellow_text</item>
+	    <item name="6">@string/custom_text</item>
+  	</string-array>
+  		
+	<string-array name="preference_led_color_options_values">
+	    <item name="0">red</item>
+	    <item name="1">blue</item>
+	    <item name="2">green</item>
+	    <item name="3">cyan</item>
+	    <item name="4">magenta</item>
+	    <item name="5">yellow</item>
+	    <item name="6">custom</item>
+  	</string-array>
+  	
+  	<!-- Notification Vibrate Arrays --> 
+	<string-array name="vibrate_setting_options">
+		<item name="0">@string/always_text</item>
+		<item name="1">@string/never_text</item>
+		<item name="2">@string/only_when_in_vibrate_mode_text</item>
+	</string-array>
+	<string-array name="vibrate_setting_options_values">
+		<item name="0">0</item>
+		<item name="1">1</item>
+		<item name="2">2</item>
+	</string-array>	
+		
+</resources>

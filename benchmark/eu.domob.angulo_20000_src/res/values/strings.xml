@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Angulo.  Measure angles and slopes with Android!
+    Copyright (C) 2011-2014  Daniel Kraft <d@domob.eu>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<resources>
+  <string name="app_name">Angulo</string>
+  <string name="app_version">2.0</string>
+  <string name="app_name_classic">Angulo Classic</string>
+  <string name="app_name_triangulation">Tri-Angulo</string>
+
+  <string name="setReference">Set</string>
+  <string name="freeze">Freeze</string>
+  <string name="unfreeze">Unfreeze</string>
+  <string name="setLevel">Level</string>
+  <string name="gravity">Gravity</string>
+  <string name="magnetic">Magnetic</string>
+
+  <string name="help">Help</string>
+  <string name="preferences">Preferences</string>
+  <string name="about">About</string>
+
+  <string name="category_general">General</string>
+  <string name="category_triangulo">Tri-Angulo</string>
+
+  <string name="rate_pref">Update rate</string>
+  <string name="rate_summary">How often measurements are taken.</string>
+  <string name="rate_default">ui</string>
+
+  <string name="smoothing_pref">Smoothing</string>
+  <string name="smoothing_summary">Average sensor values for smoother
+results?</string>
+  <string name="smoothing_default">little</string>
+
+  <string name="orientation_pref">Screen orientation</string>
+  <string name="orientation_summary">Set screen orientation for Angulo.</string>
+  <string name="orientation_default">sensor</string>
+
+  <string name="height_pref">Viewpoint height</string>
+  <string name="height_summary">Set height of device\'s viewpoint
+when measuring.</string>
+  <string name="height_text">Angulo needs to know the height above the floor at
+which the device (the camera, to be precise) is held.  Use the form below to
+enter the height in metres, or let Angulo measure it by dropping the device
+(on a <b>suitably soft floor</b>!)
+and measuring the time.</string>
+  <string name="height_default">1.5</string>
+
+  <string name="height_button_drop">Drop</string>
+  <string name="height_dropping_msg">Drop the device on a soft floor...</string>
+
+  <string name="measure_distance">%.2f m</string>
+  <string name="measure_info">Height set to %.2f m.</string>
+
+  <string name="help_title">Quick Guide</string>
+  <string name="help_link_para">See also the
+<a href="http://www.domob.eu/projects/angulo.php">webpage</a> for more
+details.</string>
+
+  <string name="help_classic_para1">To measure an angle (slope or inclination),
+simply point the device into one direction, press <b>Set</b>, and point
+it into the other direction.</string>
+  <string name="help_classic_para2">Then the rotation angle relative to gravity
+(down) and magnetic field (towards magnetic pole) is displayed.  The green
+number is a combined, usually more accurate angle.</string>
+  <string name="help_classic_para3">For easy reading, you can also <b>Freeze</b>
+(and later <b>Unfreeze</b>).  <b>Level</b> sets the reference direction to
+one of the principal axes of the device instead, so that it can be used as
+water-level.</string>
+
+  <string name="help_triangulo_para1">Point the camera focus towards a target
+on the floor, and the distance to it will be calculated from the angle the
+device has with respect to the direction of gravity.</string>
+  <string name="help_triangulo_para2">Note that in order to get correct
+results, there must not be an inclination of the floor towards the target!
+Also ensure that you configure the height at which the device (the camera,
+to be precise) is held correctly.</string>
+  <string name="help_triangulo_para3">The distance displayed is the distance
+between the device\'s projection onto the floor and the target.  If you think
+of the point where you are standing on the floor, consider also the distance
+the device is held in front of your body!</string>
+
+  <string name="about_title">About and Copyright</string>
+  <string name="about_version">This is <b>%s</b> version <b>%s</b>.</string>
+  <string name="about_para1">Copyright (C) 2011-2014 by Daniel Kraft.
+Feel free to send me any comments or suggestions via
+<a href="mailto:d@domob.eu">email</a> or visit
+<a href="http://www.domob.eu/projects/angulo.php">Angulo\'s
+webpage</a>.</string>
+  <string name="about_para2">This program is free software: you can
+    redistribute it and/or modify
+    it under the terms of the
+    <a href="https://www.gnu.org/copyleft/gpl.html">GNU General
+    Public License</a> as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.</string>
+  <string name="about_para3">This program is distributed in the hope that it
+    will be useful,
+    but <i>without any warranty</i>; without even the implied warranty of
+    <i>merchantability</i> or <i>fitness for a particular purpose</i>.  See the
+    GNU General Public License for more details.</string>
+
+</resources>

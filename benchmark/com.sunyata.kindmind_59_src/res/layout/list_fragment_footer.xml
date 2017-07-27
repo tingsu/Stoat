@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+PLEASE NOTE: This layout needs to be in its own file to avoid this error:
+_______NotFoundException: Resource ID ______ is not valid
+ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical" >
+  
+  <Button 
+    android:id="@+id/listFragment_addNewItem_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="?android:attr/buttonBarButtonStyle"
+    android:text="@string/listFragment_newItem" >
+  </Button>
+  
+</LinearLayout>

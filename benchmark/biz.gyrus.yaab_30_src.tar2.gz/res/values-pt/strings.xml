@@ -1,0 +1,74 @@
+<resources>
+
+    <string name="app_name">YAAB</string>
+    <string name="title_activity_main">Yet Another Auto Brightness</string>
+    <string name="btn_start_text">Iniciar</string>
+    <string name="btn_stop_text">Parar</string>
+    <string name="cb_autostart_text">Iniciar no boot</string>
+    <string name="cb_notificon_text">Manter notificação</string>
+    <string name="status_running">Ativo</string>
+    <string name="status_stopped">Parado</string>
+    <string name="status_nosensor">Sem sensor de luminosidade</string>
+    
+    <string name="toast_service_started">Controle de brilho iniciado!</string>
+    <string name="toast_service_stopped">Controle de brilho interrompido!</string>
+    
+    <string name="manual_adjust">Ajuste manual</string>
+
+    <string name="txt_howto_use">MODO DE USAR: Toque em \&quot;Iniciar\&quot;, e espere o statuts mudar para \&quot;Ativo\&quot;. Nada além disso. Use o deslizador \&quot;Ajuste manual\&quot; para mudar o nível médio de brilho, se necessário.\n\nO modo noturno vai funcionar apenas se o sensor de luminosidade do dispositivo for capaz de ler valores baixos.</string>
+    <string name="txt_nolightsensor_sorry">Desculpe, não foi encontrado sensor de luminosidade neste dispositivo. Este aplicativo não é funcional sem o sensor.</string>
+
+    <string name="title_activity_credits">Yet Another Auto Brightness</string>
+    <string name="activity_credits_txt_title">Créditos</string>
+    <string name="activity_credits_txt_main">Este aplicativo é desenvolvido e suportado por <a href="http://www.gyrus.biz/">Gyrus Solutions</a>.\nO código-fonte e versões de desenvolvimento estão disponíveis em <a href="https://bitbucket.org/gyrussolutions/yaab/">BitBucket</a>.\n\nO SOFTWARE É DISPONIBILIZADO \"TAL QUAL\", SEM QUAISQUER GARANTIAS, EXPLÍCITAS OU IMPLÍCITAS, INCLUINDO MAS NÃO LIMITADAS A COMERCIALIZAÇÃO, ADEQUAÇÃO A UM DETERMINADO FIM E NÃO VIOLAÇÃO. EM NENHUM CASO OS AUTORES OU DETENTORES DE DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR QUALQUER RECLAMAÇÃO, DANOS OU OUTRAS RESPONSABILIDADES, SEJA EM UMA AÇÃO DE CUMPRIMENTO DE CONTRATO, AGRAVO OU DE OUTRA FORMA DECORRENTES DE CONEXÃO COM O SOFTWARE OU SEU USO OU OUTRAS APLICAÇÕES DO MESMO.</string>
+    <string name="activity_credits_btn_close">Fechar</string>
+    
+    <string name="preferences">Configurações</string>
+    <string name="cb_alwaysfg_text">Manter sempre em primeiro plano</string>
+    <string name="summary_autostart_preference">Iniciar o serviço automaticamente durante o boot</string>
+	<string name="summary_fgservice_preference">Mostrar ícone de notificação quando o serviço estiver ativo</string>
+	<string name="summary_always_fgsrv_preference">Não colocar o serviço em segundo plano mesmo ao desligar a tela</string>
+	<string name="alert_keepalive_title">Usar alarme de sistema</string>
+	<string name="alert_keepalive_summary">Uma espécie de \&quot;manter ativo\&quot; para o serviço. EXPERIMENTAL.</string>
+	
+	<string name="ranges_title">Intervalos</string>
+	<string name="txt_night">Noite</string>
+	<string name="txt_normal">Normal</string>
+	<string name="ranges_summary">Mínimo, Máximo, Limiares, Brilho do modo noturno</string>
+	<string name="brightness_range_caption">Intervalo de brilho</string>
+    <string name="txt_min">Limite mínimo de brilho</string>
+    <string name="txt_max">Limite máximo de brilho</string>    
+	<string name="night_reading_caption">Modo noturno</string>
+	<string name="cb_autonight_text">Modo noturno automático</string>
+	<string name="txt_night_threshold">Limiar de modo noturno</string>
+	<string name="txt_night_brightness">Brilho de modo noturno</string>
+	<string name="btn_night_test">Testar</string>
+	<string name="txt_sensor_reading">Leitura mais recente do sensor de luminosidade:</string>
+	<string name="txt_threshold_value">Valor do limiar atual:</string>
+	<string name="txt_none">nenhum</string>
+	<string name="brightness_status_off">Desligado</string>
+	<string name="brightness_status_auto">Auto</string>
+	<string name="brightness_status_manualnight">Noturno (manual)</string>
+	<string name="brightness_status_autonight">Noturno</string>
+	<string name="txt_not_auto_note">Note que, como o serviço está em modo automático, você pode não notar imediatamente o efeito das mudanças de algumas dessas configurações.</string>
+	
+	<string name="cb_smooth_title">Brilho suave</string>
+	<string name="cb_smooth_summary">Aplicar as mudanças de brilho suavemente</string>
+	
+	<string name="cb_lownmvalues_title">Baixos valores de modo Noite</string>
+	<string name="cb_lownmvalues_summary">Divida limites da faixa de 10</string>
+
+	<string name="cb_nightfalldelay_title">Atraso Modo Noturno</string>
+	<string name="cb_nightfalldelay_summary">A 5 segundos de atraso antes de auto noite fica por</string>
+	
+		<string name="btn_donate_text">Doar</string>
+	<string name="activity_donate_txt_title">Doar</string>
+	<string name="activity_donate_btn1_text">~ 1 USD</string>
+	<string name="activity_donate_btn2_text">~ 2 USD</string>
+	<string name="activity_donate_btn3_text">~ 3 USD</string>
+	<string name="activity_donate_status_initializingbilling">Inicializar Google Play faturamento</string>
+	<string name="activity_donate_status_billingfailed">Google Play faturamento inacessível</string>
+	<string name="activity_donate_status_billingok">Por favor, proceda</string>
+	<string name="activity_donate_btn_yours">Obrigado</string>
+				
+</resources>

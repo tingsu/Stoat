@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (c) 2015
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item   android:id="@+id/search"
+            android:title="@string/search"
+            android:showAsAction="ifRoom|collapseActionView"
+            android:icon="@drawable/ic_btn_search"
+            android:actionViewClass="android.widget.SearchView"/>
+
+    <item   android:id="@+id/check_all_apps"
+            android:title="@string/check_all_apps_desc"
+            android:showAsAction="ifRoom"
+            android:icon="@drawable/ic_menu_refresh"/>
+
+    <item   android:id="@+id/show_system"
+            android:title="@string/show_system_apps"/>
+    <item   android:id="@+id/sort_type"
+            android:title="@string/sort_type_alpha"/>
+    <item   android:id="@+id/refresh_apps"
+            android:title="@string/refresh_menu_desc"/>
+    <item   android:id="@+id/settings"
+            android:title="@string/settings"/>
+</menu>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="number_messages_title">Message Limit</string>
+	<string name="number_messages_summary">Number of messages to see when in a room.</string>
+	<string name="number_messages_default">80</string>
+	<string name="entry_exit_title">Enter/Exit Messages</string>
+	<string name="entry_exit_summary_on">See when people come and go.</string>
+	<string name="entry_exit_summary_off">Hide when people come and go.</string>
+	<string name="entry_exit_default">true</string>
+	<string name="timestamps_title">Timestamps</string>
+	<string name="timestamps_summary_on">See timestamp messages.</string>
+	<string name="timestamps_summary_off">Hide timestamp messages.</string>
+	<string name="timestamps_default">true</string>
+	<string name="load_images_title">Linked images</string>
+	<string name="load_images_summary_on">Display linked images.</string>
+	<string name="load_images_summary_off">Do not display linked images.</string>
+	<string name="load_images_default">true</string>
+</resources>

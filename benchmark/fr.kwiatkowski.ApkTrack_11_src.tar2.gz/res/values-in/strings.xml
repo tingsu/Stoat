@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">ApkTrack</string>
+
+    <!-- Menu bar strings -->
+    <string name="refresh_menu_desc">Deteksi lagi aplikasi terinstal</string>
+    <string name="check_all_apps_desc">Periksa pembaharuan untuk semua aplikasi</string>
+    <string name="show_system_apps">Tampilkan aplikasi system</string>
+    <string name="hide_system_apps">Sembunyikan aplikasi system</string>
+    <string name="sort_type_alpha">Urutkan berdasarkan abjad</string>
+    <string name="sort_type_updated">Urutkan berdasarkan status</string>
+
+    <!-- Refresh installed apps button strings. Please mind the leading space and trailing line feed! -->
+    <string name="new_apps_detected"> %1$d aplikasi baru terdeteksi</string>
+    <string name="apps_updated"> %1$d aplikasi diperbaharui</string>
+    <string name="apps_deleted">%1$d aplikasi dihapus</string>
+
+    <!-- Notification strings -->
+    <string name="app_updated_notification">%1$s terbaharui.\n</string>
+    <string name="app_version_available">Versi %1$s tersedia!\n</string>
+    <string name="app_can_be_updated">%1$s dapat diperbaharui!</string>
+
+    <!-- Application status strings -->
+    <string name="no_data_found">Tidak ditemukan informasi pembaharuan</string>
+    <string name="network_error">Masalah sambungan</string>
+    <string name="generic_exception">Kesalahan: %1$s</string>
+</resources>

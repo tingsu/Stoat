@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/entry_detail_list_item"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:padding="@dimen/layout_padding" >
+	<TableLayout
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:stretchColumns="1" >
+		<TableRow>
+			<TextView
+				android:id="@+id/entry_amount_textview" />
+			<TextView
+				android:id="@+id/entry_date_textview"
+				android:gravity="right" />
+		</TableRow>
+	</TableLayout>	
+</LinearLayout>

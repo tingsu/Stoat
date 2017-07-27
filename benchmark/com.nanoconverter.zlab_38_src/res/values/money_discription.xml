@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="USD_discription">U.S. Dollars</string>
+    <string name="EUR_discription">Euro</string>
+    <string name="CHF_discription">Swiss Franc</string>
+    <string name="GBP_discription">Pounds</string>
+    <string name="JPY_discription">Japanese yen</string>
+    <string name="UAH_discription">Ukrainian hryvnia</string>
+    <string name="RUB_discription">Russian Ruble</string>
+    <string name="MDL_discription">Moldavian lei</string>
+    <string name="BYR_discription">Belarusian Ruble</string>
+    <string name="PLN_discription">Poland Zloty</string>
+    <string name="LTL_discription">Lithuanian Litas</string>
+    <string name="LVL_discription">Latvian lats</string>
+    <string name="AZN_discription">Azerbaijani manat</string>
+    <string name="AUD_discription">Australian Dollars</string>
+    <string name="AMD_discription">Armenian Drama</string>
+    <string name="BGN_discription">Bulgarian lvy</string>
+    <string name="BRL_discription">Brazilian Reais</string>
+    <string name="HUF_discription">Hungarian Forint</string>
+    <string name="DKK_discription">Danish crowns</string>
+    <string name="INR_discription">Indian rupee</string>
+    <string name="KZT_discription">Kazakh tenge</string>
+    <string name="CAD_discription">Canadian Dollars</string>
+    <string name="KGS_discription">Kyrgyz soma</string>
+    <string name="CNY_discription">Chinese Yuan</string>
+    <string name="NOK_discription">Norwegian kroner</string>
+    <string name="RON_discription">New Romanian Leu</string>
+    <string name="XDR_discription">Special Drawing Rights</string>
+    <string name="SGD_discription">Singapore Dollars</string>
+    <string name="TJS_discription">Tajik Somoni</string>
+    <string name="TRY_discription">Turkish lira</string>
+    <string name="TMT_discription">New Turkmenistan Manat</string>
+    <string name="UZS_discription">Uzbek soums</string>
+    <string name="CZK_discription">Czech crown</string>
+    <string name="SEK_discription">Swedish Krona</string>
+    <string name="ZAR_discription">South African rand</string>
+    <string name="KRW_discription">Won South Korea</string>
+    <string name="FOO_discription">Free course</string>
+</resources>

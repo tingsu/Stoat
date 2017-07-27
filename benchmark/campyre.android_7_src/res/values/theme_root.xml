@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="RootTheme" parent="android:Theme.NoTitleBar"></style>
+    <style name="RootDialog" parent="android:Theme.Dialog"></style>
+    <style name="RootList" parent="@android:style/Widget.ListView"></style>
+</resources>

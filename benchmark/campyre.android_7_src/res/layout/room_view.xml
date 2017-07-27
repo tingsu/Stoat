@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+	android:background="@color/main_background"
+	> 
+		
+	<ListView android:id="@android:id/list"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:divider="@color/message_text_background"
+		/>
+	<!-- setting android:divider to a color removes the divider entirely (which is what I want), for reasons unknown to me -->
+		
+	<LinearLayout android:id="@id/android:empty"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent"
+    	android:layout_weight="1"
+    	
+    	android:orientation="horizontal"
+    	android:gravity="center"
+    	>
+    	
+    	<ProgressBar android:id="@+id/empty_spinner"
+    		android:layout_width="wrap_content"
+    		android:layout_height="wrap_content"
+    		style="?android:attr/progressBarStyleSmallTitle"
+    		
+    		android:layout_marginRight="10dp"
+    		/>
+    		
+    	<TextView android:id="@+id/empty_message"
+    		android:layout_width="wrap_content"
+    		android:layout_height="wrap_content"
+    		
+    		android:text="@string/joining_room"
+    		/>
+    	
+    </LinearLayout>
+	
+	<LinearLayout android:id="@+id/room_bottom"
+		android:orientation="horizontal"
+		
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		
+		android:background="@color/message_text_background"
+		
+		android:layout_weight="0"
+		>
+		
+		<EditText android:id="@+id/room_message_body"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			
+			android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+			
+			android:enabled="false"
+			android:focusable="false"
+			
+			android:imeOptions="actionDone"
+			android:imeActionId="6"
+			android:imeActionLabel="@string/send_button"
+			/>
+			
+		<Button android:id="@+id/room_speak"
+			android:layout_width="80dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="0"
+			
+			android:enabled="false"
+			
+			android:textSize="18sp"
+			android:text="@string/send_button"
+			/>
+	</LinearLayout>
+	
+</LinearLayout>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" android:layout_gravity="right" android:gravity="right">
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="URLazy"
+                android:id="@+id/textView" android:layout_gravity="center" android:layout_weight="1"
+                android:gravity="center_horizontal"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Refresh"
+                android:id="@+id/refresh" android:onClick="onRefresh"/>
+    </LinearLayout>
+    <ExpandableListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/list" android:layout_gravity="center_vertical"/>
+</LinearLayout>

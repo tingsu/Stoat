@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014
+  ~
+  ~ ApkTrack is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ ApkTrack is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with ApkTrack.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">ApkTrack</string>
+
+    <!-- Menu bar strings -->
+    <string name="refresh_menu_desc">Installierte Anwendungen neu erkennnen</string>
+    <string name="check_all_apps_desc">Überprüfe Aktualisierungen für alle Anwendungen </string>
+    <string name="show_system_apps">Zeige System-Anwendungen </string>
+    <string name="hide_system_apps">Verstecke System-Anwendungen </string>
+    <string name="sort_type_alpha">Sortiere alphabetisch</string>
+    <string name="sort_type_updated">Sortiere nach Status</string>
+    <string name="settings">Einstellungen</string>
+    <string name="search">Suche Anwendungen</string>
+
+    <!-- Refresh installed apps button strings. Please mind the leading space and trailing line feed! -->
+    <string name="new_apps_detected"> %1$d neue Anwendung(en) erkannt\n</string>
+    <string name="apps_updated"> %1$d Anwendung(en) aktualisiert\n</string>
+    <string name="apps_deleted">%1$d Anwendung(en) gelöscht</string>
+
+    <!-- Notification strings -->
+    <string name="app_updated_notification">%1$s aktualisiert.</string>
+    <string name="apps_updated_notification">Neue Aktualisierungen gefunden.</string>
+    <string name="apps_updated_notification_summary">%1$s und %2$d andere Anwendung(en) können aktualisiert werden.</string>
+    <string name="app_version_available">Version %1$s ist verfügbar!</string>
+    <string name="app_can_be_updated">%1$s kann aktualisiert werden!</string>
+
+    <!-- Application status strings -->
+    <string name="no_data_found">Keine Aktualisierungs-Informationen gefunden</string>
+    <string name="network_error">Verbindungs-Fehler</string>
+    <string name="current">Aktuell:</string>
+    <string name="generic_exception">Fehler: %1$s</string>
+    <string name="last_check">Letzte Überprüfung:</string>
+    <string name="never">Nie</string>
+
+    <!-- Update source chooser dialog -->
+    <string name="available_update_sources">Verfügbare Aktualisierungs-Quellen</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+
+    <!-- Settings strings -->
+    <string name="general">Allgemeine Einstellungen</string>
+    <string name="preferred_search_engine">Bevorzugte Suchmaschine</string>
+    <string name="preferred_search_engine_desc">Wähle aus, welche Suchmaschine benutzt werden soll zum Suchen von APKs\nAktuelle Auswahl: %s</string>
+    <string name="enable_background_checks">Aktiviere Hintergrund-Überprüfung</string>
+    <string name="enable_background_checks_desc">Führe regelmäßige Hintergrund-Überprüfungen für alle Anwendungen aus.</string>
+    <string name="background_checks_on_wifi_only">Nur W-LAN</string>
+    <string name="background_checks_on_wifi_only_desc">Nutze niemals mobile Daten für Hintergrund-Überprüfungen.</string>
+    <string name="appearance">Aussehen</string>
+    <string name="hide_unknown_apps">Verstecke unbekannte Anwendungen</string>
+    <string name="hide_unknown_apps_desc">Zeige keine Anwendungen, für die keine Aktualisierungs-Informationen gefunden werden können.</string>
+
+    <!-- Messages -->
+    <string name="search_no_result">Keine Ergebnisse gefunden.</string>
+
+</resources>

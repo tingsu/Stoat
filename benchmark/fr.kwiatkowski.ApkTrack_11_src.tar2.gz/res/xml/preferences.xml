@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/general" android:key="pref_general">
+        <CheckBoxPreference
+            android:key="pref_background_checks"
+            android:defaultValue="false"
+            android:title="@string/enable_background_checks"
+            android:summary="@string/enable_background_checks_desc" />
+
+        <CheckBoxPreference
+                android:key="pref_wifi_only"
+                android:defaultValue="true"
+                android:title="@string/background_checks_on_wifi_only"
+                android:summary="@string/background_checks_on_wifi_only_desc"
+                android:dependency="pref_background_checks"/>
+
+        <ListPreference
+            android:key="pref_search_engine"
+            android:entryValues="@array/search_engine_urls"
+            android:entries="@array/search_engines"
+            android:defaultValue="@string/search_engine_default"
+            android:title="@string/preferred_search_engine"
+            android:summary="@string/preferred_search_engine_desc"/>
+    </PreferenceCategory>
+
+    <!-- TODO: Keep on coding the preferences!
+    <PreferenceCategory android:title="@string/appearance" android:key="pref_appearance">
+        <CheckBoxPreference
+            android:key="pref_hide_unknown_apps"
+            android:title="@string/hide_unknown_apps"
+            android:summary="@string/hide_unknown_apps_desc"
+            android:defaultValue="false" />
+    </PreferenceCategory> -->
+</PreferenceScreen>

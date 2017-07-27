@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sortName"
+          android:title="@string/ascending"
+          android:icon="@drawable/ic_menu_sort_alphabetically" />
+    <item android:id="@+id/sortNameDec"
+          android:title="@string/descending"
+          android:icon="@drawable/ic_menu_sort_alphabeticallydesc" />
+    <item android:id="@+id/sortInstalled"
+          android:title="@string/Installed"
+          android:icon="@drawable/ic_menu_sort_alphabetically" />
+    <item android:id="@+id/sortNotInstalled"
+          android:title="@string/NotInstalled"
+          android:icon="@drawable/ic_menu_sort_alphabeticallydesc" />
+</menu>

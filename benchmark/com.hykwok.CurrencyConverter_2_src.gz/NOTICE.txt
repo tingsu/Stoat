@@ -1,0 +1,6 @@
+Currency Converter
+Copyright 2010 Kwok Ho Yin
+
+This software contains the works from Sodipodi Flag collection. The collection is available at http://www.openclipart.org/packages.
+
+The application icon is the work of IconEden.com. It can be downloaded from http://www.iconeden.com/icon/category/free.

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_text">arXiv mobile is an open-source application to browse daily scientific articles submitted to arXiv.org and to search the entire arXiv.org database. If you like it and use it often, please consider buying the supporter version of the application to support the developer\'s efforts.\n\nViewing PDFs requires a PDF viewer (try AdobeReader from the Market)\n\nYou can add categories and custom searches to your favorites list and can share articles by pressing menu on the article screen.\n\narXiv mobile contains a corresponding widget that checks for new articles in your favorite categories/searches once every hour. Note that favorites that were created with the (non-default) RSS source preference on will not be included in the widget.</string>
+    <string name="app_name">arXiv mobile</string>
+    <string name="android_2_x_required">Downloading PDFs is not supported on your device</string>
+    <string name="add_favorites">Add to Favorites</string>
+    <string name="added_to_favorites">Added custom search to your favorites</string>
+    <string name="added_to_favorites_rss">Added custom search to your favorites.\n\nYour source preferences is RSS: so, this favorite will not show up in the widget.</string>
+    <string name="share">Share Article</string>
+    <string name="download_failed">Error: Could not download PDF.</string>
+    <string name="no_storage">Neither /sdcard or /emmc available to download PDF.</string>
+    <string name="install_reader">You must install a PDF Reader from the Market. Try AdobeReader.</string>
+    <string name="searching">Searching</string>
+    <string name="loading">Loading. Please wait...</string>
+    <string name="couldnt_parse">Couldn\'t Parse - No Network Connection to Server?</string>
+    <string name="deleted_history">Deleted PDF history</string>
+    <string name="clear_history">Clear PDF history</string>
+    <string name="view_history">View PDF history</string>
+    <string name="about_arxiv_droid">About arXiv mobile</string>
+    <string name="remove_favorites">Remove From Favorites</string>
+    <string name="add_search_to_favorites">Add to Favorites</string>
+    <string name="next">next</string>
+    <string name="previous">previous</string>
+    <string name="size">Size:</string>
+    <string name="view_pdf">Get PDF</string>
+    <string name="search">Search</string>
+    <string name="search_fields">Search Fields:</string>
+    <string name="search_from">Search From:</string>
+    <string name="today">Today</string>
+    <string name="donate">Support Developer</string>
+    <string name="preferences">Preferences</string>
+</resources>

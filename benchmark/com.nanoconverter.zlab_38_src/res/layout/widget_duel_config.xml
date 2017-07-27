@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/config_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/preview_window"
+        android:layout_width="match_parent"
+        android:layout_height="146dp"
+        android:background="@drawable/flower"
+        android:gravity="center" >
+
+        <LinearLayout
+            android:id="@+id/widget_preview_layout"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:background="@drawable/shape_square"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/sourceLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="2dp" >
+
+                <ImageView
+                    android:id="@+id/menu_button"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:src="@android:drawable/ic_menu_more"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:id="@+id/bank_preview"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="CBR"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="9dp" />
+
+                <ImageView
+                    android:id="@+id/update_button"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="right"
+                    android:src="@android:drawable/stat_notify_sync" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/rate_preview"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="0.78"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/curLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="2dp" >
+
+                <TextView
+                    android:id="@+id/cur_preview"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:gravity="center"
+                    android:text="USD/EUR"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="10dp" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <Spinner
+                android:id="@+id/spinFrom"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:entries="@array/listArray" />
+
+            <Spinner
+                android:id="@+id/spinTo"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:entries="@array/listArray" />
+
+            <Spinner
+                android:id="@+id/spinBank"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:entries="@array/listsourceConfig" />
+
+            <Spinner
+                android:id="@+id/spinTheme"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:entries="@array/listwidgettheme" />
+
+            <CheckBox
+                android:id="@+id/checkRounded"
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/rounded_corner_not" />
+
+            <CheckBox
+                android:id="@+id/checkCircle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/circle_or_not" />
+
+            <CheckBox
+                android:id="@+id/checkUpdateShow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/show_update" />
+
+            <CheckBox
+                android:id="@+id/checkBank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/show_bank" />
+
+            <CheckBox
+                android:id="@+id/checkCur"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/show_cur" />
+
+            <CheckBox
+                android:id="@+id/checkOnlyFrom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/show_onlyFrom" />
+
+            <CheckBox
+                android:id="@+id/checkOnlyTo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/show_onlyTo" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/okconfig"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="OK" />
+
+</LinearLayout>

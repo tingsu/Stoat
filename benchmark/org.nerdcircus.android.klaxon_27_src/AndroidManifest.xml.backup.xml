@@ -1,0 +1,113 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.nerdcircus.android.klaxon"
+    android:installLocation="auto"
+    android:versionCode="27"
+    android:versionName="0.27">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" > </uses-permission>
+    <uses-sdk
+        android:minSdkVersion="4"
+    />
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_MMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <application android:icon="@drawable/app_icon"
+        android:theme="@style/SelectorTheme">
+        <activity android:name=".KlaxonList" android:label="@string/app_name" 
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:mimeType="vnd.android.cursor.dir/pages" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".PageViewer" android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <data android:mimeType="vnd.android.cursor.item/pages" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <provider android:name=".PagerProvider" android:authorities="org.nerdcircus.android.klaxon" android:multiprocess="true"/>
+        <receiver android:name=".SmsPageReceiver" >
+            <intent-filter android:priority="100">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+            <intent-filter>
+                <data android:mimeType="vnd.android.cursor.item/pages" />
+                <action android:name="org.nerdcircus.android.klaxon.REPLY" />
+            </intent-filter>
+
+        </receiver>
+        <!--
+        <receiver android:name=".MmsPageReceiver" >
+            <intent-filter>
+                <action android:name="android.provider.Telephony.WAP_PUSH_RECEIVED"/>
+                <data android:mimeType="application/vnd.wap.mms-message" />
+            </intent-filter>
+        </receiver>
+        -->
+        <!--
+        <receiver android:name=".GmailPageReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.PROVIDER_CHANGED" />
+                <data android:scheme="content"
+                      android:path="gmail-ls/unread/^i" />
+            </intent-filter>
+            <intent-filter>
+                <data android:mimeType="vnd.android.cursor.item/pages" />
+                <action android:name="org.nerdcircus.android.klaxon.REPLY" />
+            </intent-filter>
+        </receiver>
+        -->
+        <receiver android:name=".Notifier" >
+            <intent-filter>
+                <action android:name="org.nerdcircus.android.klaxon.PAGES_VIEWED" />
+                <action android:name="org.nerdcircus.android.klaxon.ANNOY" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.nerdcircus.android.klaxon.PAGE_RECEIVED" />
+                <data android:mimeType="vnd.android.cursor.item/pages" />
+            </intent-filter>
+            <intent-filter>
+                <!-- this action is called after a reply is sent, to update state -->
+                <action android:name="org.nerdcircus.android.klaxon.REPLY_SENT" />
+                <data android:mimeType="vnd.android.cursor.item/pages" />
+            </intent-filter>
+        </receiver>
+        <activity android:name=".Preferences" android:label="@string/prefs_activity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Changelog" android:label="Changelog">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ReplyList" android:label="@string/replylist_activity">
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <data android:mimeType="vnd.android.cursor.item/reply" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ReplyEditor" android:label="Reply Editor">
+            <intent-filter>
+                <action android:name="android.intent.action.INSERT" />
+                <data android:mimeType="vnd.android.cursor.dir/reply" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <data android:mimeType="vnd.android.cursor.item/reply" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest> 

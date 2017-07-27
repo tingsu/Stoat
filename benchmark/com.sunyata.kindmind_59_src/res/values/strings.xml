@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+ 
+    <!-- MainActivityC -->
+    <string name="app_name">KindMind</string>
+    <string name="feelings_title">Feelings</string>
+    <string name="needs_title">Needs</string>
+    <string name="kindness_title">Kindness</string>
+
+    <!-- ListFragmentC Option Menu Items -->
+    <string name="listFragment_newItem">Add New List Item</string>
+    <string name="listFragment_firstKindnessItem">Add First Kindness Item</string>
+    <string name="listFragment_empty">List empty, to add a new kindness list item, click on the button below. Ideas for new actions can be found here:\nhttps://sites.google.com/site/mindfulnessandhealing/kindmind/kindness\n</string>
+    
+    <!-- ListFragmentC Option Menu Items -->
+    <string name="listFragment_menu_savePattern">Save pattern</string>
+    <string name="listFragment_menu_clearAllSelections">[DEBUG] Clear list selections</string>
+    <string name="listFragment_menu_sortAlphabetically">[DEBUG] Sort alphabetically</string>
+    <string name="listFragment_menu_sortByRank">[DEBUG] Sort using KindSort (default)</string>
+    <string name="listFragment_menu_sendAllAsText">Send lists as text</string>
+    <string name="listFragment_menu_about">About</string>
+    <string name="listFragment_menu_help">Help (online)</string>
+    <string name="listFragment_menu_shareExperience_debug">[DEBUG] Share experience</string>
+    <string name="listFragment_menu_backupDatabase_debug">[DEBUG] Backup database</string>
+    <string name="listFragment_menu_resetDatabase_debug">[DEBUG] Reset database</string>
+    
+    <!-- AboutFragmentC -->
+    <string name="about_activityTitle">About KindMind</string>
+    <string name="about_version_title">Version</string>
+    <!-- version text is set programmatically, ex: "0.14.31_BETA -->
+    <string name="about_createdBy_title">Created By</string>
+    <string name="about_createdBy_text">Tord Dellsén, sunyata.software@gmail.com</string>
+    <string name="about_price_title">Price</string>
+    <string name="about_price_text">"As of this writing the app is completely cost-free but not free and open source software. Any of these facts may change in the future"</string>
+    <string name="about_privacy_title">Privacy</string>
+    <string name="about_privacy_text">This application is designed with the idea in mind to keep user data locally, google analytics is not used and backup is not done to any cloud service</string>
+    <string name="about_legal_title">Legal</string>
+    <string name="about_legal_text">Using this software, you are accepting the software \"as is\". The developer will not be held responsible for any damages arising from use of the software. There is no warranty for this software</string>
+    <string name="about_photoCredits_title">Photo Credits</string>
+    <string name="about_photoCredits_text">The KindMind white flower logo and icon (and some google play image resources) are based on a photo taken by Torgny Dellsén, the image has been used with permission.\n   http://torgnydellsen.zenfolio.com/</string>
+    <string name="about_thanks_title">Thanks</string>
+    <string name="about_thanks_text">The idea for this app came from work by Jane McGonigal. The structure of feelings and needs are from Marshall Rosenberg and Nonviolent Communication (sm). Ideas from Kristin Neff and Buddhism also influenced this app.</string>
+    
+    <!-- Widget Config -->
+    <string name="widgetConfig_activityTitle">Widget Setup</string>
+    <string name="widgetConfig_text">Please choose type of widget:</string>
+    <string name="widgetConfig_ok">OK</string>
+    <string name="widgetConfig_cancel">Cancel</string>
+
+    <!-- ItemSetupFragmentC -->
+    <string name="itemSetup_activityTitle">Item Setup</string>
+    <string name="itemSetup_listItem_title">Title</string>
+    <string name="itemSetup_dailyReminder_title">Daily Reminder</string>
+    <string name="itemSetup_dailyReminder_timeNotSet">"--:--"</string>
+    <string name="itemSetup_actionsOnClick_title">Actions on Click</string>
+    <string name="itemSetup_addNewAction_title">Add new action</string>
+    <string name="itemSetup_menu_deleteListItem">Delete item</string>
+    <string name="itemSetup_menu_deleteListItem_dialog_title">Please confirm</string>
+    <string name="itemSetup_menu_deleteListItem_dialog_message">Are you sure you want to delete this item?</string>
+    <string name="itemSetup_menu_deleteListItem_dialog_cancel">Cancel</string>
+    <string name="itemSetup_menu_deleteListItem_dialog_delete">Delete</string>
+    <string name="itemSetup_listItemNameHint">Please enter a title for the new list item</string>
+    
+    <!-- ItemSetupFragmentC: Add new action dialog -->
+    <string name="itemSetup_imageChooser">Image</string>
+    <string name="itemSetup_audioChooser">Audio</string>
+    <string name="itemSetup_videoChooser">Video</string>
+    <string name="itemSetup_contactChooser">Contact</string>
+    <string name="itemSetup_bookmarkChooser">Bookmark</string>
+    
+    <!-- Other -->
+    <string name="widgetList_empty">Empty</string>
+    <string name="videoChooser_activityTitle">Video Chooser</string>
+    <string name="bookmarkChooser_activityTitle">Bookmark Chooser</string>
+    <string name="actionListItem_delete">Del</string>
+    
+    
+    
+</resources>

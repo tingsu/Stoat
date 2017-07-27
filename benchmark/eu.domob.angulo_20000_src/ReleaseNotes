@@ -1,0 +1,31 @@
+Version 2.0 (2014-03-09, r67):
+==============================
+
+  * Add a new activity (Tri-Angulo) that allows to approximate distances to
+    points targetted with the camera.
+
+Version 1.3 (2013-12-14, r46):
+==============================
+
+  * Allow both portrait and landscape layouts.  A new preference allows
+    to choose between those or automatic orientation with sensor.
+
+  * New function "Level" to set the device's reference direction to one of
+    the principal axes.
+
+Version 1.2 (2012-07-20, r36):
+==============================
+
+  * Added preference to control sensor rate.
+
+  * Implemented optional smoothing function for sensor measurements.
+
+Version 1.1 (2012-07-10, r29):
+==============================
+
+  * Replaced menu items by stock ones.
+
+Version 1.0:
+============
+
+  * Initial release.

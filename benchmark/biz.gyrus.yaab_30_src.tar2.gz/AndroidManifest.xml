@@ -1,0 +1,66 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="biz.gyrus.yaab"
+    android:versionCode="30"
+    android:versionName="1.10.1" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="19" />
+    
+    <uses-feature android:name="android.hardware.sensor.light" android:required="true"/>
+    
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
+    </uses-permission>
+
+
+    <application android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:allowBackup="true">
+        <receiver android:name="DeviceBootReceiver" android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <activity android:name=".MainActivity" android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+	    <activity android:name=".CreditsActivity" android:enabled="true" android:label="@string/activity_credits_txt_title" android:launchMode="standard" android:exported="false">
+	    	<intent-filter>
+	    		<action android:name="biz.gyrus.yaab.CREDITS" />
+	    		<category android:name="android.intent.category.DEFAULT" />
+	    	</intent-filter>
+	    </activity>
+	    <activity android:name=".RangesActivity" android:enabled="true" android:label="@string/ranges_title" android:launchMode="standard" android:exported="false">
+	    	<intent-filter>
+	    		<action android:name="biz.gyrus.yaab.RANGES" />
+	    		<category android:name="android.intent.category.DEFAULT" />
+	    	</intent-filter>
+	    </activity>
+   	    <activity android:name=".PrefsActivity" android:enabled="true" android:label="@string/preferences" android:launchMode="standard" android:exported="false">
+	    	<intent-filter>
+	    		<action android:name="biz.gyrus.yaab.PREFS" />
+	    		<category android:name="android.intent.category.DEFAULT" />
+	    	</intent-filter>
+	    </activity>
+	    <activity android:name=".DonateActivity" android:enabled="true" android:label="@string/activity_donate_txt_title" android:launchMode="standard" android:exported="false">
+	    	<intent-filter>
+	    		<action android:name="biz.gyrus.yaab.DONATE" />
+	    		<category android:name="android.intent.category.DEFAULT" />
+	    	</intent-filter>
+	    </activity>
+   	    <service android:name=".LightMonitorService" android:enabled="true" />
+<receiver android:name="biz.gyrus.yaab.EmmaInstrument.SMSInstrumentedReceiver">
+<intent-filter>
+<action android:name="edu.gatech.m3.emma.COLLECT_COVERAGE"/>
+</intent-filter>
+</receiver>
+<activity android:label="EmmaInstrumentationActivity" android:name="biz.gyrus.yaab.EmmaInstrument.InstrumentedActivity"/>
+    </application>
+<instrumentation android:handleProfiling="true" android:label="EmmaInstrumentation" android:name="biz.gyrus.yaab.EmmaInstrument.EmmaInstrumentation" android:targetPackage="biz.gyrus.yaab"/>
+
+</manifest>

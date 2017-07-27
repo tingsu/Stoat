@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="USD_discription">Доллары США</string>
+    <string name="EUR_discription">Евро</string>
+    <string name="CHF_discription">Швейцарские франки</string>
+    <string name="GBP_discription">Фунты стерлингов</string>
+    <string name="JPY_discription">Японские йены</string>
+    <string name="UAH_discription">Гривны</string>
+    <string name="RUB_discription">Рубли</string>
+    <string name="MDL_discription">Молдавские леи</string>
+    <string name="BYR_discription">Белорусские рубли</string>
+    <string name="PLN_discription">Польские злоты</string>
+    <string name="LTL_discription">Литовские литы</string>
+    <string name="LVL_discription">Латвийские латы</string>
+    <string name="AZN_discription">Азербайджанские манаты</string>
+    <string name="AUD_discription">Австралийские доллары</string>
+    <string name="AMD_discription">Армянские драмы</string>
+    <string name="BGN_discription">Болгарские лвы</string>
+    <string name="BRL_discription">Бразильские реалы</string>
+    <string name="HUF_discription">Венгерские форинто</string>
+    <string name="DKK_discription">Датские кроны</string>
+    <string name="INR_discription">Индийские рупии</string>
+    <string name="KZT_discription">Казахские тенге</string>
+    <string name="CAD_discription">Канадские доллары</string>
+    <string name="KGS_discription">Киргизские сомы</string>
+    <string name="CNY_discription">Китайские юани</string>
+    <string name="NOK_discription">Норвежские кроны</string>
+    <string name="RON_discription">Новые румынские леи</string>
+    <string name="XDR_discription">СДР</string>
+    <string name="SGD_discription">Сингапурские доллары</string>
+    <string name="TJS_discription">Таджикские сомони</string>
+    <string name="TRY_discription">Турецкие лиры</string>
+    <string name="TMT_discription">Новые туркменские манаты</string>
+    <string name="UZS_discription">Узбекские сумы</string>
+    <string name="CZK_discription">Чешские кроны</string>
+    <string name="SEK_discription">Шведские кроны</string>
+    <string name="ZAR_discription">Южноафриканские рэнды</string>
+    <string name="KRW_discription">Вон Республики Корея</string>
+    <string name="FOO_discription">Свободный курс</string>
+</resources>

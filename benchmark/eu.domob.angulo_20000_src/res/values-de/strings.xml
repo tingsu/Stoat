@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Angulo.  Measure angles and slopes with Android!
+    Copyright (C) 2011-2014  Daniel Kraft <d@domob.eu>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<resources>
+  <string name="setReference">Setzen</string>
+  <string name="freeze">Sperren</string>
+  <string name="unfreeze">Entsperren</string>
+  <string name="setLevel">Einrasten</string>
+  <string name="gravity">Gravitation</string>
+  <string name="magnetic">Magnetfeld</string>
+
+  <string name="help">Hilfe</string>
+  <string name="preferences">Einstellungen</string>
+  <string name="about">Über</string>
+
+  <string name="category_general">Allgemein</string>
+
+  <string name="rate_pref">Update-Rate</string>
+  <string name="rate_summary">Wie schnell soll gemessen werden?</string>
+
+  <string name="smoothing_pref">Glätten</string>
+  <string name="smoothing_summary">Ausmitteln der Sensordaten für glatterere
+Werte.</string>
+
+  <string name="orientation_pref">Bildschirmausrichtung</string>
+  <string name="orientation_summary">Bildschirmausrichtung für Angulo
+einstellen.</string>
+
+  <string name="height_pref">Messhöhe</string>
+  <string name="height_summary">Höhe, aus der gemessen wird,
+konfigurieren.</string>
+  <string name="height_text">Angulo muss die Höhe über dem Boden kennen,
+in der sich das Gerät (genauer, die Kamera) befindet.  Diese kann über das
+Eingabefeld unten konfiguriert werden.  Alternativ kann Angulo die Höhe auch
+aus der Fallzeit berechnen, wenn das Gerät auf eine <b>weiche Unterlage</b>
+fallen gelassen wird.</string>
+
+  <string name="height_button_drop">Aus Fallzeit</string>
+  <string name="height_dropping_msg">Gerät auf eine weiche Unterlage
+fallen lassen...</string>
+
+  <string name="measure_info">Höhe auf %.2f m gesetzt.</string>
+
+  <string name="help_title">Kurzanleitung</string>
+  <string name="help_link_para">Mehr Informationen sind auch noch auf der
+<a href="http://www.domob.eu/projects/angulo.php">Webseite</a>
+zu finden.</string>
+
+  <string name="help_classic_para1">Um einen Winkel zu messen, mit dem Gerät in
+eine bestimmte Richtung zeigen, <b>Setzen</b> drücken, und dann auf
+einen zweiten Punkt ausrichten.</string>
+  <string name="help_classic_para2">Dann wird der Rotationswinkel relativ zur
+Gravitation (nach unten) und dem magnetischen Feld (in Richtung des
+Magnetpols der Erde) angezeigt.  Die grüne Anzeige kombiniert beide
+Messungen und ist (meistens) ein genauerer Wert.</string>
+  <string name="help_classic_para3">Um den Wert leicht ablesen zu können,
+<b>Sperren</b> (und später <b>Entsperren</b>) auswählen.  <b>Einrasten</b> setzt
+die Referenz-Richtung auf eine der Hauptachsen des Geräts, so dass es als
+Wasserwaage benutzt werden kann.</string>
+
+  <string name="help_triangulo_para1">Tri-Angulo berechnet den Abstand
+zum mittels Kamera-Peilung anvisierten Ziel.  Das Ziel muss sich am Boden
+befinden, die Messung erfolgt über den Winkel des Geräts zum Lot.</string>
+  <string name="help_triangulo_para2">Zum Ziel hin darf es keine
+Steigung geben, da sonst die Ergebnisse verfälscht werden!  Es ist auch
+wichtig, dass vor der Messung die Höhe, in der das Gerät (die Kamera,
+um genau zu sein) gehalten wird, richtig eingestellt wurde.</string>
+  <string name="help_triangulo_para3">Die angezeigte Distanz ist der Abstand
+des Ziels zum direkt unter dem Gerät am Boden liegenden Punkt.  Es muss also
+auch der Abstand einbezogen werden, in dem das Gerät eventuell vor dem
+Körper gehalten wird!</string>
+
+  <string name="about_title">Copyright und Über</string>
+  <string name="about_version">Dies ist <b>%s</b>, Version <b>%s</b>.</string>
+  <string name="about_para1">Copyright (C) 2011-2014 bei Daniel Kraft.
+Ich freue mich über Kommentare und Vorschläge via
+<a href="mailto:d@domob.eu">Email</a>; siehe auch
+<a href="http://www.domob.eu/projects/angulo.php">Angulo\'s
+Webseite</a>.</string>
+  <!-- about_para2 and about_para3 are the stuff from GPL, which I don't
+       translate.  -->
+
+</resources>
