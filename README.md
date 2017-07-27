@@ -116,7 +116,7 @@ stoat_mcmc_sampling_output: the outputs of mcmc sampling.
      
 coverage: the all coverage data during two phases
 
-# Benchmark
+## Benchmark
 
 Some benchmark apps used in our paper.
 
