@@ -1,0 +1,413 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect BytecodeDescriptor {
+
+  class FieldDescriptor {
+    private BytecodeParser p;
+    String typeDescriptor;
+
+    public FieldDescriptor(BytecodeParser parser, String name) {
+      p = parser;
+      int descriptor_index = p.u2();
+      typeDescriptor = ((CONSTANT_Utf8_Info) p.constantPool[descriptor_index]).string();
+      if(BytecodeParser.VERBOSE)
+        p.println("  Field: " + name + ", " + typeDescriptor);
+    }
+
+    public Access type() {
+      return new TypeDescriptor(p, typeDescriptor).type();
+    }
+
+    public boolean isBoolean() {
+      return new TypeDescriptor(p, typeDescriptor).isBoolean();
+    }
+
+  }
+
+
+  class FieldInfo {
+    private BytecodeParser p;
+    String name;
+    int flags;
+    private FieldDescriptor fieldDescriptor;
+    private Attributes.FieldAttributes attributes;
+
+    public FieldInfo(BytecodeParser parser) {
+      p = parser;
+      flags = p.u2();
+      if(BytecodeParser.VERBOSE)
+        p.print("Flags: " + flags);
+      int name_index = p.u2();
+      name = ((CONSTANT_Utf8_Info) p.constantPool[name_index]).string();
+
+      fieldDescriptor = new FieldDescriptor(p, name);
+      attributes = new Attributes.FieldAttributes(p);
+    }
+
+    public BodyDecl bodyDecl() {
+      FieldDeclaration f;
+      if((flags & Flags.ACC_ENUM) != 0)
+        //EnumConstant : FieldDeclaration ::= Modifiers <ID:String> Arg:Expr* BodyDecl* /TypeAccess:Access/ /[Init:Expr]/;
+        f = new EnumConstant(
+            BytecodeParser.modifiers(flags),
+            name,
+            new List(),
+            new List()
+            );
+      else {
+        Signatures.FieldSignature s = attributes.fieldSignature;
+        Access type = s != null ? s.fieldTypeAccess() : fieldDescriptor.type();
+        f = new FieldDeclaration(
+            BytecodeParser.modifiers(flags),
+            type,
+            name,
+            new Opt()
+            );
+      }
+      if(attributes.constantValue() != null)
+        if(fieldDescriptor.isBoolean()) {
+          f.setInit(attributes.constantValue().exprAsBoolean());
+        }
+        else {
+          f.setInit(attributes.constantValue().expr());
+        }
+
+      if(attributes.annotations != null)
+        for(Iterator iter = attributes.annotations.iterator(); iter.hasNext(); )
+          f.getModifiersNoTransform().addModifier((Modifier)iter.next());
+
+      return f;
+    }
+
+    public boolean isSynthetic() {
+      return attributes.isSynthetic();
+    }
+
+  }
+
+
+  class MethodDescriptor {
+    private BytecodeParser p;
+    private String parameterDescriptors;
+    private String typeDescriptor;
+
+    public MethodDescriptor(BytecodeParser parser, String name) {
+      p = parser;
+      int descriptor_index = p.u2();
+      String descriptor = ((CONSTANT_Utf8_Info) p.constantPool[descriptor_index]).string();
+      if(BytecodeParser.VERBOSE)
+        p.println("  Method: " + name + ", " + descriptor);
+      //String[] strings = descriptor.substring(1).split("\\)");
+      //parameterDescriptors = strings[0];
+      //typeDescriptor = strings[1];
+      int pos = descriptor.indexOf(')');
+      parameterDescriptors = descriptor.substring(1, pos);
+      typeDescriptor = descriptor.substring(pos+1, descriptor.length());
+    }
+
+    public List parameterList() {
+      TypeDescriptor d = new TypeDescriptor(p, parameterDescriptors);
+      return d.parameterList();
+    }
+    public List parameterListSkipFirst() {
+      TypeDescriptor d = new TypeDescriptor(p, parameterDescriptors);
+      return d.parameterListSkipFirst();
+    }
+
+    public Access type() {
+      TypeDescriptor d = new TypeDescriptor(p, typeDescriptor);
+      return d.type();
+    }
+  }
+
+  class MethodInfo {
+    private BytecodeParser p;
+    String name;
+    int flags;
+    private MethodDescriptor methodDescriptor;
+    private Attributes.MethodAttributes attributes;
+
+    public MethodInfo(BytecodeParser parser) {
+      p = parser;
+      flags = p.u2();
+      if(BytecodeParser.VERBOSE)
+        p.print("  Flags: " + Integer.toBinaryString(flags));
+      int name_index = p.u2();
+      CONSTANT_Info info = p.constantPool[name_index];
+      if(info == null || !(info instanceof CONSTANT_Utf8_Info)) {
+        System.err.println("Expected CONSTANT_Utf8_Info but found: " + info.getClass().getName());
+        //if(info instanceof CONSTANT_Class_Info) {
+        //  System.err.println(" found CONSTANT_Class_Info: " + ((CONSTANT_Class_Info)info).name());
+        //  name = ((CONSTANT_Class_Info)info).name();
+        //}
+      } 
+      name = ((CONSTANT_Utf8_Info)info).string();
+      methodDescriptor = new MethodDescriptor(p, name);
+      attributes = new Attributes.MethodAttributes(p);
+    }
+    public BodyDecl bodyDecl() {
+      Signatures.MethodSignature s = attributes.methodSignature;
+      Access returnType = (s != null && s.hasReturnType()) ? s.returnType() : methodDescriptor.type();
+      List parameterList;
+      if(isConstructor() && p.isInnerClass) {
+        parameterList = methodDescriptor.parameterListSkipFirst();
+        if(s != null) {
+          Iterator iter = s.parameterTypes().iterator();
+          if(iter.hasNext()) iter.next();
+          for(int i = 0; iter.hasNext(); i++) {
+            Access a = (Access)iter.next();
+            ((ParameterDeclaration)parameterList.getChildNoTransform(i)).setTypeAccess(a);
+          }
+        }
+      }
+      else {
+        parameterList = methodDescriptor.parameterList();
+        if(s != null) {
+          int i = 0;
+          for(Iterator iter = s.parameterTypes().iterator(); iter.hasNext(); i++) {
+            Access a = (Access)iter.next();
+            ((ParameterDeclaration)parameterList.getChildNoTransform(i)).setTypeAccess(a);
+          }
+        }
+      }
+      if((flags & Flags.ACC_VARARGS) != 0) {
+        int lastIndex = parameterList.getNumChildNoTransform() - 1;
+        ParameterDeclaration p = (ParameterDeclaration)parameterList.getChildNoTransform(lastIndex);
+        parameterList.setChild(
+            new VariableArityParameterDeclaration(
+              p.getModifiersNoTransform(),
+              ((ArrayTypeAccess)p.getTypeAccessNoTransform()).getAccessNoTransform(),
+              p.getID()
+            ),
+          lastIndex
+        );
+      }
+      List exceptionList = (s != null && s.hasExceptionList()) ? s.exceptionList() : attributes.exceptionList();
+  
+      if(attributes.parameterAnnotations != null) {
+        for(int i = 0; i < attributes.parameterAnnotations.length; i++) {
+          ParameterDeclaration p = (ParameterDeclaration)parameterList.getChildNoTransform(i);
+          for(Iterator iter = attributes.parameterAnnotations[i].iterator(); iter.hasNext(); ) {
+            Modifier m = (Modifier)iter.next();
+            p.getModifiersNoTransform().addModifier(m);
+          }
+        }
+      }
+
+      BodyDecl b;
+      if(isConstructor()) {
+        b = new ConstructorDecl(BytecodeParser.modifiers(flags), name, parameterList, 
+            exceptionList, new Opt(), new Block());
+      }
+      else if(attributes.elementValue() != null) {
+        b = new AnnotationMethodDecl(BytecodeParser.modifiers(flags), returnType, name, 
+            parameterList, exceptionList, 
+            new Opt(new Block()), new Opt(attributes.elementValue()));
+      }
+      else if(s != null && s.hasFormalTypeParameters()) {
+        b = new GenericMethodDecl(BytecodeParser.modifiers(flags), returnType, name, parameterList, 
+            exceptionList, new Opt(new Block()), s.typeParameters());
+      }
+      else {
+        b = new MethodDecl(BytecodeParser.modifiers(flags), returnType, name, parameterList, 
+            exceptionList, new Opt(new Block()));
+      }
+      if(attributes.annotations != null) {
+        for(Iterator iter = attributes.annotations.iterator(); iter.hasNext(); ) {
+          if(b instanceof MethodDecl) 
+            ((MethodDecl)b).getModifiers().addModifier((Modifier)iter.next());
+          else if(b instanceof ConstructorDecl)
+            ((ConstructorDecl)b).getModifiers().addModifier((Modifier)iter.next());
+        }
+      }
+      return b;
+    }
+
+    private boolean isConstructor() {
+      return name.equals("<init>");
+    }
+
+    public boolean isSynthetic() {
+      return attributes.isSynthetic() || (flags & 0x1000) != 0;
+    }
+
+  }
+
+  class TypeDescriptor {
+    private BytecodeParser p;
+    private String descriptor;
+    public TypeDescriptor(BytecodeParser parser, String descriptor) {
+      p = parser;
+      this.descriptor = descriptor;
+    }
+
+    public boolean isBoolean() {
+      return descriptor.charAt(0) == 'Z';
+    }
+
+    public Access type() {
+      return type(descriptor);
+    }
+
+    public Access type(String s) {
+      char c = s.charAt(0);
+      switch (c) {
+        case 'B':
+          return new PrimitiveTypeAccess("byte");
+        case 'C':
+          return new PrimitiveTypeAccess("char");
+        case 'D':
+          return new PrimitiveTypeAccess("double");
+        case 'F':
+          return new PrimitiveTypeAccess("float");
+        case 'I':
+          return new PrimitiveTypeAccess("int");
+        case 'J':
+          return new PrimitiveTypeAccess("long");
+        case 'S':
+          return new PrimitiveTypeAccess("short");
+        case 'Z':
+          return new PrimitiveTypeAccess("boolean");
+        case 'L':
+          return this.p.fromClassName(s.substring(1, s.length() - 1));
+        case '[':
+          return new ArrayTypeAccess(type(s.substring(1)));
+        case 'V':
+          return new PrimitiveTypeAccess("void");
+        default:
+          this.p.println("Error: unknown type in TypeDescriptor");
+          throw new Error("Error: unknown Type in TypeDescriptor: " + s);
+      }
+      //return null;
+    }
+
+    public List parameterList() {
+      List list = new List();
+      String s = descriptor;
+      while(!s.equals("")) {
+        s = typeList(s, list);
+      }
+      return list;
+    }
+    public List parameterListSkipFirst() {
+      List list = new List();
+      String s = descriptor;
+      if(!s.equals(""))
+        s = typeList(s, new List()); // skip first
+      while(!s.equals("")) {
+        s = typeList(s, list);
+      }
+      return list;
+    }
+
+    public String typeList(String s, List l) {
+      char c = s.charAt(0);
+      switch (c) {
+        case 'B':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("byte"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'C':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("char"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'D':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("double"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'F':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("float"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'I':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("int"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'J':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("long"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'S':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("short"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'Z':
+          l.add(new ParameterDeclaration(new Modifiers(), 
+                new PrimitiveTypeAccess("boolean"), "p" + l.getNumChildNoTransform()));
+          return s.substring(1);
+        case 'L':
+          int pos = s.indexOf(';');
+          String s1 = s.substring(1, pos);
+          String s2 = s.substring(pos+1, s.length());
+          l.add(new ParameterDeclaration(new Modifiers(),
+                this.p.fromClassName(s1),
+                "p" + l.getNumChildNoTransform()));
+          return s2;
+        case '[':
+          int i = 1;
+          while(s.charAt(i) == '[') i++;
+          ArrayTypeAccess bottom = new ArrayTypeAccess(new ParseName("")); // dummy name is replaced later
+          ArrayTypeAccess top = bottom;
+          for(int j = 0; j < i - 1; j++)
+            top = new ArrayTypeAccess(top);
+          l.add(new ParameterDeclaration(new Modifiers(), top, "p" + l.getNumChild()));
+          return arrayTypeList(s.substring(i), bottom);
+        default:
+          this.p.println("Error: unknown Type \"" + c + "\" in TypeDescriptor");
+          throw new Error("Error: unknown Type in TypeDescriptor: " + s);
+      }
+      //return "";
+
+    }
+
+    public String arrayTypeList(String s, ArrayTypeAccess typeAccess) {
+      char c = s.charAt(0);
+      switch (c) {
+        case 'B':
+          typeAccess.setAccess(new PrimitiveTypeAccess("byte"));
+          return s.substring(1);
+        case 'C':
+          typeAccess.setAccess(new PrimitiveTypeAccess("char"));
+          return s.substring(1);
+        case 'D':
+          typeAccess.setAccess(new PrimitiveTypeAccess("double"));
+          return s.substring(1);
+        case 'F':
+          typeAccess.setAccess(new PrimitiveTypeAccess("float"));
+          return s.substring(1);
+        case 'I':
+          typeAccess.setAccess(new PrimitiveTypeAccess("int"));
+          return s.substring(1);
+        case 'J':
+          typeAccess.setAccess(new PrimitiveTypeAccess("long"));
+          return s.substring(1);
+        case 'S':
+          typeAccess.setAccess(new PrimitiveTypeAccess("short"));
+          return s.substring(1);
+        case 'Z':
+          typeAccess.setAccess(new PrimitiveTypeAccess("boolean"));
+          return s.substring(1);
+        case 'L':
+          //String[] strings = s.substring(1).split("\\;", 2);
+          //typeAccess.setAccess(this.p.fromClassName(strings[0]));
+          //return strings[1];
+          int pos = s.indexOf(';');
+          String s1 = s.substring(1, pos);
+          String s2 = s.substring(pos+1, s.length());
+          typeAccess.setAccess(this.p.fromClassName(s1));
+          return s2;
+        default:
+          this.p.println("Error: unknown Type in TypeDescriptor");
+          throw new Error("Error: unknown Type in TypeDescriptor: " + s);
+      }
+      //return null;
+    }
+  }
+}

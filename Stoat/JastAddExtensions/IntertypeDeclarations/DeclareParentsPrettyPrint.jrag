@@ -1,0 +1,38 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect DeclareParentsPrettyPrint {
+  public void DeclareParentsExtends.toString(StringBuffer s) {
+    s.append(indent());
+    s.append("/*");
+    s.append("declare parents: ");
+    getPattern().toString(s);
+    s.append(" extends ");
+    for(int i = 0; i < getNumTypeAccess(); i++) {
+      if(i != 0) s.append(", ");
+      getTypeAccess(i).toString(s);
+    }
+    s.append(";\n");
+    s.append("*/");
+  }
+  public void DeclareParentsImplements.toString(StringBuffer s) {
+    s.append(indent());
+    s.append("/*");
+    s.append("declare parents: ");
+    getPattern().toString(s);
+    s.append(" implements ");
+    for(int i = 0; i < getNumTypeAccess(); i++) {
+      if(i != 0) s.append(", ");
+      getTypeAccess(i).toString(s);
+    }
+    s.append(";\n");
+    s.append("*/");
+  }
+
+}

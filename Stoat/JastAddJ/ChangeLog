@@ -1,0 +1,178 @@
+2013-02-13  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Release 7.1
+
+2013-01-25  Jesper Öqvist <jesper@llbit.se>
+
+    * Removed unused import java.util.LinkedHashSet
+
+2013-01-23  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Moved PathPart and subclasses to separate .jadd file in Java1.4Frontend
+    * Improved name checking error messages for TypeDecl
+    * Package names are double-checked against canonical file names in
+    order to avoid some problems on case-insensitive file systems.
+    Trac ticket: http://svn.cs.lth.se/trac/jastadd-trac/ticket/99
+
+2013-01-10  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Fixed error in Java7Frontend/JavaPrettyPrinter.
+      Properly escape backslash file separator.
+
+2013-01-07  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Don't add system property `java.class.path` to classpath
+
+2012-11-23  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Updated to JastAdd2 version R20121122 (r889)
+
+2012-11-14  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Updated to JastAdd2 version R20121114 (r887)
+
+2012-11-09  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Updated to latest JastAdd2 version
+
+2012-11-06  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * Fixed errors in parser rule for annotations, now it is closer to the JLS.
+    Trac ticket: http://svn.cs.lth.se/trac/jastadd-trac/ticket/87
+
+2012-11-02  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * JastAddJ prints an error message and exits with nonzero exit code when
+    an unexpected exception occurs
+    * Fixed error causing NPE during ParMethodDecl type argument substitution
+    Trac ticket: http://svn.cs.lth.se/trac/jastadd-trac/ticket/86
+
+2012-11-01  Jesper Öqvist <jesper.oqvist@cs.lth.se>
+
+    * All type accesses in accessor methods should be qualified
+      Trac ticket: http://svn.cs.lth.se/trac/jastadd-trac/ticket/85
+
+2012-09-20 (JO)
+    * Modified beaver.Symbol: made the value field non-final and added custom
+      clone method. This fixes a "memory leak" when cloning AST nodes.
+
+2012-09-13 (JO)
+    * The addSourceFile method now returns the CompilationUnit representing
+      the added source file name
+
+2012-09-12 (ES/JO)
+    * Applied patch from Emma which fixed a circular type lookup problem
+      for generic types. The patch added the new inExtendsOrImplements
+      attribute.
+
+2012-07-18 (JO)
+    * JastAddJ now uses the relative path to identify compilation units.
+      The pathName attribute of compilation units may now be different due to
+      this change.
+      Using the relative path rather than the absolute path makes it simpler
+      for static analysis tools to support relocation between different
+      machines.
+
+2012-06-29 (JO)
+    * Made field and variable initializer type errors more verbose
+    * Fixed error in type lookup that could cause duplicate compilation units
+      to be added in the AST (one as a from-source CU, the other as library CU)
+      See also http://svn.cs.lth.se/trac/jastadd-trac/ticket/74
+
+2012-05-07 (JO)
+    Changed the name of the Java7Backend compiler to JastAddJ (JJ7)
+
+    Changed the name of the Java7Backend generated Jar file to JJ7.jar
+
+2012-05-04 (JO)
+    An implementation of createQualifiedAccess was added to AbstractWildcardType
+    so that wildcard types do not use the default behaviour of creating a
+    qualified type access with package and type name which are undefined for
+    wildcard types.
+
+    If a corresponding class file and source file have the same last modified
+    timestamp, then the class file will be parsed rather than the source file.
+
+    Final non-static fields now also receive the ConstantValue attribute when
+    the value is constant.
+
+    Fixed error that caused faulty bytecode generation when compiling an
+    enhanced for statement where the loop variable was a boxed primitive type.
+
+    Fixed definite assignment not propagating to second expression in an
+    assert statement.
+
+    Set the ACC_VARARGS flag for variable arity constructors.
+
+2012-05-03 (JO)
+    The hostType attribute now always returns the "original" TypeDecl, so for
+    example a method in a generic class may be the child of a ParClassDecl but
+    hostType will now point to the corresponding GenericClassDecl.
+    This fixes an error where extraneous accessor methods were generated for
+    some types of method access that did not require an accessor method.
+
+2012-04-26 (JO)
+    JastAddJ exits with exit code 0 if it only prints version or help
+    information. The version string output by -version was also made shorter.
+
+2012-03-24 (JO)
+    Updated to latest JastAdd2 and RagDoll.
+
+2012-03-06 (JO)
+    Removed the TypeDecl.subclassWithinBody(TypeDecl) method since the
+    purpose of that method was to find an enclosing class inheriting from a
+    given superclass C while determining member accessibility.
+    Only looking at the directly enclosing subclass of C is not sufficient to
+    determine the accessibility of the field or method - all enclsing classes
+    must be checked until one that can access the member is found.
+    This is the puprpose of the new methods
+    TypeDecl.mayAccess(Expr, FieldDeclaration)
+    TypeDecl.mayAccess(MethodAccess, MethodDecl)
+
+2012-02-18 (JO)
+    Moved the Java7Backend compiler main class to
+    org.jastadd.jastaddj.JavaCompiler. A main class with the same name remains
+    in the default package, for backwards compatibility.
+
+2011-12-08 (JO)
+    Upgraded Beaver to version 0.9.9
+    The new version of Beaver uses a new naming convention for the Beaver jar
+    files, an effect of this is that the jar file used for Ant tasks is now
+    called beaver-ant.jar. Extensions using Beaver in their Ant scripts by
+    referencing Java1.4Frontend/tools/beaver.jar should be updated to reference
+    Java1.4Frontend/tools/beaver-ant.jar instead.
+
+2011-11-23 (JO)
+    Added automatic version number update to build scripts for JJ7.
+
+2011-09-24 (JO)
+    Updated the JastAdd2 tool to version R20110924.
+
+2011-09-15 (JO)
+    Added isDefaultConstructor flag to ConstructorDecl. Pretty printing
+    now ignores auto-generated default constructors. Extensions that rely on
+    pretty printing to generate default constructors should refine the
+    setDefaultConstructor method to make it do nothing.
+
+2011-06-03 (JO)
+    Refactored the Java AST. CatchClause is now an abstract base class
+    for BasicCatch, which fills the same role that CatchClause previously had.
+    Extensions that use the old CatchClause node type will have to in some
+    cases move attribute refines etc. to BasicCatch.
+
+2011-05-12 (JO)
+    Modified build files to use more heap memory when running JastAdd2
+    using an exec task.
+
+2011-04-01 (JO)
+    Errors and warnings are printed on the error stream instead of the
+    standard output stream.
+
+2011-08-09 (JO)
+    Added build file to root JastAddJ directory with clean target that
+    cleans all JastAddJ modules.
+
+2011-08-09 (JO)
+    Refactored VariableDeclaration.jrag - moved interface Variable to
+    Variable.jadd
+

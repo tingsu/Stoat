@@ -1,0 +1,60 @@
+<project name="JastAddJ" default="build">
+	<target name="java4" description="build only the Java4 backend">
+		<ant antfile="Java1.4Backend/build.xml" target="build"
+			inheritAll="false"/>
+	</target>
+	<target name="java5" description="build only the Java5 backend">
+		<ant antfile="Java1.5Backend/build.xml" target="build"
+			inheritAll="false"/>
+	</target>
+	<target name="java7" description="build only the Java7 backend">
+		<ant antfile="Java7Backend/build.xml" target="build"
+			inheritAll="false"/>
+	</target>
+	<target name="build" description="build all JastAddJ modules">
+		<echo message="building all JastAddJ modules"/>
+		<ant antfile="Java1.4Frontend/build.xml" target="build"
+			inheritAll="false"/>
+		<ant antfile="Java1.4Backend/build.xml" target="build"
+			inheritAll="false"/>
+		<ant antfile="Java1.5Frontend/build.xml" target="build"
+			inheritAll="false"/>
+		<ant antfile="Java1.5Backend/build.xml" target="build"
+			inheritAll="false"/>
+		<ant antfile="Java7Frontend/build.xml" target="build"
+			inheritAll="false"/>
+		<ant antfile="Java7Backend/build.xml" target="build"
+			inheritAll="false"/>
+	</target>
+	<target name="clean" description="clean all JastAddJ modules">
+		<echo message="cleaning all JastAddJ modules"/>
+		<ant antfile="Java1.4Frontend/build.xml" target="clean"
+			inheritAll="false"/>
+		<ant antfile="Java1.4Backend/build.xml" target="clean"
+			inheritAll="false"/>
+		<ant antfile="Java1.5Frontend/build.xml" target="clean"
+			inheritAll="false"/>
+		<ant antfile="Java1.5Backend/build.xml" target="clean"
+			inheritAll="false"/>
+		<ant antfile="Java7Frontend/build.xml" target="clean"
+			inheritAll="false"/>
+		<ant antfile="Java7Backend/build.xml" target="clean"
+			inheritAll="false"/>
+	</target>
+	<target name="release" description="Build a source release of JastAddJ"
+		depends="clean">
+		<zip destfile="jastaddj-${version}.zip">
+			<zipfileset dir="." prefix="JastAddJ">
+				<include name="LICENSE"/>
+				<include name="build.xml"/>
+				<include name="ChangeLog"/>
+				<include name="Java1.4Frontend/**/*"/>
+				<include name="Java1.4Backend/**/*"/>
+				<include name="Java1.5Frontend/**/*"/>
+				<include name="Java1.5Backend/**/*"/>
+				<include name="Java7Frontend/**/*"/>
+				<include name="Java7Backend/**/*"/>
+			</zipfileset>
+		</zip>
+	</target>
+</project>

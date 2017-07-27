@@ -1,0 +1,446 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import java.util.*;
+import java.io.*;
+
+aspect ConstantPool {
+  syn lazy ConstantPool TypeDecl.constantPool() = new ConstantPool(this);
+
+  syn lazy String TypeDecl.constantPoolName() {
+    if(!isNestedType()) {
+      String packageName = packageName();
+      if(!packageName.equals("")) {
+        packageName = packageName.replace('.', '/') + "/";
+      }
+      return packageName + name();
+    }
+    else {
+      String prefix = enclosingType().constantPoolName();
+      if(isAnonymous()) {
+        return prefix + "$" + uniqueIndex();
+      }
+      else if(isLocalClass()) {
+        return prefix + "$" + uniqueIndex() + name();
+      }
+      return prefix + "$" + name();
+    }
+  }
+
+  syn lazy String ArrayDecl.constantPoolName() = typeDescriptor();
+
+  public class ConstantPool {
+    public TypeDecl typeDecl;
+    public ConstantPool(TypeDecl typeDecl) {
+      this.typeDecl = typeDecl;
+      //if(!typeDecl.isFinal)
+      //  System.out.println("Warning: trying to create constant pool for non final type decl " + typeDecl.fullName());
+    }
+    
+    public static final byte CONSTANT_Class              = 7;
+    public static final byte CONSTANT_Fieldref           = 9;
+    public static final byte CONSTANT_Methodref          = 10;
+    public static final byte CONSTANT_InterfaceMethodref = 11;
+    public static final byte CONSTANT_String             = 8;
+    public static final byte CONSTANT_Integer            = 3;
+    public static final byte CONSTANT_Float              = 4;
+    public static final byte CONSTANT_Long               = 5;
+    public static final byte CONSTANT_Double             = 6;
+    public static final byte CONSTANT_NameAndType        = 12;
+    public static final byte CONSTANT_Utf8               = 1;
+ 
+    private int posCounter = 1;
+ 
+    private ArrayList list = new ArrayList();
+    private void addCPInfo(CPInfo info) {
+      list.add(info);
+    }
+ 
+    // for debugging purposes
+    public int numElements() {
+      return list.size();
+    }
+    public String toString() {
+      StringBuffer s = new StringBuffer();
+      for(Iterator iter = list.iterator(); iter.hasNext(); ) {
+        s.append(iter.next().toString());
+        s.append("\n");
+      }
+      return s.toString();
+    }
+ 
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeChar(posCounter);
+      for(Iterator iter = list.iterator(); iter.hasNext(); ) {
+        CPInfo info = (CPInfo)iter.next();
+        info.emit(out);
+      }
+    }
+
+    private int labelCounter = 1;
+    public int newLabel() {
+      return labelCounter++;
+    }
+ 
+    private HashMap classConstants = new HashMap();
+    public int addClass(String name) {
+      Map map = classConstants;
+      Object key = name;
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantClass(addUtf8(name.replace('.', '/')));
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        String s = info.toString();
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap fieldrefConstants = new HashMap();
+    public int addFieldref(String classname, String name, String type) {
+      Map map = fieldrefConstants;
+      Object key = classname + name + type;
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantFieldref(addClass(classname), addNameAndType(name, type));
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        String s = info.toString();
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap methodrefConstants = new HashMap();
+    public int addMethodref(String classname, String name, String desc) {
+      Map map = methodrefConstants;
+      Object key = classname + name + desc;
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantMethodref(addClass(classname), addNameAndType(name, desc));
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        String s = info.toString();
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap interfaceMethodrefConstants = new HashMap();
+    public int addInterfaceMethodref(String classname, String name, String desc) {
+      Map map = interfaceMethodrefConstants;
+      Object key = classname + name + desc;
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantInterfaceMethodref(addClass(classname), addNameAndType(name, desc));
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        String s = info.toString();
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap nameAndTypeConstants = new HashMap();
+    public int addNameAndType(String name, String type) {
+      Map map = nameAndTypeConstants;
+      Object key = name + type;
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantNameAndType(addUtf8(name), addUtf8(type));
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        String s = info.toString();
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap utf8Constants = new HashMap();
+    public int addUtf8(String name) {
+      Map map = utf8Constants;
+      Object key = name;
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantUtf8(name);
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        String s = info.toString();
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap stringConstants = new HashMap();
+    public int addConstant(String val) {
+      Map map = stringConstants;
+      Object key = val;
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantString(addUtf8(val));
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        String s = info.toString();
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap intConstants = new HashMap();
+    public int addConstant(int val) {
+      Map map = intConstants;
+      Object key = new Integer(val);
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantInteger(val);
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap floatConstants = new HashMap();
+    public int addConstant(float val) {
+      Map map = floatConstants;
+      Object key = new Float(val);
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantFloat(val);
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap longConstants = new HashMap();
+    public int addConstant(long val) {
+      Map map = longConstants;
+      Object key = new Long(val);
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantLong(val);
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+ 
+    private HashMap doubleConstants = new HashMap();
+    public int addConstant(double val) {
+      Map map = doubleConstants;
+      Object key = new Double(val);
+      if(!map.containsKey(key)) {
+        CPInfo info = new ConstantDouble(val);
+        info.pos = posCounter; posCounter += info.size();
+        addCPInfo(info);
+        map.put(key, info);
+        return info.pos;
+      }
+      CPInfo info = (CPInfo)map.get(key);
+      return info.pos;
+    }
+  }
+
+  public class CPInfo {
+    public void emit(DataOutputStream out) throws IOException {
+    }
+    public int size() {
+      return  1;
+    }
+    public int pos;
+  }
+
+  public class ConstantClass extends CPInfo {
+    private int name;
+    public ConstantClass(int name) {
+      this.name = name;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Class);
+      out.writeChar(name);
+    }
+    public String toString() {
+      return pos + " ConstantClass: tag " + ConstantPool.CONSTANT_Class + ", name_index: " + name;
+    }
+  }
+
+  public class ConstantFieldref extends CPInfo {
+    private int classname;
+    private int nameandtype;
+    public ConstantFieldref(int classname, int nameandtype) {
+      this.classname = classname;
+      this.nameandtype = nameandtype;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Fieldref);
+      out.writeChar(classname);
+      out.writeChar(nameandtype);
+    }
+    public String toString() {
+      return pos + " ConstantFieldref: tag " + ConstantPool.CONSTANT_Fieldref + ", class_index: " + classname + ", name_and_type_index: " + nameandtype;
+    }
+  }
+  
+  public class ConstantMethodref extends CPInfo {
+    private int classname;
+    private int nameandtype;
+    public ConstantMethodref(int classname, int nameandtype) {
+      this.classname = classname;
+      this.nameandtype = nameandtype;
+    }
+
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Methodref);
+      out.writeChar(classname);
+      out.writeChar(nameandtype);
+    }
+    public String toString() {
+      return pos + " ConstantMethodref: tag " + ConstantPool.CONSTANT_Methodref + ", class_index: " + classname + ", name_and_type_index: " + nameandtype;
+    }
+  }
+  
+  public class ConstantInterfaceMethodref extends CPInfo {
+    private int classname;
+    private int nameandtype;
+    public ConstantInterfaceMethodref(int classname, int nameandtype) {
+      this.classname = classname;
+      this.nameandtype = nameandtype;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_InterfaceMethodref);
+      out.writeChar(classname);
+      out.writeChar(nameandtype);
+    }
+    public String toString() {
+      return pos + " ConstantInterfaceMethodref: tag " + ConstantPool.CONSTANT_InterfaceMethodref + ", class_index: " + classname + ", name_and_type_index: " + nameandtype;
+    }
+  }
+
+  public class ConstantNameAndType extends CPInfo {
+    private int name;
+    private int type;
+    public ConstantNameAndType(int name, int type) {
+      this.name = name;
+      this.type = type;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_NameAndType);
+      out.writeChar(name);
+      out.writeChar(type);
+    }
+    public String toString() {
+      return pos + " NameAndType: tag " + ConstantPool.CONSTANT_NameAndType + ", name_index: " + name + ", descriptor_index: " + type;
+    }
+  }
+
+  public class ConstantUtf8 extends CPInfo {
+    private String name;
+    public ConstantUtf8(String name) {
+      this.name = name;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Utf8);
+      out.writeUTF(name);
+    }
+    public String toString() {
+      return pos + " ConstantUtf8: tag " + ConstantPool.CONSTANT_Utf8 + ", length: " + name.length() + ", bytes: " + name;
+    }
+  }
+
+  public class ConstantString extends CPInfo {
+    private int name;
+    public ConstantString(int name) {
+      this.name = name;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_String);
+      out.writeChar(name);
+    }
+    public String toString() {
+      return pos + " ConstantString: tag " + ConstantPool.CONSTANT_String + ", string_index: " + name;
+    }
+  }
+
+  public class ConstantInteger extends CPInfo {
+    private int val;
+    public ConstantInteger(int val) {
+      this.val = val;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Integer);
+      out.writeInt(val);
+    }
+    public String toString() {
+      return pos + " ConstantInteger: tag " + ConstantPool.CONSTANT_Integer + ", bytes: " + val;
+    }
+  }
+
+  public class ConstantFloat extends CPInfo {
+    private float val;
+    public ConstantFloat(float val) {
+      this.val = val;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Float);
+      out.writeFloat(val);
+    }
+    public String toString() {
+      return pos + " ConstantFloat: tag " + ConstantPool.CONSTANT_Float + ", bytes: " + val;
+    }
+  }
+
+  public class ConstantLong extends CPInfo {
+    private long val;
+    public ConstantLong(long val) {
+      this.val = val;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Long);
+      out.writeLong(val);
+    }
+    public int size() {
+      return 2;
+    }
+    public String toString() {
+      return pos + " ConstantLong: tag " + ConstantPool.CONSTANT_Long + ", bytes: " + val;
+    }
+  }
+
+  public class ConstantDouble extends CPInfo {
+    private double val;
+    public ConstantDouble(double val) {
+      this.val = val;
+    }
+    public void emit(DataOutputStream out) throws IOException {
+      out.writeByte(ConstantPool.CONSTANT_Double);
+      out.writeDouble(val);
+    }
+    public int size() {
+      return 2;
+    }
+    public String toString() {
+      return pos + " ConstantDouble: tag " + ConstantPool.CONSTANT_Double + ", bytes: " + val;
+    }
+  }
+
+}

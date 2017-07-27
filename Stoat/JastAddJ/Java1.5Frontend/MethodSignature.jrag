@@ -1,0 +1,421 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect MethodSignature15 {
+  refine LookupMethod protected SimpleSet MethodAccess.maxSpecific(Collection candidates) {
+    SimpleSet potentiallyApplicable = potentiallyApplicable(candidates);
+    // first phase
+    SimpleSet maxSpecific = applicableBySubtyping(potentiallyApplicable);
+    // second phase
+    maxSpecific = applicableByMethodInvocationConversion(potentiallyApplicable,
+        maxSpecific);
+    // third phase
+    maxSpecific = applicableVariableArity(potentiallyApplicable, maxSpecific);
+    return maxSpecific;
+  }
+
+  protected SimpleSet MethodAccess.potentiallyApplicable(Collection candidates) {
+    SimpleSet potentiallyApplicable = SimpleSet.emptySet;
+    // select potentially applicable methods
+    for(Iterator iter = candidates.iterator(); iter.hasNext(); ) {
+      MethodDecl decl = (MethodDecl)iter.next();
+      if(potentiallyApplicable(decl) && accessible(decl)) {
+        if(decl instanceof GenericMethodDecl) {
+          decl = ((GenericMethodDecl)decl).lookupParMethodDecl(typeArguments(decl));
+        }
+        potentiallyApplicable = potentiallyApplicable.add(decl);
+      }
+    }
+    return potentiallyApplicable;
+  }
+
+  protected SimpleSet MethodAccess.applicableBySubtyping(SimpleSet potentiallyApplicable) {
+    SimpleSet maxSpecific = SimpleSet.emptySet;
+    for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
+      MethodDecl decl = (MethodDecl)iter.next();
+      if(applicableBySubtyping(decl))
+        maxSpecific = mostSpecific(maxSpecific, decl);
+    }
+    return maxSpecific;
+  }
+
+  protected SimpleSet MethodAccess.applicableByMethodInvocationConversion(SimpleSet potentiallyApplicable, SimpleSet maxSpecific) {
+    if(maxSpecific.isEmpty()) {
+      for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
+        MethodDecl decl = (MethodDecl)iter.next();
+        if(applicableByMethodInvocationConversion(decl))
+          maxSpecific = mostSpecific(maxSpecific, decl);
+      }
+    }
+    return maxSpecific;
+  }
+
+  protected SimpleSet MethodAccess.applicableVariableArity(SimpleSet potentiallyApplicable, SimpleSet maxSpecific) {
+    if(maxSpecific.isEmpty()) {
+      for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
+        MethodDecl decl = (MethodDecl)iter.next();
+        if(decl.isVariableArity() && applicableVariableArity(decl))
+          maxSpecific = mostSpecific(maxSpecific, decl);
+      }
+    }
+    return maxSpecific;
+  }
+
+  refine ConstructScope eq ClassInstanceExpr.decls() {
+    TypeDecl typeDecl = hasTypeDecl() ? getTypeDecl() : getAccess().type();
+    return chooseConstructor(typeDecl.constructors(), getArgList());
+  }
+  refine ConstructScope eq ConstructorAccess.decls() {
+    return chooseConstructor(lookupConstructor(), getArgList());
+  }
+  refine ConstructScope eq SuperConstructorAccess.decls() {
+    Collection c = hasPrevExpr() && !prevExpr().isTypeAccess() ?
+      hostType().lookupSuperConstructor() : lookupSuperConstructor();
+    return chooseConstructor(c, getArgList());
+  }
+
+  refine AnonymousClasses eq ClassInstanceExpr.getTypeDecl().constructorDecl() {
+    Collection c = getAccess().type().constructors();
+    SimpleSet maxSpecific = chooseConstructor(c, getArgList());
+    if(maxSpecific.size() == 1)
+      return (ConstructorDecl)maxSpecific.iterator().next();
+    return unknownConstructor();
+  }
+
+  protected SimpleSet Expr.chooseConstructor(Collection constructors, List argList) {
+    SimpleSet potentiallyApplicable = SimpleSet.emptySet;
+    // select potentially applicable constructors
+    for(Iterator iter = constructors.iterator(); iter.hasNext(); ) {
+      ConstructorDecl decl = (ConstructorDecl)iter.next();
+      if(decl.potentiallyApplicable(argList) && decl.accessibleFrom(hostType()))
+        potentiallyApplicable = potentiallyApplicable.add(decl);
+    }
+    // first phase
+    SimpleSet maxSpecific = SimpleSet.emptySet;
+    for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
+      ConstructorDecl decl = (ConstructorDecl)iter.next();
+      if(decl.applicableBySubtyping(argList))
+        maxSpecific = mostSpecific(maxSpecific, decl);
+    }
+
+    // second phase
+    if(maxSpecific.isEmpty()) {
+      for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
+        ConstructorDecl decl = (ConstructorDecl)iter.next();
+        if(decl.applicableByMethodInvocationConversion(argList))
+          maxSpecific = mostSpecific(maxSpecific, decl);
+      }
+    }
+
+    // third phase
+    if(maxSpecific.isEmpty()) {
+      for(Iterator iter = potentiallyApplicable.iterator(); iter.hasNext(); ) {
+        ConstructorDecl decl = (ConstructorDecl)iter.next();
+        if(decl.isVariableArity() && decl.applicableVariableArity(argList))
+          maxSpecific = mostSpecific(maxSpecific, decl);
+      }
+    }
+    return maxSpecific;
+  }
+
+
+  protected static SimpleSet Expr.mostSpecific(SimpleSet maxSpecific, ConstructorDecl decl) {
+    if(maxSpecific.isEmpty())
+      maxSpecific = maxSpecific.add(decl);
+    else {
+      if(decl.moreSpecificThan((ConstructorDecl)maxSpecific.iterator().next()))
+        maxSpecific = SimpleSet.emptySet.add(decl);
+      else if(!((ConstructorDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
+        maxSpecific = maxSpecific.add(decl);
+    }
+    return maxSpecific;
+  }
+
+  private static SimpleSet MethodAccess.mostSpecific(SimpleSet maxSpecific, MethodDecl decl) {
+    if(maxSpecific.isEmpty())
+      maxSpecific = maxSpecific.add(decl);
+    else {
+      if(decl.moreSpecificThan((MethodDecl)maxSpecific.iterator().next()))
+        maxSpecific = SimpleSet.emptySet.add(decl);
+      else if(!((MethodDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
+        maxSpecific = maxSpecific.add(decl);
+    }
+    return maxSpecific;
+  }
+
+  eq ParMethodDecl.moreSpecificThan(MethodDecl m) =
+    genericMethodDecl().moreSpecificThan(m instanceof ParMethodDecl ? ((ParMethodDecl)m).genericMethodDecl() : m );
+
+  refine MethodDecl eq MethodDecl.moreSpecificThan(MethodDecl m) {
+    if(!isVariableArity() && !m.isVariableArity())
+      return refined(m);
+    int num = Math.max(getNumParameter(), m.getNumParameter());
+    for(int i = 0; i < num; i++) {
+      TypeDecl t1 = i < getNumParameter() - 1 ? getParameter(i).type() : getParameter(getNumParameter()-1).type().componentType();
+      TypeDecl t2 = i < m.getNumParameter() - 1 ? m.getParameter(i).type() : m.getParameter(m.getNumParameter()-1).type().componentType();
+      if(!t1.instanceOf(t2))
+        return false;
+    }
+    return true;
+  }
+
+  refine ConstructorDecl eq ConstructorDecl.moreSpecificThan(ConstructorDecl m) {
+    if(!isVariableArity() && !m.isVariableArity())
+      return refined(m);
+    int num = Math.max(getNumParameter(), m.getNumParameter());
+    for(int i = 0; i < num; i++) {
+      TypeDecl t1 = i < getNumParameter() - 1 ? getParameter(i).type() : getParameter(getNumParameter()-1).type().componentType();
+      TypeDecl t2 = i < m.getNumParameter() - 1 ? m.getParameter(i).type() : m.getParameter(m.getNumParameter()-1).type().componentType();
+      if(!t1.instanceOf(t2))
+        return false;
+    }
+    return true;
+  }
+
+  syn boolean MethodAccess.applicableBySubtyping(MethodDecl m) {
+    if(m.getNumParameter() != getNumArg())
+      return false;
+    for(int i = 0; i < m.getNumParameter(); i++)
+      if(!getArg(i).type().instanceOf(m.getParameter(i).type()))
+        return false;
+    return true;
+  }
+
+  syn boolean ConstructorDecl.applicableBySubtyping(List argList) {
+    if(getNumParameter() != argList.getNumChild())
+      return false;
+    for(int i = 0; i < getNumParameter(); i++) {
+      TypeDecl arg = ((Expr)argList.getChild(i)).type();
+      if(!arg.instanceOf(getParameter(i).type()))
+        return false;
+    }
+    return true;
+  }
+
+  syn boolean MethodAccess.applicableByMethodInvocationConversion(MethodDecl m) {
+    if(m.getNumParameter() != getNumArg())
+      return false;
+    for(int i = 0; i < m.getNumParameter(); i++)
+      if(!getArg(i).type().methodInvocationConversionTo(m.getParameter(i).type()))
+        return false;
+    return true;
+  }
+
+  syn boolean ConstructorDecl.applicableByMethodInvocationConversion(List argList) {
+    if(getNumParameter() != argList.getNumChild())
+      return false;
+    for(int i = 0; i < getNumParameter(); i++) {
+      TypeDecl arg = ((Expr)argList.getChild(i)).type();
+      if(!arg.methodInvocationConversionTo(getParameter(i).type()))
+        return false;
+    }
+    return true;
+  }
+
+  syn boolean MethodAccess.applicableVariableArity(MethodDecl m) {
+    for(int i = 0; i < m.getNumParameter() - 1; i++)
+      if(!getArg(i).type().methodInvocationConversionTo(m.getParameter(i).type()))
+        return false;
+    for(int i = m.getNumParameter() - 1; i < getNumArg(); i++)
+      if(!getArg(i).type().methodInvocationConversionTo(m.lastParameter().type().componentType()))
+        return false;
+    return true;
+  }
+
+  syn boolean ConstructorDecl.applicableVariableArity(List argList) {
+    for(int i = 0; i < getNumParameter() - 1; i++) {
+      TypeDecl arg = ((Expr)argList.getChild(i)).type();
+      if(!arg.methodInvocationConversionTo(getParameter(i).type()))
+        return false;
+    }
+    for(int i = getNumParameter() - 1; i < argList.getNumChild(); i++) {
+      TypeDecl arg = ((Expr)argList.getChild(i)).type();
+      if(!arg.methodInvocationConversionTo(lastParameter().type().componentType()))
+        return false;
+    }
+    return true;
+  }
+
+  // 15.12.2.1
+
+  /* A member method is potentially applicable to a method invocation if and only if
+     all of the following are true:
+    * The name of the member is identical to the name of the method in the method
+      invocation.
+    * The member is accessible (§6.6) to the class or interface in which the
+      method invocation appears.
+    * The arity of the member is lesser or equal to the arity of the method
+      invocation.
+    * If the member is a variable arity method with arity n, the arity of the
+      method invocation is greater or equal to n-1.
+    * If the member is a fixed arity method with arity n, the arity of the method
+      invocation is equal to n.
+    * If the method invocation includes explicit type parameters, and the member
+      is a generic method, then the number of actual type parameters is equal to
+      the number of formal type parameters.*/
+  syn boolean MethodAccess.potentiallyApplicable(MethodDecl m) {
+    if(!m.name().equals(name()))
+      return false;
+    if(!m.accessibleFrom(hostType()))
+      return false;
+    if(m.isVariableArity() && !(arity() >= m.arity()-1))
+      return false;
+    if(!m.isVariableArity() && !(m.arity() == arity()))
+      return false;
+    if(m instanceof GenericMethodDecl) {
+      GenericMethodDecl gm = (GenericMethodDecl)m;
+      ArrayList list = typeArguments(m);
+      if(list.size() != 0) {
+        if(gm.getNumTypeParameter() != list.size())
+          return false;
+        for(int i = 0; i < gm.getNumTypeParameter(); i++)
+          if(!((TypeDecl)list.get(i)).subtype(gm.original().getTypeParameter(i)))
+            return false;
+      }
+    }
+    return true;
+  }
+  syn int MethodDecl.arity() = getNumParameter();
+  syn int MethodAccess.arity() = getNumArg();
+
+  syn lazy ArrayList MethodAccess.typeArguments(MethodDecl m) {
+    ArrayList typeArguments = new ArrayList();
+    if(m instanceof GenericMethodDecl) {
+      GenericMethodDecl g = (GenericMethodDecl)m;
+      Collection arguments = computeConstraints(g);
+      if(arguments.isEmpty())
+        return typeArguments;
+      int i = 0;
+      for(Iterator iter = arguments.iterator(); iter.hasNext(); i++) {
+        TypeDecl typeDecl = (TypeDecl)iter.next();
+        if(typeDecl == null) {
+          TypeVariable v = g.original().getTypeParameter(i);
+          if(v.getNumTypeBound() == 0)
+            typeDecl = typeObject();
+          else if(v.getNumTypeBound() == 1)
+            typeDecl = v.getTypeBound(0).type();
+          else
+            typeDecl = v.lubType();
+        }
+        typeArguments.add(typeDecl);
+      }
+    }
+    return typeArguments;
+  }
+  eq ParMethodAccess.typeArguments(MethodDecl m) {
+    ArrayList typeArguments = new ArrayList();
+    for(int i = 0; i < getNumTypeArgument(); i++)
+      typeArguments.add(getTypeArgument(i).type());
+    return typeArguments;
+  }
+
+  syn boolean ConstructorDecl.potentiallyApplicable(List argList) {
+    if(isVariableArity() && !(argList.getNumChild() >= arity()-1))
+      return false;
+    if(!isVariableArity() && !(arity() == argList.getNumChild()))
+      return false;
+    return true;
+  }
+  syn int ConstructorDecl.arity() = getNumParameter();
+  syn int ConstructorAccess.arity() = getNumArg();
+  syn int ClassInstanceExpr.arity() = getNumArg();
+
+  // 15.12.3
+  // refine old type checking to be valid when using variable arity parameters
+  refine TypeCheck public void MethodAccess.typeCheck() {
+    if(isQualified() && decl().isAbstract() && qualifier().isSuperAccess())
+      error("may not access abstract methods in superclass");
+    if(!decl().isVariableArity() || invokesVariableArityAsArray()) {
+      for(int i = 0; i < decl().getNumParameter(); i++) {
+        TypeDecl exprType = getArg(i).type();
+        TypeDecl parmType = decl().getParameter(i).type();
+        if(!exprType.methodInvocationConversionTo(parmType) && !exprType.isUnknown() && !parmType.isUnknown()) {
+          error("#The type " + exprType.typeName() + " of expr " +
+            getArg(i) + " is not compatible with the method parameter " +
+            decl().getParameter(i));
+        }
+      }
+    }
+  }
+
+  refine MethodDecl eq MethodDecl.signature() {
+    StringBuffer s = new StringBuffer();
+    s.append(name() + "(");
+    for(int i = 0; i < getNumParameter(); i++) {
+      if(i != 0) s.append(", ");
+      s.append(getParameter(i).type().erasure().typeName());
+    }
+    s.append(")");
+    return s.toString();
+
+  }
+
+  refine MemberMethods eq ClassDecl.methodsSignatureMap() {
+    HashMap map = new HashMap(localMethodsSignatureMap());
+    if(hasSuperclass()) {
+      for(Iterator iter = superclass().methodsIterator(); iter.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter.next();
+        if(!m.isPrivate() && m.accessibleFrom(this) && !localMethodsSignatureMap().containsKey(m.signature())) {
+          if(!(m instanceof MethodDeclSubstituted) || !localMethodsSignatureMap().containsKey(m.sourceMethodDecl().signature()))
+            putSimpleSetElement(map, m.signature(), m);
+        }
+      }
+    }
+    for(Iterator outerIter = interfacesIterator(); outerIter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)outerIter.next();
+      for(Iterator iter = typeDecl.methodsIterator(); iter.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter.next();
+        if(!m.isPrivate() && m.accessibleFrom(this) && !localMethodsSignatureMap().containsKey(m.signature())) {
+          if(!(m instanceof MethodDeclSubstituted) || !localMethodsSignatureMap().containsKey(m.sourceMethodDecl().signature())) {
+            if(allMethodsAbstract((SimpleSet)map.get(m.signature())) &&
+              (!(m instanceof MethodDeclSubstituted) ||
+               allMethodsAbstract((SimpleSet)map.get(m.sourceMethodDecl().signature()))              )
+            )
+              putSimpleSetElement(map, m.signature(), m);
+          }
+        }
+      }
+    }
+    return map;
+  }
+  refine MemberMethods eq InterfaceDecl.methodsSignatureMap() {
+    HashMap map = new HashMap(localMethodsSignatureMap());
+    for(Iterator outerIter = superinterfacesIterator(); outerIter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)outerIter.next();
+      for(Iterator iter = typeDecl.methodsIterator(); iter.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter.next();
+        if(!m.isPrivate() && m.accessibleFrom(this) && !localMethodsSignatureMap().containsKey(m.signature()))
+          if(!(m instanceof MethodDeclSubstituted) || !localMethodsSignatureMap().containsKey(m.sourceMethodDecl().signature()))
+            putSimpleSetElement(map, m.signature(), m);
+      }
+    }
+    for(Iterator iter = typeObject().methodsIterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(m.isPublic() && !map.containsKey(m.signature()))
+        putSimpleSetElement(map, m.signature(), m);
+    }
+    return map;
+  }
+
+  eq ParTypeDecl.unimplementedMethods() {
+    HashSet set = new HashSet();
+    HashSet result = new HashSet();
+    for(Iterator iter = genericDecl().unimplementedMethods().iterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      set.add(m.sourceMethodDecl());
+    }
+    for(Iterator iter = super.unimplementedMethods().iterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(set.contains(m.sourceMethodDecl()))
+        result.add(m);
+    }
+    return result;
+  }
+
+}

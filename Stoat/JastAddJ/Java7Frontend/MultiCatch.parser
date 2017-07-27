@@ -1,0 +1,25 @@
+CatchClause catch_clause =
+  CATCH LPAREN multi_catch_param.p RPAREN block.b
+  {:
+    return new MultiCatch(p, b);
+  :}
+;
+
+CatchParameterDeclaration multi_catch_param =
+  modifiers.a? multi_catch_type.b IDENTIFIER dims.c?
+  {:
+    return new CatchParameterDeclaration(new Modifiers(a), b, IDENTIFIER);
+  :}
+;
+
+List multi_catch_type =
+  type.a OR type.b
+  {:
+    return new List().add(a).add(b);
+  :}
+
+| multi_catch_type.a OR type.b
+  {:
+    return a.add(b);
+  :}
+;

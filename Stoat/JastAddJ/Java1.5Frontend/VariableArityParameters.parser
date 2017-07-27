@@ -1,0 +1,4 @@
+ParameterDeclaration formal_parameter =
+    modifiers.m? type.t ELLIPSIS IDENTIFIER dims.d? 
+    {: return new VariableArityParameterDeclaration(new Modifiers(m), t.addArrayDims(d), IDENTIFIER); :}  ;
+

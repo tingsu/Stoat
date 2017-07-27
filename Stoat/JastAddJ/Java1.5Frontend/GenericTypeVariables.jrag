@@ -1,0 +1,113 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect GenericTypeVariables {
+  
+  // The bounds of a type variable should be resolved to type names
+  eq TypeVariable.getTypeBound().nameType() = NameType.TYPE_NAME;
+
+  rewrite TypeVariable {
+    when (getNumTypeBound() == 0)
+    to TypeVariable {
+      addTypeBound(
+        new TypeAccess(
+          "java.lang",
+          "Object"
+        )
+      );
+      return this;
+    }
+  }
+
+  public void TypeVariable.nameCheck() {
+    if(extractSingleType(lookupType(name())) != this)
+      error("*** Semantic Error: type variable " + name() + " is multiply declared");
+  }
+
+  syn TypeDecl TypeVariable.lowerBound() = getTypeBound(0).type();
+  
+}
+
+aspect GenericTypeVariablesMembers {
+  eq TypeVariable.memberMethods(String name) {
+    Collection list = new HashSet();
+    for(int i = 0; i < getNumTypeBound(); i++) {
+      for(Iterator iter = getTypeBound(i).type().memberMethods(name).iterator(); iter.hasNext(); ) {
+        MethodDecl decl = (MethodDecl)iter.next();
+        //if(decl.accessibleFrom(hostType()))
+          list.add(decl);
+      }
+    }
+    return list;
+  }
+  
+  eq TypeVariable.memberFields(String name) {
+    SimpleSet set = SimpleSet.emptySet;
+    for(int i = 0; i < getNumTypeBound(); i++) {
+      for(Iterator iter = getTypeBound(i).type().memberFields(name).iterator(); iter.hasNext(); ) {
+        FieldDeclaration decl = (FieldDeclaration)iter.next();
+        //if(decl.accessibleFrom(hostType()))
+          set = set.add(decl);
+      }
+    }
+    return set;
+  }
+
+}
+
+aspect GenricTypeVariablesTypeAnalysis {
+
+  public void TypeVariable.typeCheck() {
+    if(!getTypeBound(0).type().isTypeVariable() && !getTypeBound(0).type().isClassDecl() && !getTypeBound(0).type().isInterfaceDecl()) {
+      error("the first type bound must be either a type variable, or a class or interface type which " + 
+        getTypeBound(0).type().fullName() + " is not");
+    }
+    for(int i = 1; i < getNumTypeBound(); i++) {
+      if(!getTypeBound(i).type().isInterfaceDecl()) {
+        error("type bound " + i + " must be an interface type which " + 
+          getTypeBound(i).type().fullName() + " is not");
+      }
+    }
+    HashSet typeSet = new HashSet();
+    for(int i = 0; i < getNumTypeBound(); i++) {
+      TypeDecl type = getTypeBound(i).type();
+      TypeDecl erasure = type.erasure();
+      if(typeSet.contains(erasure)) {
+        if(type != erasure) {
+          error("the erasure " + erasure.fullName() + " of typebound " + getTypeBound(i) + " is multiply declared in " + this);
+        }
+        else {
+          error(type.fullName() + " is multiply declared");
+        }
+      }
+      typeSet.add(erasure);
+    }
+
+    for(int i = 0; i < getNumTypeBound(); i++) {
+      TypeDecl type = getTypeBound(i).type();
+      for(Iterator iter = type.methodsIterator(); iter.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter.next();
+        for(int j = i+1; j < getNumTypeBound(); j++) {
+          TypeDecl destType = getTypeBound(j).type();
+          for(Iterator destIter = destType.memberMethods(m.name()).iterator(); destIter.hasNext(); ) {
+            MethodDecl n = (MethodDecl)destIter.next();
+            if(m.sameSignature(n) && m.type() != n.type()) {
+              error("the two bounds, " + type.name() + " and " + destType.name() + ", in type variable " + name() + 
+                " have a method " + m.signature() + " with conflicting return types " + m.type().name() + " and " + n.type().name());
+            }
+          }
+        }
+      }
+    }
+
+    
+  }
+  
+  
+}

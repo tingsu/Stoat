@@ -1,0 +1,41 @@
+The Java1.4Frontend is part of the JastAdd project (http://www.jastadd.org)
+The source code copyright is held by Torbjörn Ekman, tobbe@ekman.net
+
+Java1.4Frontend - Version R20071019
+
+The Java1.4Frontend performs static-semantic checking including name analysis
+and type analysis and compile-time error checking. It is a high-quality
+implementation that passes almost all tests in the jacks test suite (more than
+javac and jikes).
+
+A main program JavaPrettyPrinter is included that parses Java source code,
+performs static-semantic checking and prettyprints the programs to standard
+output. 
+
+BUILDING
+
+All tools needed (jastadd2, jflex, beaver, etc.) are included. You only need to
+have javac and Apache Ant installed in order to continue. An example ant build file is
+included.
+
+RUNNING
+
+Usage: java JavaPrettyPrinter <options> <source files>
+  -verbose                  Output messages about what the compiler is doing
+  -classpath <path>         Specify where to find user class files
+  -sourcepath <path>        Specify where to find input source files
+  -bootclasspath <path>     Override location of bootstrap class files
+  -extdirs <dirs>           Override location of installed extensions
+  -d <directory>            Specify where to place generated class files
+  -help                     Print a synopsis of standard options
+  -version                  Print version information
+
+LICENSING
+
+The frontend source code is covered by the BSD license.
+
+The included tools are covered by their individual licenses:
+JastAdd (BSD license).
+jflex (lexer generator) (GPL license)
+beaver (parser generator) (BSD license)
+junit (testing tool) (Common Public License)

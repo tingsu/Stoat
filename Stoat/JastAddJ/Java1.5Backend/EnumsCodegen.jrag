@@ -1,0 +1,141 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect EnumsCodegen {
+    // add flags to enums
+  public static final int Modifiers.ACC_ENUM = 0x4000;
+  eq EnumDecl.flags() = super.flags() | Modifiers.ACC_ENUM;
+  eq EnumConstant.flags() = super.flags() | Modifiers.ACC_ENUM;
+
+  // transform enum switch statements into integer indexed switch statements
+  public void SwitchStmt.transformation() {
+    if(getExpr().type().isEnumDecl()) {
+      TypeDecl type = getExpr().type();
+      hostType().createEnumArray(type);
+      hostType().createEnumMethod(type);
+      setExpr(
+        hostType().createEnumMethod(type).createBoundAccess(new List()).qualifiesAccess(
+        new ArrayAccess(
+          ((Expr)getExpr().fullCopy()).qualifiesAccess(new MethodAccess("ordinal", new List()))
+        ))
+      );
+    }
+    super.transformation();
+  }
+
+  public void ConstCase.transformation() {
+    if(getValue() instanceof VarAccess && getValue().varDecl() instanceof EnumConstant) {
+      int i = hostType().createEnumIndex((EnumConstant)getValue().varDecl());
+      setValue(Literal.buildIntegerLiteral(i));
+    }
+    super.transformation();
+  }
+
+
+  // static method with lazy initalization
+  syn lazy MethodDecl TypeDecl.createEnumMethod(TypeDecl enumDecl) {
+    MethodDecl m = new MethodDecl(
+      new Modifiers(new List().add(new Modifier("static")).add(new Modifier("final")).add(new Modifier("private"))),
+      typeInt().arrayType().createQualifiedAccess(),
+      "$SwitchMap$" + enumDecl.fullName().replace('.', '$'),
+      new List(),
+      new List(),
+      new Opt(
+        new Block(
+          new List().add(
+            new IfStmt(
+              new EQExpr(
+                createEnumArray(enumDecl).createBoundFieldAccess(),
+                new NullLiteral("null")
+              ),
+              AssignExpr.asStmt(
+                createEnumArray(enumDecl).createBoundFieldAccess(),
+                new ArrayCreationExpr(
+                  new ArrayTypeWithSizeAccess(
+                    typeInt().createQualifiedAccess(),
+                    enumDecl.createQualifiedAccess().qualifiesAccess(
+                        new MethodAccess("values", new List())).qualifiesAccess(
+                        new VarAccess("length"))
+                  ),
+                  new Opt()
+                )
+              ),
+              new Opt()
+            )
+          ).add(
+            new ReturnStmt(
+              createEnumArray(enumDecl).createBoundFieldAccess()
+            )
+          )
+        )
+      )
+    );
+    // add method declaration as a body declaration
+    getBodyDeclList().insertChild(m, 1);
+    // trigger possible rewrites
+    return (MethodDecl)getBodyDeclList().getChild(1);
+  }
+  // compute index of enum constants
+  private HashMap TypeDecl.createEnumIndexMap = null;
+  syn lazy int TypeDecl.createEnumIndex(EnumConstant e) {
+    if(createEnumIndexMap == null)
+      createEnumIndexMap = new HashMap();
+    if(!createEnumIndexMap.containsKey(e.hostType()))
+      createEnumIndexMap.put(e.hostType(), new Integer(0));
+    Integer i = (Integer)createEnumIndexMap.get(e.hostType());
+    i = new Integer(i.intValue() + 1);
+    createEnumIndexMap.put(e.hostType(), i);
+
+    MethodDecl m = createEnumMethod(e.hostType());
+    List list = m.getBlock().getStmtList();
+    list.insertChild(
+      new TryStmt(
+        new Block(
+          new List().add(
+            AssignExpr.asStmt(
+              createEnumArray(e.hostType()).createBoundFieldAccess().qualifiesAccess(
+                new ArrayAccess(
+                  e.createBoundFieldAccess().qualifiesAccess(new MethodAccess("ordinal", new List()))
+                )
+              ),
+              Literal.buildIntegerLiteral(i.intValue())
+            )
+          )
+        ),
+        new List().add(
+          new BasicCatch(
+            new ParameterDeclaration(
+              lookupType("java.lang", "NoSuchFieldError").createQualifiedAccess(),
+              "e"
+            ),
+            new Block(
+              new List()
+            )
+          )
+        ),
+        new Opt()
+      ),
+      list.getNumChild()-1
+    );
+    return i.intValue();
+  }
+  // static field with array contents
+  syn lazy FieldDeclaration TypeDecl.createEnumArray(TypeDecl enumDecl) {
+    FieldDeclaration f = new FieldDeclaration(
+      new Modifiers(new List().add(new Modifier("static")).add(new Modifier("final")).add(new Modifier("private"))),
+      typeInt().arrayType().createQualifiedAccess(),
+      "$SwitchMap$" + enumDecl.fullName().replace('.', '$'),
+      new Opt()
+    );
+    // add field declaration as a body declaration
+    getBodyDeclList().insertChild(f, 0);
+    // trigger possible rewrites
+    return (FieldDeclaration)getBodyDeclList().getChild(0);
+  }
+}

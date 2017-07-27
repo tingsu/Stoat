@@ -1,0 +1,25 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect StaticImportsCodegen {
+  refine GenericsCodegen protected TypeDecl VarAccess.fieldQualifierType() {
+    TypeDecl typeDecl = refined();
+    if(typeDecl != null)
+      return typeDecl;
+    return decl().hostType();
+  }
+
+  refine GenericsCodegen protected TypeDecl MethodAccess.methodQualifierType() {
+    TypeDecl typeDecl = refined();
+    if(typeDecl != null)
+      return typeDecl;
+    return decl().hostType();
+  }
+
+}

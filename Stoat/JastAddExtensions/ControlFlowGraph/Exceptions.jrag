@@ -1,0 +1,56 @@
+aspect Exceptions {
+
+  // set of uncaught exceptions thrown in an AST node and its children
+  syn lazy SmallSet<TypeDecl> ASTNode.uncaughtExceptions() {
+    SmallSet<TypeDecl> uncaughtExns = SmallSet.empty();
+    for(int i = 0; i < getNumChild(); i++)
+      uncaughtExns = uncaughtExns.union(getChild(i).uncaughtExceptions());
+    return uncaughtExns;
+  }
+
+  eq ThrowStmt.uncaughtExceptions() 
+    = super.uncaughtExceptions().union(getExpr().type());
+
+  eq TryStmt.uncaughtExceptions() {
+    // Create a set containing the remaining throws after a throw-catch match
+    SmallSet<TypeDecl> res = SmallSet.empty();
+    for(TypeDecl exn : getBlock().uncaughtExceptions()) {
+      boolean caught = false;
+      for(int i = 0; i < getNumCatchClause() && !caught; i++)
+	  caught = getCatchClause(i).handles(exn);
+      if(!caught)
+	  res = res.union(exn);
+    }
+    // Add throws from catch blocks and finally
+    for(int i = 0; i < getNumCatchClause(); i++)
+      res = res.union(getCatchClause(i).getBlock().uncaughtExceptions());
+    if (hasFinally())
+      res = res.union(getFinally().uncaughtExceptions());
+    return res;
+  }
+
+  eq MethodAccess.uncaughtExceptions() {
+    SmallSet<TypeDecl> uncaughtExns = super.uncaughtExceptions();
+    for(Access acc : decl().getExceptions())
+      uncaughtExns = uncaughtExns.union(acc.type());
+    return uncaughtExns;
+  }
+
+  eq ConstructorAccess.uncaughtExceptions() {
+    SmallSet<TypeDecl> uncaughtExns = super.uncaughtExceptions();
+    for(Access acc : decl().getExceptions())
+      uncaughtExns = uncaughtExns.union(acc.type());
+    return uncaughtExns;
+  }
+
+  eq ClassInstanceExpr.uncaughtExceptions() {
+    SmallSet<TypeDecl> uncaughtExns = super.uncaughtExceptions();
+    for(Access acc : decl().getExceptions())
+      uncaughtExns = uncaughtExns.union(acc.type());
+    return uncaughtExns;
+  }
+
+  eq TypeDecl.uncaughtExceptions() {
+    return SmallSet.empty();
+  }
+}

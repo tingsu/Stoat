@@ -1,0 +1,205 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect IntertypeConstructorNameAnalysis {
+  eq IntertypeConstructorDecl.getTargetType().nameType() = NameType.TYPE_NAME;
+
+  syn TypeDecl IntertypeConstructorDecl.hostAspect() = (TypeDecl)getParent().getParent();
+  syn TypeDecl IntertypeConstructorDecl.introducedType() = getTargetType().type();
+
+  eq IntertypeConstructorDecl.getBlock().enclosingType() = introducedType();
+  eq IntertypeConstructorDecl.getBlock().isMemberType() = introducedType().isMemberType();
+  eq IntertypeConstructorDecl.getBlock().enclosingInstance() = introducedType();
+  eq IntertypeConstructorDecl.getConstructorInvocation().enclosingType() = introducedType();
+  eq IntertypeConstructorDecl.getConstructorInvocation().isMemberType() = introducedType().isMemberType();
+  eq IntertypeConstructorDecl.getConstructorInvocation().enclosingInstance() = introducedType();
+
+  syn TypeDecl IntertypeConstructorDecl.hostType() = introducedType();
+  eq IntertypeConstructorDecl.getChild().hostType() = hostAspect();
+
+  eq IntertypeConstructorDecl.getConstructorInvocation().lookupConstructor() = hostType().constructors();
+  eq IntertypeConstructorDecl.getBlock().lookupConstructor() = hostType().constructors();
+  eq IntertypeConstructorDecl.getConstructorInvocation().lookupSuperConstructor() = hostType().lookupSuperConstructor();
+  eq IntertypeConstructorDecl.getBlock().lookupSuperConstructor() = hostType().lookupSuperConstructor();
+
+  eq IntertypeConstructorDecl.getConstructorInvocation().lookupMethod(String name) {
+    Collection c = introducedType().memberMethods(name);
+    return !c.isEmpty() ? c : lookupMethod(name);
+  }
+  eq IntertypeConstructorDecl.getBlock().lookupMethod(String name) {
+    Collection c = introducedType().memberMethods(name);
+    return !c.isEmpty() ? c : lookupMethod(name);
+  }
+
+  eq TypeDecl.getChild().visibilityContext() = this;
+  eq Program.getChild().visibilityContext() = null;
+  inh TypeDecl Expr.visibilityContext();
+
+  inh TypeDecl Expr.thisType();
+  eq TypeDecl.getChild().thisType() = this;
+  eq IntertypeConstructorDecl.getChild().thisType() = introducedType();
+  eq IntertypeFieldDeclaration.getChild().thisType() = introducedType();
+  eq IntertypeMethodDecl.getChild().thisType() = introducedType();
+  eq Program.getChild().thisType() = null;
+
+  refine ConstructScope eq SuperConstructorAccess.decls() {
+    Collection c = hasPrevExpr() && !prevExpr().isTypeAccess() ?
+      thisType().lookupSuperConstructor() : lookupSuperConstructor();
+    return mostSpecificConstructor(c);
+  }
+
+  public void SuperAccess.typeCheck() {
+    super.typeCheck();
+    TypeDecl typeDecl = decl();
+    if(typeDecl.isInterfaceDecl()) {
+      InterfaceDecl decl = (InterfaceDecl)typeDecl;
+      int i = 0;
+      for(Iterator iter = decl.superinterfacesIterator(); iter.hasNext(); ) {
+        i++;
+      }
+      if(i > 1)
+        error("can not use super with multiple super interfaces");
+    }
+  }
+
+  refine TypeScopePropagation eq ThisAccess.decl() {
+    return isQualified() ? qualifier().type() : thisType();
+  }
+  refine TypeScopePropagation eq SuperAccess.decl() {
+    return isQualified() ? qualifier().type() : thisType();
+  }
+
+  refine TypeAnalysis eq SuperAccess.type() {
+    TypeDecl typeDecl = decl();
+    if(typeDecl.isInterfaceDecl()) {
+      InterfaceDecl decl = (InterfaceDecl)typeDecl;
+      TypeDecl superInterface = null;
+      int i = 0;
+      for(Iterator iter = decl.superinterfacesIterator(); iter.hasNext(); ) {
+        superInterface = (TypeDecl)iter.next();
+        i++;
+      }
+      if(i == 1) 
+        return superInterface;
+      else if(i > 1)
+        return unknownType();
+      /*
+      if(hasNextAccess() && nextAccess() instanceof MethodAccess) {
+        MethodAccess ma = (MethodAccess)nextAccess();
+        SimpleSet maxSpecific = SimpleSet.emptySet;
+        for(Iterator iter = ((InterfaceDecl)typeDecl).superinterfacesIterator(); iter.hasNext(); ) {
+          InterfaceDecl superInterface = (InterfaceDecl)iter.next();
+          for(Iterator i2 = superInterface.memberMethods(ma.name()).iterator(); i2.hasNext(); ) {
+            MethodDecl decl = (MethodDecl)i2.next();
+            if(ma.applicable(decl)) {
+              if(maxSpecific.isEmpty())
+                maxSpecific = maxSpecific.add(decl);
+              else {
+                if(decl.moreSpecificThan((MethodDecl)maxSpecific.iterator().next()))
+                  maxSpecific = SimpleSet.emptySet.add(decl);
+                else if(!((MethodDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
+                  maxSpecific = maxSpecific.add(decl);
+              }
+            }
+          }
+        }
+        SimpleSet set = SimpleSet.emptySet;
+        for(Iterator iter = maxSpecific.iterator(); iter.hasNext(); ) {
+          MethodDecl n = (MethodDecl)iter.next();
+          if(!n.isAbstract())
+            set = set.add(n);
+        }
+        if(set.size() == 1) {
+          MethodDecl m = (MethodDecl)set.iterator().next();
+          return m.hostType();
+        }
+      }
+      */
+      return typeObject();
+    }
+    if(!typeDecl.isClassDecl())
+      return unknownType();
+    ClassDecl classDecl = (ClassDecl)typeDecl;
+    if(!classDecl.hasSuperclass())
+      return unknownType();
+    return classDecl.superclass();
+  }
+  inh TypeDecl SuperAccess.typeObject();
+
+  // Hack to avoid multiple declared intertype constructors
+
+  syn boolean BodyDecl.isExactConstructorDecl() = false;
+  eq ConstructorDecl.isExactConstructorDecl() = true;
+  eq IntertypeConstructorDecl.isExactConstructorDecl() = false;
+
+  refine ConstructorLookup eq TypeDecl.constructors() {
+    Collection c = new ArrayList();
+    for(int i = 0; i < getNumBodyDecl(); i++) {
+      if(getBodyDecl(i).isExactConstructorDecl()) {
+        c.add(getBodyDecl(i));
+      }
+    }
+    if(c.isEmpty() && isClassDecl()) {
+      Modifiers m = new Modifiers();
+      if(isPublic()) m.addModifier(new Modifier("public"));
+      else if(isProtected()) m.addModifier(new Modifier("protected"));
+      else if(isPrivate()) m.addModifier(new Modifier("private"));
+      addBodyDecl(
+          new ConstructorDecl(
+            m,
+            name(),
+            new List(),
+            new List(),
+            new Opt(),
+            new Block()
+          )
+      );
+      c.add(getBodyDecl(getNumBodyDecl()-1));
+    }
+    c.addAll(introducedConstructors());
+    return c;
+  }
+
+  void IntertypeConstructorDecl.collectIntertypeDecls(HashMap map) {
+    super.collectIntertypeDecls(map);
+    TypeDecl typeDecl = introducedType();
+    if(!map.containsKey(typeDecl))
+      map.put(typeDecl, new ArrayList());
+    Collection c = (Collection)map.get(typeDecl);
+    c.add(this);
+  }
+
+  syn lazy Collection TypeDecl.introducedConstructors() {
+    Collection c = new ArrayList();
+    for(Iterator iter = intertypeDecls().iterator(); iter.hasNext(); ) {
+      ASTNode node = (ASTNode)iter.next();
+      if(node instanceof IntertypeConstructorDecl) {
+        c.add(node);
+      }
+    }
+    return c;
+  }
+
+  eq IntertypeConstructorDecl.name() = introducedType().name();
+
+  eq IntertypeConstructorDecl.accessibleFrom(TypeDecl type) {
+    if(!hostAspect().accessibleFrom(type))
+      return false;
+    else if(isPublic())
+      return true;
+    else if(isProtected()) {
+      return true;
+    }
+    else if(isPrivate()) {
+      return hostAspect().topLevelType() == type.topLevelType();
+    }
+    else
+      return hostAspect().hostPackage().equals(type.hostPackage());
+  }
+}

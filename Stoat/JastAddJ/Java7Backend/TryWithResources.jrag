@@ -1,0 +1,296 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect TryWithResources {
+
+	/**
+	 * An NTA which is used for code generation.
+	 *
+	 * This NTA will handle the recursive nature of code
+	 * generation for try-with-resources statements.
+	 */
+	syn nta Stmt TryWithResources.getTransformed() {
+		if (getNumCatchClause() == 0 && !hasFinally()) {
+			// transform to BasicTWR
+			Block block;
+			if (getNumResource() == 1) {
+				block = (Block) getBlock().cloneSubtree();
+			} else {
+				block = new Block();
+				List<ResourceDeclaration> resourceListTail =
+					new List<ResourceDeclaration>();
+				for (int i = 1; i < getNumResource(); ++i) {
+					resourceListTail.add((ResourceDeclaration)
+							getResource(i).cloneSubtree());
+				}
+				block.addStmt(new TryWithResources(
+							resourceListTail,
+							(Block) getBlock().cloneSubtree(),
+							new List<CatchClause>(),
+							new Opt<Block>()));
+			}
+			return new BasicTWR(
+					(ResourceDeclaration)
+					getResource(0).cloneSubtree(),
+					block);
+		} else {
+			// transform to surrounding try stmt
+			Block block = new Block();
+			block.addStmt(new TryWithResources(
+						(List<ResourceDeclaration>)
+						getResourceList().cloneSubtree(),
+						(Block) getBlock().cloneSubtree(),
+						new List<CatchClause>(),
+						new Opt<Block>()));
+
+			return new TryStmt(block,
+					(List<CatchClause>) getCatchClauseList().cloneSubtree(),
+					(Opt<Block>) getFinallyOpt().cloneSubtree());
+		}
+	}
+
+	/**
+	 * Code generation for the try-with-resources statement.
+	 */
+	public void TryWithResources.createBCode(CodeGeneration gen) {
+
+		getTransformed().createBCode(gen);
+	}
+
+	/**
+ 	 * The general structure of the basic try-with-resources:
+ 	 *
+ 	 * <pre><code>
+ 	 * RESOURCE
+ 	 * BLOCK
+ 	 *
+ 	 * Primary Exception Handler
+ 	 *   Automatic Closing of Resource
+ 	 *     Suppressed Exception Handler
+ 	 *   re-throw primary exception
+ 	 * Automatic Closing of Resource
+ 	 * </pre></code>
+ 	 *
+ 	 * Pseudocode for basic try-with-resources:
+	 *
+	 * <pre><code>
+	 * 0  .resourceBegin
+	 * 1  emit RESOURCE
+	 * 0  store resource
+	 * 0  .resourceEnd
+	 *
+	 * 0  .blockBegin
+	 * 0  emit BLOCK
+	 * 0  .blockEnd
+	 * 0  goto outerFinally
+	 *
+	 * 1  .resourceException
+	 * 1  throw
+	 *
+	 * #if BLOCK is not empty:
+	 *
+	 * 1  .catchPrimary
+	 * 0  store primary
+	 *
+	 * 0  .tryCloseBegin
+	 * 1  load resource
+	 * 0  ifnull innerFinally
+	 * 1  load resource
+	 * 0  invoke java.lang.AutoCloseable.close()
+	 * 0  .tryCloseEnd
+	 *
+	 * 0  goto innerFinally
+	 *
+	 * 1  .catchSuppressed
+	 * 0  store suppressed
+	 * 1  load primary
+	 * 2  load suppressed
+	 * 0  invoke java.lang.Throwable.addSuppressed(Throwable)
+	 *
+	 * 0  .innerFinally
+	 * 1  load primary
+	 * 1  throw
+	 *
+	 * #endif BLOCK is not empty
+	 *
+	 * 0  .outerFinally
+	 * 1  load resource
+	 * 0  ifnull tryEnd
+	 * 1  load resource
+	 * 0  invoke java.lang.AutoCloseable.close()
+	 *
+	 * 0  .tryEnd
+	 *
+	 * Exception Table:
+	 * resourceBegin .. resourceEnd : resourceException
+	 * blockBegin .. blockEnd : catchPrimary
+	 * tryCloseBegin .. tryCloseEnd : catchSuppressed
+	 * </pre></code>
+	 *
+	 */
+	public void BasicTWR.createBCode(CodeGeneration gen) {
+		ResourceDeclaration resource = getResource();
+
+		int resourceBeginLbl = hostType().constantPool().newLabel();
+		int resourceEndLbl = hostType().constantPool().newLabel();
+		int blockBeginLbl = hostType().constantPool().newLabel();
+		int blockEndLbl = hostType().constantPool().newLabel();
+		int tryCloseBeginLbl = hostType().constantPool().newLabel();
+		int tryCloseEndLbl = hostType().constantPool().newLabel();
+
+		int resourceExceptionLbl = hostType().constantPool().newLabel();
+		int catchPrimaryLbl = hostType().constantPool().newLabel();
+		int catchSuppressedLbl = hostType().constantPool().newLabel();
+		int innerFinallyLbl = hostType().constantPool().newLabel();
+		int outerFinallyLbl = hostType().constantPool().newLabel();
+		int tryEndLbl = hostType().constantPool().newLabel();
+
+		TypeDecl throwableType = lookupType("java.lang", "Throwable");
+		TypeDecl resourceType = resource.type();
+		TypeDecl autoCloseableType = lookupType("java.lang", "AutoCloseable");
+
+		gen.changeStackDepth(3);
+		int resourceIndex = resource.localNum();
+		int primaryIndex = resourceIndex+resourceType.variableSize();
+		int suppressedIndex = primaryIndex+throwableType.variableSize();
+
+		// store the resource in local
+		gen.addLabel(resourceBeginLbl);
+		resource.createBCode(gen);
+		gen.addLabel(resourceEndLbl);
+		gen.emit(Bytecode.NOP);
+
+		gen.addLabel(blockBeginLbl);
+		getBlock().createBCode(gen);
+		gen.addLabel(blockEndLbl);
+		gen.emitGoto(outerFinallyLbl);
+
+		// If there was an exception when initializing the resource
+		// we need to directly rethrow the exception
+		gen.addLabel(resourceExceptionLbl);
+		gen.emitThrow();
+		gen.addException(
+			gen.addressOf(resourceBeginLbl),
+			gen.addressOf(resourceEndLbl),
+			gen.addressOf(resourceExceptionLbl),
+			0);
+
+		if (gen.addressOf(blockBeginLbl) != gen.addressOf(blockEndLbl)) {
+
+			// catch primary exception
+			// operand stack: .., #primary
+			gen.addLabel(catchPrimaryLbl);
+			throwableType.emitStoreLocal(gen, primaryIndex);
+
+			// try-close resource
+			gen.addLabel(tryCloseBeginLbl);
+			{
+				// if resource != null
+				resourceType.emitLoadLocal(gen, resourceIndex);
+				gen.emitCompare(Bytecode.IFNULL, innerFinallyLbl);
+				resourceType.emitLoadLocal(gen, resourceIndex);
+				closeMethod().emitInvokeMethod(gen, autoCloseableType);
+			}
+			gen.addLabel(tryCloseEndLbl);
+			gen.emitGoto(innerFinallyLbl);
+			
+			// catch suppressed exception
+			// operand stack: .., #primary, #suppressed
+			gen.addLabel(catchSuppressedLbl);
+			throwableType.emitStoreLocal(gen, suppressedIndex);
+			throwableType.emitLoadLocal(gen, primaryIndex);
+			throwableType.emitLoadLocal(gen, suppressedIndex);
+			addSuppressedMethod().emitInvokeMethod(gen, throwableType);
+
+			// inner finally
+			// operand stack: .., #primary
+			gen.addLabel(innerFinallyLbl);
+			throwableType.emitLoadLocal(gen, primaryIndex);
+			gen.emitThrow();
+
+			// If there was an exception during the block of the try
+			// statement, then we should try to close the resource
+			gen.addException(
+				gen.addressOf(blockBeginLbl),
+				gen.addressOf(blockEndLbl),
+				gen.addressOf(catchPrimaryLbl),
+				0);
+
+			// If an exception occurrs during the automatic closing
+			// of a resource after an exception in the try block...
+			gen.addException(
+				gen.addressOf(tryCloseBeginLbl),
+				gen.addressOf(tryCloseEndLbl),
+				gen.addressOf(catchSuppressedLbl),
+				0);
+		}
+
+		// outer finally
+		gen.addLabel(outerFinallyLbl);
+		{
+			// if resource != null
+			resourceType.emitLoadLocal(gen, resourceIndex);
+			gen.emitCompare(Bytecode.IFNULL, tryEndLbl);
+			resourceType.emitLoadLocal(gen, resourceIndex);
+			closeMethod().emitInvokeMethod(gen, autoCloseableType);
+		}
+
+		gen.addLabel(tryEndLbl);
+		gen.emit(Bytecode.NOP);
+	}
+
+	/**
+	 * Lookup the java.lang.Throwable.close() method.
+	 */
+	private MethodDecl BasicTWR.closeMethod() {
+		TypeDecl autoCloseableType = lookupType("java.lang", "AutoCloseable");
+		if (autoCloseableType == null)
+			throw new Error("Could not find java.lang.AutoCloseable");
+		for (MethodDecl method : (Collection<MethodDecl>)
+				autoCloseableType.memberMethods("close")) {
+			if (method.getNumParameter() == 0)
+				return method;
+		}
+		throw new Error("Could not find java.lang.AutoCloseable.close()");
+	}
+
+	/**
+	 * Lookup the java.lang.Throwable.addSuppressed(Throwable) method.
+	 */
+	private MethodDecl BasicTWR.addSuppressedMethod() {
+		TypeDecl throwableType = lookupType("java.lang", "Throwable");
+		if (throwableType == null)
+			throw new Error("Could not find java.lang.Throwable");
+		for (MethodDecl method : (Collection<MethodDecl>)
+				throwableType.memberMethods("addSuppressed")) {
+			if (method.getNumParameter() == 1 &&
+					method.getParameter(0).getTypeAccess().type() ==
+					throwableType) {
+				return method;
+			}
+		}
+		throw new Error("Could not find java.lang.Throwable.addSuppressed()");
+	}
+
+	/**
+	 * Local indices to store the resources.
+	 */
+	eq BasicTWR.getResource().localNum() = localNum();
+
+	eq TryWithResources.getResource(int index).localNum() = 50;
+	eq TryWithResources.getBlock().localNum() = 100;
+
+	/**
+	 * Local indices for the block are adjusted to account for the resource
+	 * variables.
+	 */
+	eq BasicTWR.getBlock().localNum() =
+		getResource().localNum() +
+		getResource().type().variableSize() +
+		2 * lookupType("java.lang", "Throwable").variableSize();
+}

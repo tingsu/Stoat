@@ -1,0 +1,41 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received
+ * a copy of the modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+
+/**
+ * Add support for warnings to JastAddJ.
+ */
+aspect Warnings {
+
+	/**
+	 * The collectErrors method is refined so that it calls
+	 * the checkWarnings method on each ASTNode to report
+	 * unchecked warnings.
+	 */
+	refine ErrorCheck public void ASTNode.collectErrors() {
+		nameCheck();
+		typeCheck();
+		accessControl();
+		exceptionHandling();
+		checkUnreachableStmt();
+		definiteAssignment();
+		checkModifiers();
+		checkWarnings();
+		for(int i = 0; i < getNumChild(); i++) {
+			getChild(i).collectErrors();
+		}
+	}
+
+	/**
+	 * Checking of the SafeVarargs annotation is only needed for method
+	 * declarations.
+	 */
+	public void ASTNode.checkWarnings() {
+	}
+
+}

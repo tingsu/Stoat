@@ -1,0 +1,46 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received
+ * a copy of the modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+/**
+ * The @Override annotation was changed in Java 6.
+ *
+ * The specification of the @Override annotation since Java 6:
+ *
+ * "If a method declaration is annotated with the annotation @Override,
+ * but the method does not override or implement a method declared in a
+ * supertype, or is not override-equivalent to a public method of Object,
+ * a compile-time error will occur.
+ */
+aspect Annotations {
+	refine Annotations
+	public void Annotation.checkOverride() {
+		if (decl().fullName().equals("java.lang.Override") &&
+				enclosingBodyDecl() instanceof MethodDecl) {
+
+			MethodDecl method = (MethodDecl)enclosingBodyDecl();
+			TypeDecl host = method.hostType();
+			SimpleSet ancestors = host.ancestorMethods(method.signature());
+			boolean found = false;
+			for (Iterator iter = ancestors.iterator(); iter.hasNext(); ) {
+				MethodDecl decl = (MethodDecl)iter.next();
+				if (method.overrides(decl)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				TypeDecl typeObject = lookupType("java.lang", "Object");
+				SimpleSet overrides =
+					typeObject.localMethodsSignature(method.signature());
+				if (overrides.isEmpty() ||
+						!((MethodDecl) overrides.iterator().next()).isPublic())
+					error("method does not override a method from a supertype");
+			}
+		}
+	}
+}

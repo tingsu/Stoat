@@ -1,0 +1,30 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect Version {
+  refine GenerateClassfile eq TypeDecl.majorVersion() {
+    return 49;
+  }
+
+
+  refine Transformations public void ClassAccess.transformation() {
+    super.transformation();
+  }
+  refine CreateBCode public void ClassAccess.createBCode(CodeGeneration gen) {
+    if(prevExpr().type().isPrimitiveType() || prevExpr().type().isVoid())
+      refined(gen);
+    else {
+      int index = gen.constantPool().addClass(prevExpr().type().jvmName());
+      if(index < 256)
+        gen.emit(Bytecode.LDC).add(index);
+      else 
+        gen.emit(Bytecode.LDC_W).add2(index);
+    }
+  }
+}

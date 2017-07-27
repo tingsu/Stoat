@@ -1,0 +1,131 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect LocalNum {
+  inh lazy int VariableDeclaration.localNum();
+  inh lazy int Stmt.localNum();
+  inh lazy int ParameterDeclaration.localNum();
+
+  eq Program.getChild(int index).localNum() = 0;
+
+  syn lazy int MethodDecl.offsetBeforeParameters() = isStatic() ? 0 : 1;
+  
+  syn lazy int MethodDecl.offsetAfterParameters() {
+    if(getNumParameter() == 0)
+      return offsetBeforeParameters();
+    return getParameter(getNumParameter()-1).localNum() + 
+           getParameter(getNumParameter()-1).type().variableSize();
+  }
+  
+  eq MethodDecl.getParameter(int index).localNum() {
+    if(index == 0)
+      return offsetBeforeParameters();
+    return getParameter(index-1).localNum() + getParameter(index-1).type().variableSize();
+  }
+
+  eq InstanceInitializer.getBlock().localNum() {
+    int localNum = 1;
+    for(Iterator iter = hostType().constructors().iterator(); iter.hasNext(); ) {
+      ConstructorDecl c = (ConstructorDecl)iter.next();
+      int num = c.getNumParameter() == 0 ? c.localNumOfFirstParameter() : 
+                c.getParameter(c.getNumParameter()-1).localNum() + c.getParameter(c.getNumParameter()-1).type().variableSize();
+      if(num > localNum)
+        localNum = num;
+    }
+    return localNum;
+  }
+
+  inh lazy int ReturnStmt.resultSaveLocalNum();
+  eq MethodDecl.getBlock().resultSaveLocalNum() = offsetAfterParameters();
+  eq Program.getChild().resultSaveLocalNum() {
+    throw new Error("Unsupported operation resultSaveLocalNum");
+  }
+
+  syn lazy int MethodDecl.resultOffset() = type().isVoid() ? 0 : type().variableSize();
+  
+  eq MethodDecl.getBlock().localNum() = offsetAfterParameters() + 
+      resultOffset();
+
+  syn lazy int ConstructorDecl.localNumOfFirstParameter() {
+    int i = 1;
+    if(hostType().needsEnclosing())
+      i++;
+    if(hostType().needsSuperEnclosing())
+      i++;
+    return i;
+  }
+
+  syn lazy int ConstructorDecl.offsetFirstEnclosingVariable() {
+    int localIndex = localNumOfFirstParameter();
+    Collection vars = hostType().enclosingVariables();
+    if(vars.isEmpty())
+      return localIndex;
+    String name = "val$" + ((Variable)vars.iterator().next()).name();
+    for(int i = 0; !getParameter(i).name().equals(name); i++)
+      localIndex += getParameter(i).type().variableSize();
+    return localIndex;
+  }
+
+  syn int ConstructorDecl.localIndexOfEnclosingVariable(Variable v) {
+    int localIndex  = offsetFirstEnclosingVariable();
+    Iterator iter = hostType().enclosingVariables().iterator();
+    Variable varDecl = (Variable)iter.next();
+    while(varDecl != v && iter.hasNext()) {
+      localIndex += varDecl.type().variableSize();
+      varDecl = (Variable)iter.next();
+    }
+    return localIndex;
+  }
+
+  eq ConstructorDecl.getParameter(int index).localNum() = index == 0 ?
+    localNumOfFirstParameter() :
+    getParameter(index-1).localNum() + getParameter(index-1).type().variableSize();
+
+  eq ConstructorDecl.getBlock().localNum() = getNumParameter() == 0 ? 
+    localNumOfFirstParameter() :
+    getParameter(getNumParameter()-1).localNum() + getParameter(getNumParameter()-1).type().variableSize();
+
+  eq ForStmt.getStmt().localNum() {
+    if(getNumInitStmt() == 0)
+      return localNum();
+    if(getInitStmt(getNumInitStmt()-1) instanceof VariableDeclaration)
+      return getInitStmt(getNumInitStmt()-1).localNum() + ((VariableDeclaration)getInitStmt(getNumInitStmt()-1)).type().variableSize();
+    return getInitStmt(getNumInitStmt()-1).localNum();
+  }
+  
+  eq ForStmt.getInitStmt(int index).localNum() {
+    if(index == 0)
+      return localNum();
+    if(getInitStmt(index-1) instanceof VariableDeclaration)
+      return getInitStmt(index-1).localNum() + ((VariableDeclaration)getInitStmt(index-1)).type().variableSize();
+    return getInitStmt(index-1).localNum();
+  }
+  
+  eq Block.getStmt(int index).localNum() {
+    if(index == 0)
+      return localNum();
+    if(getStmt(index-1) instanceof VariableDeclaration)
+      return getStmt(index-1).localNum() + ((VariableDeclaration)getStmt(index-1)).type().variableSize();
+    return getStmt(index-1).localNum();
+  }
+
+  eq TryStmt.getFinally().localNum() = localNum() + 2;
+
+  eq BasicCatch.getBlock().localNum() = getParameter().localNum() + getParameter().type().variableSize();
+
+  eq SynchronizedStmt.getBlock().localNum() = localNum() + 3;
+
+  syn int TypeDecl.variableSize() = 0;
+  eq ReferenceType.variableSize() = 1;
+  eq PrimitiveType.variableSize() = 1;
+  eq LongType.variableSize() = 2;
+  eq DoubleType.variableSize() = 2;
+  eq NullType.variableSize() = 1;
+}
+

@@ -1,0 +1,88 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect MultiCatch {
+
+	/**
+	 * The Multi-Catch clause has two or more exception table entries
+	 * which all point to the same exception handler.
+	 */
+	public void MultiCatch.exceptionTableEntries(CodeGeneration gen, TryStmt tryStmt) {
+		for (int i = 0; i < getParameter().getNumTypeAccess(); ++i) {
+			TypeDecl type = getParameter().getTypeAccess(i).type();
+
+			gen.addException(
+				gen.addressOf(tryStmt.label_begin()),
+				gen.addressOf(tryStmt.label_block_end()),
+				gen.addressOf(label()),
+				gen.constantPool().addClass(type.constantPoolName())
+				);
+		}
+	}
+
+	/**
+	 * Code gen.
+	 */
+	public void MultiCatch.createBCode(CodeGeneration gen) {
+		gen.addLabel(label());
+		// add 1 to stack depth
+		gen.changeStackDepth(1);
+		getParameter().type().emitStoreLocal(gen, localNum());
+		getBlock().createBCode(gen);
+	}
+
+	/**
+	 * Local number used to store the exception parameter.
+	 */
+	inh lazy int CatchParameterDeclaration.localNum();
+	inh lazy int MultiCatch.localNum();
+
+	eq MultiCatch.getBlock().localNum() =
+		localNum() + getParameter().type().variableSize();
+	eq MultiCatch.getParameter().localNum() = localNum();
+
+	refine GenericsCodegen
+	public void VarAccess.createAssignLoadDest(CodeGeneration gen) {
+		Variable v = decl();
+		if (v instanceof CatchParameterDeclaration) {
+			if (v.isInstanceVariable())
+				gen.emitDup();
+			CatchParameterDeclaration decl = (CatchParameterDeclaration)v;
+			decl.type().emitLoadLocal(gen, decl.localNum());
+		} else {
+			refined(gen);
+		}
+	}
+
+	refine GenericsCodegen
+	public void VarAccess.createBCode(CodeGeneration gen) {
+		Variable v = decl();
+		if (v instanceof CatchParameterDeclaration) {
+			CatchParameterDeclaration decl = (CatchParameterDeclaration)v;
+			if (decl.hostType() == hostType())
+				decl.type().emitLoadLocal(gen, decl.localNum());
+			else
+				emitLoadLocalInNestedClass(gen, decl);
+		} else {
+			refined(gen);
+		}
+	}
+
+	eq BasicTWR.getBlock().lookupVariable(String name) =
+		localLookup(name);
+	syn lazy SimpleSet BasicTWR.localLookup(String name) {
+		VariableDeclaration v = localVariableDeclaration(name);
+		if (v != null) return v;
+		return lookupVariable(name);
+	}
+	syn lazy VariableDeclaration BasicTWR.localVariableDeclaration(String name) =
+		getResource().declaresVariable(name) ? getResource() : null;
+
+	BasicTWR implements VariableScope;
+	inh lazy SimpleSet BasicTWR.lookupVariable(String name);
+}

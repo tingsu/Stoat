@@ -1,0 +1,58 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect IntertypeFieldErrorCheck {
+  public void IntertypeFieldDeclaration.typeCheck() {
+    super.typeCheck();
+    if(introducedType().isInterfaceDecl() && isStatic())
+      error("static inter-type field on interface not supported");
+  }
+
+  public void IntertypeFieldDeclaration.checkModifiers() {
+    if(isPrivate() && hostType().isInterfaceDecl()) {
+      if(isProtected())
+        error("an interface field may not be protected");
+      if(isTransient())
+        error("an interface field may not be transient");
+      if(isVolatile())
+        error("an interface field may not be volatile");
+    }
+    else 
+      super.typeCheck();
+  }
+
+  refine NameCheck public void FieldDeclaration.nameCheck() {
+    for(Iterator iter = hostType().memberFields(name()).iterator(); iter.hasNext(); ) {
+      FieldDeclaration v = (FieldDeclaration)iter.next();
+      if(v != this && v.accessibleFrom(hostType()))
+        error("field named " + name() + " is multiply declared in type " + hostType().typeName());
+    }
+  }
+
+  public void IntertypeFieldDeclaration.nameCheck() {
+    if(!introducedType().memberFields(name()).contains(this))
+      error("field is already declared");
+    else {
+      for(Iterator iter = introducedType().memberFields(name()).iterator(); iter.hasNext(); ) {
+        FieldDeclaration v = (FieldDeclaration)iter.next();
+        if(v != this && v.accessibleFrom(hostAspect()))
+          error("field named " + name() + " is multiply declared in type " + hostType().typeName());
+      }
+    }
+    if(!introducedType().isUnknown() && !introducedType().compilationUnit().weavable())
+      error("Host of an intertype field declaration must be a weavable class");
+
+  }
+
+  // disable definite assignment in intertype field declarations
+  public void IntertypeFieldDeclaration.definiteAssignment() {
+  }
+
+  eq IntertypeFieldDeclaration.getModifiers().mayBeProtected() = false;
+}

@@ -1,0 +1,131 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect VariableArityParameters {
+  // 8.4.1
+
+  /* The last formal parameter in a list is special; it may be a variable arity
+  parameter, indicated by an elipsis following the type.*/
+  public void VariableArityParameterDeclaration.nameCheck() {
+    super.nameCheck();
+    if(!variableArityValid())
+      error("only the last formal paramater may be of variable arity");
+  }
+
+  eq ConstructorDecl.getParameter(int i).variableArityValid() = i == getNumParameter() - 1;
+  eq MethodDecl.getParameter(int i).variableArityValid() = i == getNumParameter() - 1;
+  eq BasicCatch.getParameter().variableArityValid() = false;
+  eq Program.getChild().variableArityValid() = false;
+
+  inh boolean VariableArityParameterDeclaration.variableArityValid();
+
+  /* If the last formal parameter is a variable arity parameter of type T, it is
+  considered to define a formal parameter of type T[].*/
+  eq VariableArityParameterDeclaration.type() = super.type().arrayType();
+
+  /* The method is then a variable arity method. Otherwise, it is a fixed arity method.*/
+  syn boolean MethodDecl.isVariableArity() = getNumParameter() == 0 ? false : getParameter(getNumParameter()-1).isVariableArity();
+  syn boolean ConstructorDecl.isVariableArity() = getNumParameter() == 0 ? false : getParameter(getNumParameter()-1).isVariableArity();
+  syn boolean ParameterDeclaration.isVariableArity() = false;
+  eq VariableArityParameterDeclaration.isVariableArity() = true;
+
+  syn ParameterDeclaration MethodDecl.lastParameter() = 
+    getParameter(getNumParameter() - 1);
+  syn boolean MethodAccess.invokesVariableArityAsArray() {
+    if(!decl().isVariableArity())
+      return false;
+    if(arity() != decl().arity())
+      return false;
+    return getArg(getNumArg()-1).type().methodInvocationConversionTo(decl().lastParameter().type());
+  }
+  syn boolean ConstructorAccess.invokesVariableArityAsArray() {
+    if(!decl().isVariableArity())
+      return false;
+    if(arity() != decl().arity())
+      return false;
+    return getArg(getNumArg()-1).type().methodInvocationConversionTo(decl().lastParameter().type());
+  }
+  syn boolean ClassInstanceExpr.invokesVariableArityAsArray() {
+    if(!decl().isVariableArity())
+      return false;
+    if(arity() != decl().arity())
+      return false;
+    return getArg(getNumArg()-1).type().methodInvocationConversionTo(decl().lastParameter().type());
+  }
+
+
+  syn ParameterDeclaration ConstructorDecl.lastParameter() = 
+    getParameter(getNumParameter() - 1);
+
+  // 15.12.2
+
+/*
+A method is applicable if it is either applicable by subtyping (§15.12.2.2),
+applicable by method invocation conversion (§15.12.2.3), or it is an applicable
+variable arity method (§15.12.2.4).
+
+The process of determining applicability begins by determining the potentially
+applicable methods (§15.12.2.1). The remainder of the process is split into
+three phases.
+
+The first phase (§15.12.2.2) performs overload resolution without permitting
+boxing or unboxing conversion, or the use of variable arity method invocation.
+If no applicable method is found during this phase then processing continues to
+the second phase.
+
+The second phase (§15.12.2.3) performs overload resolution while allowing
+boxing and unboxing, but still precludes the use of variable arity method
+invocation. If no applicable method is found during this phase then processing
+continues to the third phase.
+
+The third phase (§15.12.2.4) allows overloading to be combined with variable
+arity methods, boxing and unboxing.
+
+Deciding whether a method is applicable will, in the case of generic methods
+(§8.4.4), require that actual type arguments be determined. Actual type
+arguments may be passed explicitly or implicitly. If they are passed
+implicitly, they must be inferred (§15.12.2.7) from the types of the argument
+expressions.
+
+If several applicable methods have been identified during one of the three
+phases of applicability testing, then the most specific one is chosen, as
+specified in section §15.12.2.5. See the following subsections for details.
+*/
+
+  public void VariableArityParameterDeclaration.toString(StringBuffer s) {
+    getModifiers().toString(s);
+    getTypeAccess().toString(s);
+    s.append(" ... " + name());
+  }
+
+  refine AnonymousClasses
+  protected List AnonymousDecl.constructorParameterList(ConstructorDecl decl) {
+    List parameterList = new List();
+    for(int i = 0; i < decl.getNumParameter(); i++) {
+      ParameterDeclaration param = decl.getParameter(i);
+      if (param instanceof VariableArityParameterDeclaration) {
+        parameterList.add(
+            new VariableArityParameterDeclaration(
+              new Modifiers(new List()),
+              ((ArrayDecl) param.type()).componentType().createBoundAccess(),
+              param.name()
+              ));
+      } else {
+        parameterList.add(
+            new ParameterDeclaration(
+              param.type().createBoundAccess(),
+              param.name()
+              ));
+      }
+    }
+
+    return parameterList;
+  }
+
+}

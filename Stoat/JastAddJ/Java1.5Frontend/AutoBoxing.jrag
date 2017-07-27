@@ -1,0 +1,252 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect AutoBoxing {
+
+
+  /* NumericTypes, BooleanTypes
+     TypeChecking (ensure that an expression of a certain type is valid in a particular context)
+     TypeComputation (compute the type of an expression)
+     CodeGeneration (output code including implicit type conversions and promotions)
+
+     NumericTypes:
+       binaryNumericPromotion, unaryNumericPromotion, assignmentConversion, methodInvocationConversion, castingConversion
+       numeric operations that do not use these kinds of conversions and promotions explicitly need to be refined
+     BooleanTypes:
+       assignmentConversion, methodInvocationConversion, castingConversion
+       
+  */
+
+
+
+
+  // 5.1.7 Boxing Conversion
+
+  syn boolean TypeDecl.boxingConversionTo(TypeDecl typeDecl) = false;
+  eq PrimitiveType.boxingConversionTo(TypeDecl typeDecl) = boxed() == typeDecl;
+
+  // Mapping between Primitive type and corresponding boxed Reference type
+  syn lazy TypeDecl TypeDecl.boxed() = unknownType();
+  eq BooleanType.boxed() = lookupType("java.lang", "Boolean");
+  eq ByteType.boxed() = lookupType("java.lang", "Byte");
+  eq CharType.boxed() = lookupType("java.lang", "Character");
+  eq ShortType.boxed() = lookupType("java.lang", "Short");
+  eq IntType.boxed() = lookupType("java.lang", "Integer");
+  eq LongType.boxed() = lookupType("java.lang", "Long");
+  eq FloatType.boxed() = lookupType("java.lang", "Float");
+  eq DoubleType.boxed() = lookupType("java.lang", "Double");
+
+  // 5.1.8 Unboxing Conversion
+
+  syn boolean TypeDecl.unboxingConversionTo(TypeDecl typeDecl) = false;
+  eq ReferenceType.unboxingConversionTo(TypeDecl typeDecl) = unboxed() == typeDecl;
+
+  // Mapping between Reference type and corresponding unboxed Primitive type
+  syn lazy TypeDecl TypeDecl.unboxed() = unknownType();
+  eq ReferenceType.unboxed() {
+    if(packageName().equals("java.lang") && isTopLevelType()) {
+      String n = name();
+      if(n.equals("Boolean")) return typeBoolean();
+      if(n.equals("Byte")) return typeByte();
+      if(n.equals("Character")) return typeChar();
+      if(n.equals("Short")) return typeShort();
+      if(n.equals("Integer")) return typeInt();
+      if(n.equals("Long")) return typeLong();
+      if(n.equals("Float")) return typeFloat();
+      if(n.equals("Double")) return typeDouble();
+    }
+    return unknownType();
+  }
+  inh TypeDecl ReferenceType.typeBoolean();
+  inh TypeDecl ReferenceType.typeByte();
+  inh TypeDecl ReferenceType.typeChar();
+  inh TypeDecl ReferenceType.typeShort();
+  inh TypeDecl ReferenceType.typeInt();
+  inh TypeDecl ReferenceType.typeLong();
+  inh TypeDecl ReferenceType.typeFloat();
+  inh TypeDecl ReferenceType.typeDouble();
+
+
+  // 5.2 Assignment Conversion
+  refine TypeConversion eq TypeDecl.assignConversionTo(TypeDecl type, Expr expr) {
+    if(refined(type, expr))
+      return true;
+    boolean canBoxThis = this instanceof PrimitiveType;
+    boolean canBoxType = type instanceof PrimitiveType;
+    boolean canUnboxThis = !unboxed().isUnknown();
+    boolean canUnboxType = !type.unboxed().isUnknown();
+    TypeDecl t = !canUnboxThis && canUnboxType ? type.unboxed() : type;
+    boolean sourceIsConstant = expr != null ? expr.isConstant() : false;
+    if(sourceIsConstant && (isInt() || isChar() || isShort() || isByte()) &&
+        (t.isByte() || t.isShort() || t.isChar()) &&
+        narrowingConversionTo(t) && expr.representableIn(t))
+      return true;
+    if(canBoxThis && !canBoxType && boxed().wideningConversionTo(type))
+      return true;
+    else if(canUnboxThis && !canUnboxType && unboxed().wideningConversionTo(type))
+      return true;
+
+    return false;
+  }
+
+  // 5.3 Method Invocation Conversion
+  refine TypeConversion eq TypeDecl.methodInvocationConversionTo(TypeDecl type) {
+    if(refined(type))
+      return true;
+    boolean canBoxThis = this instanceof PrimitiveType;
+    boolean canBoxType = type instanceof PrimitiveType;
+    boolean canUnboxThis = !unboxed().isUnknown();
+    boolean canUnboxType = !type.unboxed().isUnknown();
+    if(canBoxThis && !canBoxType)
+      return boxed().wideningConversionTo(type);
+    else if(canUnboxThis && !canUnboxType)
+      return unboxed().wideningConversionTo(type);
+    return false;
+  }
+
+  // 5.5 Casting Conversion
+  refine TypeConversion eq TypeDecl.castingConversionTo(TypeDecl type) {
+    if(refined(type))
+      return true;
+    boolean canBoxThis = this instanceof PrimitiveType;
+    boolean canBoxType = type instanceof PrimitiveType;
+    boolean canUnboxThis = !unboxed().isUnknown();
+    boolean canUnboxType = !type.unboxed().isUnknown();
+    if(canBoxThis && !canBoxType)
+      return boxed().wideningConversionTo(type);
+    else if(canUnboxThis && !canUnboxType)
+      return unboxed().wideningConversionTo(type);
+    return false;
+    /*
+    else if(boxingConversionTo(type))
+      return true;
+    else if(unboxingConversionTo(type))
+      return true;
+    return false;
+    */
+  }
+  refine Generics eq ClassDecl.castingConversionTo(TypeDecl type) {
+    if(refined(type))
+      return true;
+    boolean canUnboxThis = !unboxed().isUnknown();
+    boolean canUnboxType = !type.unboxed().isUnknown();
+    if(canUnboxThis && !canUnboxType)
+      return unboxed().wideningConversionTo(type);
+    return false;
+    /*
+    else if(unboxingConversionTo(type))
+      return true;
+    return false;
+    */
+  }
+  refine Generics eq InterfaceDecl.castingConversionTo(TypeDecl type) {
+    if(refined(type))
+      return true;
+    boolean canUnboxThis = !unboxed().isUnknown();
+    boolean canUnboxType = !type.unboxed().isUnknown();
+    if(canUnboxThis && !canUnboxType)
+      return unboxed().wideningConversionTo(type);
+    return false;
+    /*
+    else if(unboxingConversionTo(type))
+      return true;
+    return false;
+    */
+  }
+  //eq PrimitiveType.castingConversionTo(TypeDecl type) = 
+  //  type.isReferenceType() ? boxed().castingConversionTo(type) : super.castingConversionTo(type);
+
+  //refine Generics eq ClassDecl.castingConversionTo(TypeDecl type) {
+  //  return type.isPrimitiveType() && !unboxed().isUnknown() ? unboxed().castingConversionTo(type) : refined(type);
+  //}
+
+  // 5.6.1 Unary Numeric Promotion
+  eq ReferenceType.unaryNumericPromotion() = isNumericType() && !isUnknown() ? unboxed().unaryNumericPromotion() : this;
+  eq UnknownType.unaryNumericPromotion() = this;
+
+  // 5.6.2 Binary Numeric Promotion
+  eq ReferenceType.binaryNumericPromotion(TypeDecl type) = unboxed().binaryNumericPromotion(type);
+  refine NumericPromotion eq NumericType.binaryNumericPromotion(TypeDecl type) {
+    if(type.isReferenceType())
+      type = type.unboxed();
+    return refined(type);
+  }
+
+  refine TypeAnalysis eq ConditionalExpr.type() {
+    TypeDecl trueType = getTrueExpr().type();
+    TypeDecl falseType = getFalseExpr().type();
+    if(trueType.isBoolean() && falseType.isBoolean()) {
+      if(trueType == falseType)
+        return trueType;
+      if(trueType.isReferenceType())
+        return trueType.unboxed();
+      return trueType;
+    }
+    return refined();
+  }
+
+  eq UnknownType.binaryNumericPromotion(TypeDecl type) = this;
+
+  eq ReferenceType.isNumericType() = 
+    !unboxed().isUnknown() && unboxed().isNumericType();
+
+  eq ReferenceType.isIntegralType() = 
+    !unboxed().isUnknown() && unboxed().isIntegralType();
+
+  eq ReferenceType.isPrimitive() =
+    !unboxed().isUnknown() && unboxed().isPrimitive();
+
+  refine ConstantExpression eq Binary.binaryNumericPromotedType() {
+    TypeDecl leftType = left().type();
+    TypeDecl rightType = right().type();
+    if(leftType.isBoolean() && rightType.isBoolean()) {
+      return leftType.isReferenceType() ? leftType.unboxed() : leftType;
+    }
+    return refined();
+  }
+
+  // Affects type checking of 14.9 If, 14.10 Assert, 14.12 While, 14.13 Do, 14.14 For 
+  eq ReferenceType.isBoolean() = fullName().equals("java.lang.Boolean") && unboxed().isBoolean();
+  // Code generation need to add unboxing if the conditional is a Boxed value
+  // this is done by inserting a new node with an explicit cast
+
+
+
+  // 15.15.6 Logical Complement Operator !
+  // type()
+
+  // 15.21.2 Boolean Equality Operators == and !=
+  // If the operands of an equality operator are both of type boolean, or if
+  // one operand is of type boolean and the other is of type Boolean, then
+  // the operation is boolean equality. The boolean equality operators are
+  // associative. If one of the operands is of type Boolean it is subjected
+  // to unboxing conversion (§5.1.8)
+
+  // 15.22.2 Boolean Logical Operators &, ^, and |
+  // emitCastTo(), type()
+ 
+  // When both operands of a &, ^, or | operator are of type boolean or
+  // Boolean, then the type of the bitwise operator expression is boolean.
+  // In all cases, the operands are subject to unboxing conversion (§5.1.8)
+  // as necessary.
+
+  // 15.23 Conditional-And Operator &&
+  // Each operand of && must be of type boolean or Boolean, or a compile-time error occurs.
+  // At run time, the left-hand operand expression is evaluated first; if
+  // the result has type Boolean, it is subjected to unboxing conversion
+  // (§5.1.8);
+
+  // 15.24 Conditional-Or Operator ||
+  // See 15.23
+
+  // 15.25 Conditional Operator ? :
+  // See Spec
+
+
+}

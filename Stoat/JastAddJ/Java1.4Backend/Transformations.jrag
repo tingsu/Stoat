@@ -1,0 +1,220 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect Transformations {
+  // generic traversal of the tree
+  public void ASTNode.transformation() {
+    for(int i = 0; i < getNumChild(); i++) {
+        getChild(i).transformation();
+    }
+  }
+  
+  public void CompilationUnit.transformation() {
+    if(fromSource()) {
+      for(int i = 0; i < getNumTypeDecl(); i++) {
+        getTypeDecl(i).transformation();
+      }
+    }
+  }
+  
+  // remote collection
+  public void TypeDecl.transformation() {
+    addEnclosingVariables();
+    super.transformation();
+    if(isNestedType())
+      enclosingType().addNestedType(this);
+  }
+
+  /*
+  public void Expr.transformation() {
+    if(isConstant() && !(this instanceof Literal))
+      replace(this).with(constant().buildLiteral());
+    else
+      super.transformation();
+  }
+  */
+
+  // remote collection
+  public void TypeAccess.transformation() {
+    super.transformation();
+    if(type().elementType().isNestedType() && hostType() != null)
+      hostType().addUsedNestedType(type().elementType());
+  }
+  
+  /*
+  public void Dot.transformation() {
+    if(leftSide().isTypeAccess() && rightSide() instanceof ThisAccess) {
+      System.out.println("Replacing " + this);
+      Access a = new ThisAccess("this");
+      TypeDecl targetType = rightSide().type();
+      TypeDecl typeDecl = hostType();
+      while(typeDecl != null && typeDecl != targetType) {
+        a = a.qualifiesAccess(new VarAccess("this$0"));
+        typeDecl = typeDecl.enclosingType();
+      }
+      ASTNode result = replace(this).with(qualifyTailWith(a));
+      result.transformation();
+      return;
+    }
+    super.transformation();
+  }*/
+
+  // remote collection / demand driven creation of accessor
+  public void MethodAccess.transformation() {
+    MethodDecl m = decl();
+
+
+    /*if(!isQualified() && !m.isStatic()) {
+      TypeDecl typeDecl = hostType();
+      while(typeDecl != null && !typeDecl.hasMethod(name()))
+        typeDecl = typeDecl.enclosingType();
+      ASTNode result = replace(this).with(typeDecl.createQualifiedAccess().qualifiesAccess(new ThisAccess("this")).qualifiesAccess(new MethodAccess(name(), getArgList())));
+      result.transformation();
+      return;
+    }*/
+    
+    if(requiresAccessor()) {
+      /* Access to private methods in enclosing types:
+      The original MethodAccess is replaced with an access to an accessor method
+      built by createAccessor(). This method is built lazily and differs from
+      normal MethodDeclarations in the following ways:
+      1) The method in the class file should always be static and the signature
+         is thus changed to include a possible this reference as the first argument. 
+      2) The method is always invoked using INVOKESTATIC
+      3) The flags must indicate that the method is static and package private
+      */
+      super.transformation();
+      replace(this).with(decl().createAccessor(methodQualifierType()).createBoundAccess(getArgList()));
+      return;
+    }
+    else if(!m.isStatic() && isQualified() && prevExpr().isSuperAccess() && !hostType().instanceOf(prevExpr().type())) {
+      decl().createSuperAccessor(superAccessorTarget());
+    }
+    super.transformation();
+  }
+
+  // remote collection / demand driven creation of accessor
+  public void VarAccess.transformation() {
+    Variable v = decl();
+    if(v instanceof FieldDeclaration) {
+      FieldDeclaration f = (FieldDeclaration)v;
+      if(requiresAccessor()) {
+        TypeDecl typeDecl = fieldQualifierType();
+        if(isSource())
+          f.createAccessor(typeDecl);
+        if(isDest())
+          f.createAccessorWrite(typeDecl);
+      }
+    }
+    super.transformation();
+  }
+
+
+  public void ConstructorDecl.transformation() {
+    // this$val as fields and constructor parameters
+    addEnclosingVariables();
+    super.transformation();
+  }
+
+
+  // remote collection / demand driven creation of accessor
+  public void ClassInstanceExpr.transformation() {
+    // this$val
+    addEnclosingVariables();
+    // touch accessorIndex go force creation of private constructorAccessor
+    if(decl().isPrivate() && type() != hostType()) {
+      decl().createAccessor();
+    }
+    super.transformation();
+  }
+
+  // remote collection / demand driven creation of accessor
+  public void ConstructorAccess.transformation() {
+    // this$val
+    addEnclosingVariables();
+    // touch accessorIndex go force creation of private constructorAccessor
+    if(decl().isPrivate() && decl().hostType() != hostType()) {
+      decl().createAccessor();
+    }
+    super.transformation();
+  }
+
+  // remote collection / demand driven creation of accessor
+  public void SuperConstructorAccess.transformation() {
+    // this$val
+    addEnclosingVariables();
+    // touch accessorIndex to force creation of private constructorAccessor
+    if(decl().isPrivate() && decl().hostType() != hostType()) {
+      decl().createAccessor();
+    }
+    super.transformation();
+  }
+
+  // remote collection / demand driven creation of accessor
+  public void ClassAccess.transformation() {
+    super.transformation();
+    // touch static class method before any accessors to make it first in method
+    if(isQualified() && qualifier().type().isReferenceType()) {
+      hostType().topLevelType().createStaticClassMethod();
+      FieldDeclaration f = hostType().topLevelType().createStaticClassField(prevExpr().type().referenceClassFieldName());
+    }
+    
+  }
+
+  public void AssertStmt.transformation() {
+    super.transformation();
+    // add field to hold cached result as a side-effect
+    FieldDeclaration f = hostType().topLevelType().createStaticClassField(hostType().topLevelType().referenceClassFieldName());
+    FieldDeclaration assertionsDisabled = hostType().createAssertionsDisabled();
+    Expr condition = (Expr)getfirst().fullCopy();
+    List args = new List();
+    if(hasExpr())
+      if(getExpr().type().isString())
+        args.add(new CastExpr(new TypeAccess("java.lang", "Object"), (Expr)getExpr().fullCopy()));
+      else
+        args.add(getExpr().fullCopy());
+    Stmt stmt = 
+      new IfStmt(
+        new LogNotExpr(
+          new ParExpr(
+            new OrLogicalExpr(
+              new BoundFieldAccess(assertionsDisabled),
+              condition
+            )
+          )
+        ),
+        new ThrowStmt(
+          new ClassInstanceExpr(
+            lookupType("java.lang", "AssertionError").createQualifiedAccess(),
+            args,
+            new Opt()
+          )
+        ),
+        new Opt()
+      );
+     
+    replace(this).with(stmt);
+    stmt.transformation();
+  }
+  
+  // imperative transformation of the AST
+  // syntax ASTNode.replace(sourcenode).with(destnode)
+  // this syntax is used to allow for building the destnode using the sourcenode
+  protected ASTNode ASTNode.replace(ASTNode node) {
+    state().replacePos = node.getParent().getIndexOfChild(node);
+    node.getParent().in$Circle(true);
+    return node.getParent();
+  }
+  protected ASTNode ASTNode.with(ASTNode node) {
+   ((ASTNode)this).setChild(node, state().replacePos);
+   in$Circle(false);
+   return node;
+  }
+  public int ASTNode$State.replacePos = 0;
+}

@@ -1,0 +1,174 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect IntertypeConstructorErrorCheck {
+
+  public void IntertypeConstructorDecl.nameCheck() {
+    if(!introducedType().isUnknown() && !introducedType().compilationUnit().weavable())
+      error("Host of an intertype constructor declaration must be a weavable class");
+  }
+
+  refine TypeCheck public void ClassInstanceExpr.typeCheck() {
+    // aspects cannot be instantiated using new
+    if(type().isAspectDecl())
+       error("Cannot instantiate " + type().typeName() +
+            " with 'new' because it is an aspect.");
+    else {
+    if(isQualified() && qualifier().isTypeAccess() && !qualifier().type().isUnknown())
+      error("*** The expression in a qualified class instance expr must not be a type name");
+    // 15.9
+    if(isQualified() && !type().isInnerClass() && !((ClassDecl)type()).superclass().isInnerClass() && !type().isUnknown()) {
+      error("*** Qualified class instance creation can only instantiate inner classes and their anonymous subclasses");
+    }
+    if(!type().isClassDecl()) {
+      error("*** Can only instantiate classes, which " + type().typeName() + " is not"); 
+    }
+    TypeDecl C = type();
+    if(C.isInnerClass()) {
+      TypeDecl enclosing = null;
+      if(C.isAnonymous()) {
+        if(noEnclosingInstance()) {
+          enclosing = null;
+        }
+        else {
+          enclosing = thisType();
+        }
+      }
+      else if(C.isLocalClass()) {
+        TypeDecl O = C.enclosingType();
+        int n = 0;
+        for(TypeDecl nest = thisType(); nest != O; nest = nest.enclosingType())
+          n++;
+        if(C.inStaticContext()) {
+          enclosing = null;
+        }
+        else if(noEnclosingInstance()) {
+          enclosing = unknownType();
+        }
+        else {
+          enclosing = O;
+        }
+      }
+      else if(C.isMemberType()) {
+        if(!isQualified()) {
+          if(noEnclosingInstance()) {
+            error("No enclosing instance to initialize " + C.typeName() + " with");
+            //System.err.println("ClassInstanceExpr: Non qualified MemberType " + C.typeName() + " is in a static context when instantiated in " + this);
+            enclosing = unknownType();
+          }
+          else {
+            TypeDecl nest = thisType();
+            while(nest != null && !nest.instanceOf(C.enclosingType()))
+              nest = nest.enclosingType();
+            enclosing = nest == null ? unknownType() : nest;
+          }
+        }
+        else {
+          enclosing = enclosingInstance();
+        }
+      }
+      if(enclosing != null && !enclosing.instanceOf(type().enclosingType())) {
+        String msg = enclosing == null ? "None" : enclosing.typeName();
+        error("*** Can not instantiate " + type().typeName() + " with the enclosing instance " + msg + " due to incorrect enclosing instance");
+      }
+      else if(!isQualified() && C.isMemberType() && inExplicitConstructorInvocation() && enclosing == thisType()) {
+        error("*** The innermost enclosing instance of type " + enclosing.typeName() + " is this which is not yet initialized here.");
+      }
+      if(type().isAnonymous() && ((ClassDecl)type()).superclass().isInnerType()) {
+        TypeDecl S = ((ClassDecl)type()).superclass();
+        if(S.isLocalClass()) {
+          if(S.inStaticContext()) {
+          }
+          else if(noEnclosingInstance()) {
+            error("*** No enclosing instance to class " + type().typeName() + " due to static context");
+          }
+          else if(inExplicitConstructorInvocation())
+            error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName() + " since this is not initialized yet");
+        }
+        else if(S.isMemberType()) {
+          if(!isQualified()) {
+            // 15.9.2 2nd paragraph
+            if(noEnclosingInstance()) {
+              error("*** No enclosing instance to class " + type().typeName() + " due to static context");
+            }
+            else {
+              TypeDecl nest = thisType();
+              while(nest != null && !nest.instanceOf(S.enclosingType()))
+                nest = nest.enclosingType();
+              if(nest == null) {
+                error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName());
+              }
+              else if(inExplicitConstructorInvocation()) {
+                error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName() + " since this is not initialized yet");
+              }
+            }
+          }
+        }
+      }
+      
+    }
+    }
+  }
+
+  refine TypeHierarchyCheck public void SuperConstructorAccess.nameCheck() {
+    super.nameCheck();
+    // 8.8.5.1
+    TypeDecl c = thisType();
+    TypeDecl s = c.isClassDecl() && ((ClassDecl)c).hasSuperclass() ? ((ClassDecl)c).superclass() : unknownType();
+    if(isQualified()) {
+      if(!s.isInnerType() || s.inStaticContext())
+        error("the super type " + s.typeName() + " of " + c.typeName() +
+           " is not an inner class");
+    
+      else if(!qualifier().type().instanceOf(s.enclosingType()))
+        error("The type of this primary expression, " +
+                qualifier().type().typeName() + " is not enclosing the super type, " + 
+                s.typeName() + ", of " + c.typeName());
+    }
+    if(!isQualified() && s.isInnerType()) {
+      if(!c.isInnerType()) {
+        //error("" + s.typeName() + " isStatic: " + s.isStatic() + ", enclosingType: " + s.enclosingType().typeName());
+
+        error("no enclosing instance for " + s.typeName() + " when accessed in " + this);
+      }
+    }
+  }
+
+  refine TypeHierarchyCheck public void SuperAccess.nameCheck() {
+    if(isQualified()) {
+      if(!thisType().isInnerTypeOf(decl()) && thisType() != decl())
+        error("qualified super must name an enclosing type");
+      if(inStaticContext()) {
+        error("*** Qualified super may not occur in static context");
+      }
+    }
+    // 8.8.5.1
+    if(inExplicitConstructorInvocation() && thisType().instanceOf(decl().hostType()) )
+      error("super may not be accessed in an explicit constructor invocation");
+    // 8.4.3.2
+    if(inStaticContext())
+      error("super may not be accessed in a static context");
+  }
+
+  refine TypeHierarchyCheck public void ThisAccess.nameCheck() {
+    // 8.8.5.1
+    if(inExplicitConstructorInvocation() && thisType() == type())
+      error("this may not be accessed in an explicit constructor invocation");
+    else if(isQualified()) {
+      // 15.8.4
+      if(inStaticContext())
+        error("qualified this may not occur in static context");
+      else if(!thisType().isInnerTypeOf(decl()) && thisType() != decl())
+        error("qualified this must name an enclosing type: " + getParent());
+    }
+    // 8.4.3.2
+    else if(!isQualified() && inStaticContext())
+      error("this may not be accessed in static context: " + enclosingStmt());
+  }
+}

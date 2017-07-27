@@ -1,0 +1,20 @@
+// ES: removing this  /ParMethodDecl*/ form GenericMethodDecl;
+GenericMethodDecl : MethodDecl ::= TypeParameter:TypeVariable*; 
+// ES: removing this  /ParConstructorDecl*/; from GenericConstructorDecl -- it doesn't appear to be used
+GenericConstructorDecl : ConstructorDecl ::= TypeParameter:TypeVariable*;
+
+// ES: adding <GenericMethodDecl:GenericMethodDecl> to access the future parent node during construction before addition of ParMethodDecl
+ParMethodDecl : MethodDecl ::= TypeArgument:Access*  <GenericMethodDecl:GenericMethodDecl>;
+RawMethodDecl : ParMethodDecl;
+
+ParConstructorDecl : ConstructorDecl ::= TypeArgument:Access*;
+RawConstructorDecl : ParConstructorDecl;
+
+ParMethodAccess : MethodAccess ::= TypeArgument:Access*;
+
+// access to parameterized constructors
+ParConstructorAccess : ConstructorAccess ::= TypeArgument:Access*;
+ParSuperConstructorAccess : SuperConstructorAccess ::= TypeArgument:Access*;
+ParClassInstanceExpr : ClassInstanceExpr ::= TypeArgument:Access*;
+
+

@@ -1,0 +1,367 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect AnnotationsCodegen {
+  public void AnnotatedCompilationUnit.jimplify1phase2() {
+    super.jimplify1phase2();
+    ArrayList c = new ArrayList();
+    getModifiers().addAllAnnotations(c);
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      soot.tagkit.Tag tag = (soot.tagkit.Tag)iter.next();
+      //host.addTag(tag);
+    }
+  }
+  public void TypeDecl.addAttributes() {
+    super.addAttributes();
+    ArrayList c = new ArrayList();
+    getModifiers().addRuntimeVisibleAnnotationsAttribute(c);
+    getModifiers().addRuntimeInvisibleAnnotationsAttribute(c);
+    getModifiers().addSourceOnlyAnnotations(c);
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      soot.tagkit.Tag tag = (soot.tagkit.Tag)iter.next();
+      getSootClassDecl().addTag(tag);
+    }
+  }
+  
+  public void FieldDeclaration.addAttributes() {
+    super.addAttributes();
+    ArrayList c = new ArrayList();
+    getModifiers().addRuntimeVisibleAnnotationsAttribute(c);
+    getModifiers().addRuntimeInvisibleAnnotationsAttribute(c);
+    getModifiers().addSourceOnlyAnnotations(c);
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      soot.tagkit.Tag tag = (soot.tagkit.Tag)iter.next();
+      sootField.addTag(tag);
+    }
+  }
+  public void MethodDecl.addAttributes() {
+    super.addAttributes();
+    ArrayList c = new ArrayList();
+    getModifiers().addRuntimeVisibleAnnotationsAttribute(c);
+    getModifiers().addRuntimeInvisibleAnnotationsAttribute(c);
+    addRuntimeVisibleParameterAnnotationsAttribute(c);
+    addRuntimeInvisibleParameterAnnotationsAttribute(c);
+    addSourceLevelParameterAnnotationsAttribute(c);
+    getModifiers().addSourceOnlyAnnotations(c);
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      soot.tagkit.Tag tag = (soot.tagkit.Tag)iter.next();
+      sootMethod.addTag(tag);
+    }
+  }
+  public void ConstructorDecl.addAttributes() {
+    super.addAttributes();
+    ArrayList c = new ArrayList();
+    getModifiers().addRuntimeVisibleAnnotationsAttribute(c);
+    getModifiers().addRuntimeInvisibleAnnotationsAttribute(c);
+    addRuntimeVisibleParameterAnnotationsAttribute(c);
+    addRuntimeInvisibleParameterAnnotationsAttribute(c);
+    addSourceLevelParameterAnnotationsAttribute(c);
+    getModifiers().addSourceOnlyAnnotations(c);
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      soot.tagkit.Tag tag = (soot.tagkit.Tag)iter.next();
+      sootMethod.addTag(tag);
+    }
+  }
+  /*
+  refine EmitJimple public void VariableDeclaration.jimplify2(Body b) {
+    EmitJimple.VariableDeclaration.jimplify2(b);
+    ArrayList c = new ArrayList();
+    getModifiers().addAllAnnotations(c);
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      soot.tagkit.Tag tag = (soot.tagkit.Tag)iter.next();
+      local.addTag(tag);
+    }
+  }
+  */
+
+  public void Modifiers.addSourceOnlyAnnotations(Collection c) {
+    if(new soot.options.JBOptions(soot.PhaseOptions.v().getPhaseOptions("jb")).
+       preserve_source_annotations()) {
+	    for(int i = 0; i < getNumModifier(); i++) {
+	      if(getModifier(i) instanceof Annotation) {
+	        Annotation a = (Annotation)getModifier(i);
+	        if(!a.isRuntimeVisible() && !a.isRuntimeInvisible()) {
+      		    soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.SOURCE_VISIBLE);
+        		ArrayList elements = new ArrayList(1);
+        		a.appendAsAttributeTo(elements);
+        		tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
+        		c.add(tag);
+	        }
+	      }
+	    }
+    }
+  }
+  
+  public void Modifiers.addAllAnnotations(Collection c) {
+    for(int i = 0; i < getNumModifier(); i++) {
+      if(getModifier(i) instanceof Annotation) {
+        Annotation a = (Annotation)getModifier(i);
+        a.appendAsAttributeTo(c);
+      }
+    }
+  }
+
+  public void Modifiers.addRuntimeVisibleAnnotationsAttribute(Collection c) {
+    Collection annotations = runtimeVisibleAnnotations();
+    if(!annotations.isEmpty()) {
+      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+        Annotation annotation = (Annotation)iter.next();
+        ArrayList elements = new ArrayList(1);
+        annotation.appendAsAttributeTo(elements);
+        tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
+      }
+      c.add(tag);
+    }
+  }
+
+  // 4.8.16
+  public void Modifiers.addRuntimeInvisibleAnnotationsAttribute(Collection c) {
+    Collection annotations = runtimeInvisibleAnnotations();
+    if(!annotations.isEmpty()) {
+      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+        Annotation annotation = (Annotation)iter.next();
+        ArrayList elements = new ArrayList(1);
+        annotation.appendAsAttributeTo(elements);
+        tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
+      }
+      c.add(tag);
+    }
+  }
+
+  // defined in Java1.4Frontend these days
+  // inh TypeDecl Modifiers.hostType();
+
+  // 4.8.15
+  syn boolean Modifier.isRuntimeVisible() = false;
+  eq Annotation.isRuntimeVisible() {
+    Annotation a = decl().annotation(lookupType("java.lang.annotation", "Retention"));
+    if(a == null) return false;
+    ElementConstantValue value = (ElementConstantValue)a.getElementValuePair(0).getElementValue();
+    Variable v = value.getExpr().varDecl();
+    return v != null && v.name().equals("RUNTIME");
+  }
+
+  // 4.8.16
+  syn boolean Modifier.isRuntimeInvisible() = false;
+  eq Annotation.isRuntimeInvisible() {
+    Annotation a = decl().annotation(lookupType("java.lang.annotation", "Retention"));
+    if(a == null) return true; // default bahavior if not annotated
+    ElementConstantValue value = (ElementConstantValue)a.getElementValuePair(0).getElementValue();
+    Variable v = value.getExpr().varDecl();
+    return v != null &&  v.name().equals("CLASS");
+  }
+
+  // 4.8.17
+  public void MethodDecl.addRuntimeVisibleParameterAnnotationsAttribute(Collection c) {
+    boolean foundVisibleAnnotations = false;
+    Collection annotations = new ArrayList(getNumParameter());
+    for(int i = 0; i < getNumParameter(); i++) {
+      Collection a = getParameter(i).getModifiers().runtimeVisibleAnnotations();
+      if(!a.isEmpty()) foundVisibleAnnotations = true;
+      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+      for(Iterator iter = a.iterator(); iter.hasNext(); ) {
+        Annotation annotation = (Annotation)iter.next();
+        ArrayList elements = new ArrayList(1);
+        annotation.appendAsAttributeTo(elements);
+        tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
+      }
+      annotations.add(tag);
+    }
+    if(foundVisibleAnnotations) {
+      soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+        tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag)iter.next());
+      }
+      c.add(tag);
+    }
+  }
+  public void ConstructorDecl.addRuntimeVisibleParameterAnnotationsAttribute(Collection c) {
+    boolean foundVisibleAnnotations = false;
+    Collection annotations = new ArrayList(getNumParameter());
+    for(int i = 0; i < getNumParameter(); i++) {
+      Collection a = getParameter(i).getModifiers().runtimeVisibleAnnotations();
+      if(!a.isEmpty()) foundVisibleAnnotations = true;
+      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+      for(Iterator iter = a.iterator(); iter.hasNext(); ) {
+        Annotation annotation = (Annotation)iter.next();
+        ArrayList elements = new ArrayList(1);
+        annotation.appendAsAttributeTo(elements);
+        tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
+      }
+      annotations.add(tag);
+    }
+    if(foundVisibleAnnotations) {
+      soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_VISIBLE);
+      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+        tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag)iter.next());
+      }
+      c.add(tag);
+    }
+  }
+
+  public Collection Modifiers.runtimeVisibleAnnotations() {
+    Collection annotations = new ArrayList();
+    for(int i = 0; i < getNumModifier(); i++)
+      if(getModifier(i).isRuntimeVisible())
+        annotations.add(getModifier(i));
+    return annotations;
+  }
+
+  // 4.8.18
+  public void MethodDecl.addRuntimeInvisibleParameterAnnotationsAttribute(Collection c) {
+    boolean foundVisibleAnnotations = false;
+    Collection annotations = new ArrayList(getNumParameter());
+    for(int i = 0; i < getNumParameter(); i++) {
+      Collection a = getParameter(i).getModifiers().runtimeInvisibleAnnotations();
+      if(!a.isEmpty()) foundVisibleAnnotations = true;
+      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+      for(Iterator iter = a.iterator(); iter.hasNext(); ) {
+        Annotation annotation = (Annotation)iter.next();
+        ArrayList elements = new ArrayList(1);
+        annotation.appendAsAttributeTo(elements);
+        tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
+      }
+      annotations.add(tag);
+    }
+    if(foundVisibleAnnotations) {
+      soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+        tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag)iter.next());
+      }
+      c.add(tag);
+    }
+  }
+  public void ConstructorDecl.addRuntimeInvisibleParameterAnnotationsAttribute(Collection c) {
+    boolean foundVisibleAnnotations = false;
+    Collection annotations = new ArrayList(getNumParameter());
+    for(int i = 0; i < getNumParameter(); i++) {
+      Collection a = getParameter(i).getModifiers().runtimeInvisibleAnnotations();
+      if(!a.isEmpty()) foundVisibleAnnotations = true;
+      soot.tagkit.VisibilityAnnotationTag tag = new soot.tagkit.VisibilityAnnotationTag(soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+      for(Iterator iter = a.iterator(); iter.hasNext(); ) {
+        Annotation annotation = (Annotation)iter.next();
+        ArrayList elements = new ArrayList(1);
+        annotation.appendAsAttributeTo(elements);
+        tag.addAnnotation((soot.tagkit.AnnotationTag)elements.get(0));
+      }
+      annotations.add(tag);
+    }
+    if(foundVisibleAnnotations) {
+      soot.tagkit.VisibilityParameterAnnotationTag tag = new soot.tagkit.VisibilityParameterAnnotationTag(annotations.size(), soot.tagkit.AnnotationConstants.RUNTIME_INVISIBLE);
+      for(Iterator iter = annotations.iterator(); iter.hasNext(); ) {
+        tag.addVisibilityAnnotation((soot.tagkit.VisibilityAnnotationTag)iter.next());
+      }
+      c.add(tag);
+    }
+  }
+
+  public Collection Modifiers.runtimeInvisibleAnnotations() {
+    Collection annotations = new ArrayList();
+    for(int i = 0; i < getNumModifier(); i++)
+      if(getModifier(i).isRuntimeInvisible())
+        annotations.add(getModifier(i));
+    return annotations;
+  }
+
+  public void MethodDecl.addSourceLevelParameterAnnotationsAttribute(Collection c) {
+    boolean foundVisibleAnnotations = false;
+    Collection annotations = new ArrayList(getNumParameter());
+    for(int i = 0; i < getNumParameter(); i++) {
+      getParameter(i).getModifiers().addSourceOnlyAnnotations(c);
+    }
+  }
+  public void ConstructorDecl.addSourceLevelParameterAnnotationsAttribute(Collection c) {
+    boolean foundVisibleAnnotations = false;
+    Collection annotations = new ArrayList(getNumParameter());
+    for(int i = 0; i < getNumParameter(); i++) {
+      getParameter(i).getModifiers().addSourceOnlyAnnotations(c);
+    }
+  }
+
+  // Add ACC_ANNOTATION flag to generated class file
+  public static final int Modifiers.ACC_ANNOTATION = 0x2000;
+  eq AnnotationDecl.sootTypeModifiers() = super.sootTypeModifiers() | Modifiers.ACC_ANNOTATION;
+
+  public void AnnotationMethodDecl.addAttributes() {
+    super.addAttributes();
+    // 4.8.19
+    if(hasDefaultValue()) {
+      ArrayList elements = new ArrayList(1);
+      getDefaultValue().appendAsAttributeTo(elements, "default");
+      soot.tagkit.AnnotationDefaultTag tag = new soot.tagkit.AnnotationDefaultTag((soot.tagkit.AnnotationElem)elements.get(0));
+      sootMethod.addTag(tag);
+    }
+  }
+
+  // 4.8.15
+  public void Annotation.appendAsAttributeTo(Collection list) {
+      soot.tagkit.AnnotationTag tag = new soot.tagkit.AnnotationTag(decl().typeDescriptor(), getNumElementValuePair());
+      ArrayList elements = new ArrayList(getNumElementValuePair());
+      for(int i = 0; i < getNumElementValuePair(); i++) {
+        String name = getElementValuePair(i).getName();
+        ElementValue value = getElementValuePair(i).getElementValue();
+        value.appendAsAttributeTo(elements, name);
+      }
+      tag.setElems(elements);
+      list.add(tag);
+  }
+
+  // 4.8.15.1
+  public void ElementValue.appendAsAttributeTo(Collection list, String name) {
+    throw new Error(getClass().getName() + " does not support appendAsAttributeTo(Attribute buf)");
+  }
+
+  syn String TypeDecl.typeDescriptor() = jvmName();
+  eq ClassDecl.typeDescriptor() = "L" + jvmName().replace('.', '/') + ";";
+  eq InterfaceDecl.typeDescriptor() = "L" + jvmName().replace('.', '/') + ";";
+
+  public void ElementConstantValue.appendAsAttributeTo(Collection list, String name) {
+    if(getExpr().isConstant() && !getExpr().type().isEnumDecl()) {
+      char kind = getExpr().type().isString() ? 's' : getExpr().type().typeDescriptor().charAt(0);
+      TypeDecl type = getExpr().type();
+      if(type.isLong())
+        list.add(new soot.tagkit.AnnotationLongElem(getExpr().constant().longValue(), kind, name));
+      else if(type.isDouble())
+        list.add(new soot.tagkit.AnnotationDoubleElem(getExpr().constant().doubleValue(), kind, name));
+      else if(type.isFloat())
+        list.add(new soot.tagkit.AnnotationFloatElem(getExpr().constant().floatValue(), kind, name));
+      else if(type.isString())
+        list.add(new soot.tagkit.AnnotationStringElem(getExpr().constant().stringValue(), kind, name));
+      else if(type.isIntegralType())
+        list.add(new soot.tagkit.AnnotationIntElem(getExpr().constant().intValue(), kind, name));
+      else if(type().isBoolean())
+       list.add(new soot.tagkit.AnnotationBooleanElem(getExpr().constant().booleanValue(), kind, name));      
+      else
+        throw new UnsupportedOperationException("Unsupported attribute constant type " + type.typeName());
+    }
+    else if(getExpr().isClassAccess()) {
+      list.add(new soot.tagkit.AnnotationClassElem(getExpr().type().typeDescriptor(), 'c', name));
+    }
+    else {
+      Variable v = getExpr().varDecl();
+      if(v == null) throw new Error("Expected Enumeration constant");
+      list.add(new soot.tagkit.AnnotationEnumElem(v.type().typeDescriptor(), v.name(), 'e', name));
+    }
+  }
+  public void ElementAnnotationValue.appendAsAttributeTo(Collection list, String name) {
+    ArrayList elemVals = new ArrayList();
+    getAnnotation().appendAsAttributeTo(elemVals);
+    list.add(new soot.tagkit.AnnotationAnnotationElem((soot.tagkit.AnnotationTag)elemVals.get(0), '@', name));
+  }
+  public void ElementArrayValue.appendAsAttributeTo(Collection list, String name) {
+    ArrayList elemVals = new ArrayList();
+    for(int i = 0; i < getNumElementValue(); i++)
+      getElementValue(i).appendAsAttributeTo(elemVals, "default");
+    list.add(new soot.tagkit.AnnotationArrayElem(elemVals, '[', name));
+  }
+
+  inh TypeDecl ElementValue.hostType();
+}

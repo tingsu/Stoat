@@ -1,0 +1,187 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect AccessControl {
+  // 6.6 Access Control
+  
+  syn lazy boolean ArrayDecl.accessibleFrom(TypeDecl type) = elementType().accessibleFrom(type);
+ 
+  syn lazy boolean TypeDecl.accessibleFromPackage(String packageName) =
+    !isPrivate() && (isPublic() || hostPackage().equals(packageName));
+  
+  syn lazy boolean TypeDecl.accessibleFromExtend(TypeDecl type) {
+    if(type == this)
+      return true;
+    if(isInnerType()) { 
+      if(!enclosingType().accessibleFrom(type)) {
+        return false;
+      }
+    }
+    if(isPublic()) 
+      return true;
+    else if(isProtected()) {
+      // isProtected implies a nested type
+      if(hostPackage().equals(type.hostPackage())) {
+        return true;
+      }
+      if(type.isNestedType() && type.enclosingType().withinBodyThatSubclasses(enclosingType()) != null)
+        return true;
+      return false;
+    }
+    else if(isPrivate()) {
+      return topLevelType() == type.topLevelType();
+    }
+    else
+      return hostPackage().equals(type.hostPackage());
+  }
+ 
+  syn lazy boolean TypeDecl.accessibleFrom(TypeDecl type) {
+    if(type == this)
+      return true;
+    if(isInnerType()) { 
+      if(!enclosingType().accessibleFrom(type)) {
+        return false;
+      }
+    }
+    if(isPublic()) {  
+      return true;
+    }
+    else if(isProtected()) {
+      if(hostPackage().equals(type.hostPackage())) {
+        return true;
+      }
+      if(isMemberType()) {
+        TypeDecl typeDecl = type;
+        while(typeDecl != null && !typeDecl.instanceOf(enclosingType()))
+          typeDecl = typeDecl.enclosingType();
+        if(typeDecl != null) {
+          return true;
+        }
+      }
+      return false;
+    }
+    else if(isPrivate()) {
+      return topLevelType() == type.topLevelType();
+    }
+    else {
+      return hostPackage().equals(type.hostPackage());
+    }
+  }
+
+  syn lazy boolean MethodDecl.accessibleFrom(TypeDecl type) {
+    if(isPublic()) {
+      return true;
+    }
+    else if(isProtected()) {
+      if(hostPackage().equals(type.hostPackage()))
+        return true;
+      if(type.withinBodyThatSubclasses(hostType()) != null)
+        return true;
+      return false;
+    }
+    else if(isPrivate())
+      return hostType().topLevelType() == type.topLevelType();
+    else
+      return hostPackage().equals(type.hostPackage());
+  }
+  
+  syn lazy boolean ConstructorDecl.accessibleFrom(TypeDecl type) {
+    if(!hostType().accessibleFrom(type))
+      return false;
+    else if(isPublic())
+      return true;
+    else if(isProtected()) {
+      return true;
+    }
+    else if(isPrivate()) {
+      return hostType().topLevelType() == type.topLevelType();
+    }
+    else
+      return hostPackage().equals(type.hostPackage());
+  }
+  
+  syn lazy boolean FieldDeclaration.accessibleFrom(TypeDecl type) {
+    if(isPublic())
+      return true;
+    else if(isProtected()) {
+      if(hostPackage().equals(type.hostPackage()))
+        return true;
+      if(type.withinBodyThatSubclasses(hostType()) != null)
+        return true;
+      return false;
+    }
+    else if(isPrivate())
+      return hostType().topLevelType() == type.topLevelType();
+    else
+      return hostPackage().equals(type.hostPackage());
+  }
+    
+  public void ASTNode.accessControl() {
+  }
+  
+  public void TypeAccess.accessControl() {
+    super.accessControl();
+    TypeDecl hostType = hostType();
+    if(hostType != null && !hostType.isUnknown() && !type().accessibleFrom(hostType)) {
+      error("" + this + " in " + hostType().fullName() + " can not access type " + type().fullName());
+    }
+    else if((hostType == null || hostType.isUnknown())  && !type().accessibleFromPackage(hostPackage())) {
+      error("" + this + " can not access type " + type().fullName());
+    }
+  }
+
+  public void ClassInstanceExpr.accessControl() {
+    super.accessControl();
+    if(type().isAbstract())
+      error("Can not instantiate abstract class " + type().fullName());
+    if(!decl().accessibleFrom(hostType()))
+      error("constructor " + decl().signature() + " is not accessible");
+  }
+  
+  public void ClassDecl.accessControl() {
+    super.accessControl();
+    
+    // 8.1.1.2 final Classes
+    TypeDecl typeDecl = hasSuperclass() ? superclass() : null;
+    if(typeDecl != null && !typeDecl.accessibleFromExtend(this))
+    //if(typeDecl != null && !isCircular() && !typeDecl.accessibleFrom(this))
+      error("class " + fullName() + " may not extend non accessible type " + typeDecl.fullName());
+
+    if(hasSuperclass() && !superclass().accessibleFrom(this))
+      error("a superclass must be accessible which " + superclass().name() + " is not");
+
+    // 8.1.4
+    for(int i = 0; i < getNumImplements(); i++) {
+      TypeDecl decl = getImplements(i).type();
+      if(!decl.isCircular() && !decl.accessibleFrom(this))
+        error("class " + fullName() + " can not implement non accessible type " + decl.fullName());
+    }
+  }
+
+  public void InterfaceDecl.accessControl() {
+    super.accessControl();
+    
+    if(!isCircular()) {
+      // 9.1.2
+      HashSet set = new HashSet();
+      for(int i = 0; i < getNumSuperInterfaceId(); i++) {
+        TypeDecl decl = getSuperInterfaceId(i).type();
+
+        if(!decl.isInterfaceDecl() && !decl.isUnknown())
+          error("interface " + fullName() + " tries to extend non interface type " + decl.fullName());
+        if(!decl.isCircular() && !decl.accessibleFrom(this))
+          error("interface " + fullName() + " can not extend non accessible type " + decl.fullName());
+
+        if(set.contains(decl))
+          error("extended interface " + decl.fullName() + " mentionened multiple times in extends clause");
+        set.add(decl);
+      }
+    }
+  }
+}

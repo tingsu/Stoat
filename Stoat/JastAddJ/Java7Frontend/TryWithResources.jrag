@@ -1,0 +1,262 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect TryWithResources {
+	/**
+	 * Syntactic classification for TWR resource declarations.
+	 */
+	eq ResourceDeclaration.getTypeAccess().nameType() = NameType.TYPE_NAME;
+
+	/**
+	 * Inherit the lookupType attribute in ResourceDeclaration.
+	 */
+	inh TypeDecl ResourceDeclaration.lookupType(String packageName, String typeName);
+
+	/**
+	 * Type checking for TWR.
+	 */
+	public void ResourceDeclaration.typeCheck() {
+		TypeDecl typeAutoCloseable = lookupType("java.lang", "AutoCloseable");
+		if (typeAutoCloseable == null)
+			error("java.lang.AutoCloseable not found");
+		else if (!getTypeAccess().type().instanceOf(typeAutoCloseable))
+			error("Resource specification must declare an AutoCloseable resource");
+	}
+
+	/*coll Set<TypeDecl> Stmt.uncaughtExceptions()
+		[new HashSet<TypeDecl>()] with add;
+
+	MethodAccess contributes exceptionCollection()
+		to Stmt.uncaughtExceptions();*/
+
+	/**
+	 * Exception error checks.
+	 */
+	public void TryWithResources.exceptionHandling() {
+
+		// Check exception handling of exceptions on auto closing of resource
+		for (ResourceDeclaration resource : getResourceList()) {
+			MethodDecl close = lookupClose(resource);
+			if (close == null) continue;
+			for (Access exception : close.getExceptionList()) {
+				TypeDecl exceptionType = exception.type();
+				if (!twrHandlesException(exceptionType))
+					error("automatic closing of resource "+resource.name()+
+							" may raise the uncaught exception "+exceptionType.fullName()+"; "+
+							"it must be caught or declared as being thrown");
+			}
+		}
+	}
+
+	/**
+	 * This attribute computes whether or not the TWR statement
+	 * has a catch clause which handles the exception.
+	 */
+	syn boolean TryWithResources.catchHandlesException(TypeDecl exceptionType) {
+		for (int i = 0; i < getNumCatchClause(); i++)
+			if (getCatchClause(i).handles(exceptionType))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Returns true if exceptions of type exceptionType are handled
+	 * in the try-with-resources statement or any containing statement
+	 * within the directly enclosing method or initializer block.
+	 */
+	syn boolean TryWithResources.twrHandlesException(TypeDecl exceptionType) {
+		if (catchHandlesException(exceptionType))
+			return true;
+		if (hasFinally() && !getFinally().canCompleteNormally())
+			return true;
+		return handlesException(exceptionType);
+	}
+
+	/**
+	 * Inherit the handlesException attribute from methoddecl.
+	 */
+	inh lazy boolean TryWithResources.handlesException(TypeDecl exceptionType);
+
+	eq TryWithResources.getResource(int i).handlesException(TypeDecl exceptionType) =
+		twrHandlesException(exceptionType);
+
+	eq TryWithResources.getBlock().handlesException(TypeDecl exceptionType) =
+		twrHandlesException(exceptionType);
+
+
+	/**
+	 * Lookup the close method declaration for the resource which is being used.
+	 */
+	syn MethodDecl TryWithResources.lookupClose(ResourceDeclaration resource) {
+		TypeDecl resourceType = resource.getTypeAccess().type();
+		for (MethodDecl method : (Collection<MethodDecl>) resourceType.memberMethods("close")) {
+			if (method.getNumParameter() == 0) {
+				return method;
+			}
+		}
+		return null;
+		/* We can't throw a runtime exception here. If there is no close method it
+		 * likely means that the resource type is not a subtype of java.lang.AutoCloseable
+		 * and type checking will report this error.
+		 */
+		//throw new RuntimeException("close() not found for resource type "+resourceType.fullName());
+	}
+
+	inh lazy TypeDecl TryWithResources.typeError();
+	inh lazy TypeDecl TryWithResources.typeRuntimeException();
+
+	eq TryWithResources.getCatchClause(int childIndex).reachableCatchClause(TypeDecl exceptionType) {
+		for (int i = 0; i < childIndex; i++)
+			if (getCatchClause(i).handles(exceptionType))
+				return false;
+		if (catchableException(exceptionType))
+			return true;
+		if (exceptionType.mayCatch(typeError()) || exceptionType.mayCatch(typeRuntimeException()))
+			return true;
+		return false;
+	}
+
+	/**
+	 * Variable lookup attribute.
+	 */
+	eq TryWithResources.getBlock().lookupVariable(String name) = localLookup(name);
+	syn lazy SimpleSet TryWithResources.localLookup(String name) {
+		VariableDeclaration v = localVariableDeclaration(name);
+		if (v != null) return v;
+		return lookupVariable(name);
+	}
+	syn lazy VariableDeclaration TryWithResources.localVariableDeclaration(String name) {
+		for (ResourceDeclaration resource : getResourceList())
+			if (resource.declaresVariable(name))
+				return resource;
+		return null;
+	}
+
+	TryWithResources implements VariableScope;
+	inh lazy SimpleSet TryWithResources.lookupVariable(String name);
+	eq TryWithResources.getResource(int i).outerScope() = this;
+
+	inh boolean VariableDeclaration.resourcePreviouslyDeclared(String name);
+	inh boolean TryWithResources.resourcePreviouslyDeclared(String name);
+	eq TryWithResources.getResource(int index).resourcePreviouslyDeclared(String name) {
+		for (int i = 0; i < index; ++i) {
+			if (getResource(i).name().equals(name))
+				return true;
+		}
+		return false;
+	}
+	eq BodyDecl.getChild(int i).resourcePreviouslyDeclared(String name) = false;
+	eq Program.getChild(int i).resourcePreviouslyDeclared(String name) = false;
+
+	public void ResourceDeclaration.nameCheck() {
+		// Special name check for resource specification
+		if (resourcePreviouslyDeclared(name()))
+			error("A resource with the name "+name()+
+					" has already been declared in this try statement.");
+
+		// Do regular name check for variable declaration
+		super.nameCheck();
+	}
+
+	// Definite Assignment
+	eq TryWithResources.isDAafter(Variable v) =
+		getBlock().isDAafter(v);
+
+	// 16.2.2 7th bullet
+	eq TryWithResources.getResource(int index).isDAbefore(Variable v) =
+		index == 0 ? isDAbefore(v) : getResource(index - 1).isDAafter(v);
+	eq TryWithResources.getBlock().isDAbefore(Variable v) =
+		getNumResource() == 0 ? isDAbefore(v) :
+		getResource(getNumResource() - 1).isDAafter(v);
+
+	/**
+	 * Returns true if the try-with-resources statement can throw
+	 * an exception of type (or a subtype of) catchType.
+	 */
+	protected boolean TryWithResources.reachedException(TypeDecl catchType) {
+		boolean found = false;
+		// found is true if the exception type is caught by a catch clause
+		for(int i = 0; i < getNumCatchClause() && !found; i++)
+			if(getCatchClause(i).handles(catchType))
+				found = true;
+		// if an exception is thrown in the block and the exception is not caught and
+		// either there is no finally block or the finally block can complete normally
+		if(!found && (!hasFinally() || getFinally().canCompleteNormally()) )
+			if(catchableException(catchType))
+				return true;
+		// even if the exception is caught by the catch clauses they may 
+		// throw new exceptions
+		for(int i = 0; i < getNumCatchClause(); i++)
+			if(getCatchClause(i).reachedException(catchType))
+				return true;
+		return hasFinally() && getFinally().reachedException(catchType);
+	}
+
+	/**
+	 * True if the automatic closing of resources in this try-with-resources statement
+	 * may throw an exception of type catchType.
+	 */
+	syn boolean TryWithResources.resourceClosingException(TypeDecl catchType) {
+		for (ResourceDeclaration resource : getResourceList()) {
+			MethodDecl close = lookupClose(resource);
+			if (close == null) continue;
+			for (Access exception : close.getExceptionList()) {
+				TypeDecl exceptionType = exception.type();
+				if (catchType.mayCatch(exception.type()))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * True if the resource initialization of this try-with-resources statement
+	 * may throw an exception of type catchType.
+	 */
+	syn boolean TryWithResources.resourceInitializationException(TypeDecl catchType) {
+		for (ResourceDeclaration resource : getResourceList()) {
+			if (resource.reachedException(catchType))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+ 	 * @see AST.TryStmt#catchableException(TypeDecl) TryStmt.catchableException(TypeDecl)
+ 	 */ 
+	eq TryWithResources.catchableException(TypeDecl type) =
+		getBlock().reachedException(type) ||
+			resourceClosingException(type) ||
+			resourceInitializationException(type);
+
+	eq ResourceModifiers.isFinal() = true;
+}
+
+aspect PrettyPrint {
+	/**
+ 	 * Pretty printing of try-with-resources
+ 	 */
+	public void TryWithResources.toString(StringBuffer sb) {
+		sb.append(indent() + "try (");
+		for (ResourceDeclaration resource : getResourceList()) {
+			sb.append(resource.toString());
+		}
+		sb.append(") ");
+		getBlock().toString(sb);
+		for (CatchClause cc : getCatchClauseList()) {
+			sb.append(" ");
+			cc.toString(sb);
+		}
+		if (hasFinally()) {
+			sb.append(" finally ");
+			getFinally().toString(sb);
+		}
+	}
+
+}
+

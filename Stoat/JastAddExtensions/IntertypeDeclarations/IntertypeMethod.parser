@@ -1,0 +1,7 @@
+BodyDecl intertype_member_declaration =
+    modifiers.m? type name.targetType DOT IDENTIFIER LPAREN formal_parameter_list.p? RPAREN throws.t? method_body.b 
+    {: return new IntertypeMethodDecl(new Modifiers(m), type, IDENTIFIER, p, t, b, targetType); :}
+  | modifiers.m? VOID name.targetType DOT IDENTIFIER LPAREN formal_parameter_list.p? RPAREN throws.t? method_body.b 
+    {: return new IntertypeMethodDecl(new Modifiers(m), new TypeAccess("void"), IDENTIFIER, p, t, b, targetType); :}
+  ;
+

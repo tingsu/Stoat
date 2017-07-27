@@ -1,0 +1,41 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ *                    2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect Variable {
+	interface Variable {
+		public String name();
+		public TypeDecl type();
+		public Collection<TypeDecl> throwTypes();
+		public boolean isParameter();
+		// 4.5.3
+		public boolean isClassVariable();
+		public boolean isInstanceVariable();
+		public boolean isMethodParameter();
+		public boolean isConstructorParameter();
+		public boolean isExceptionHandlerParameter();
+		public boolean isLocalVariable();
+		// 4.5.4
+		public boolean isFinal();
+		public boolean isVolatile();
+
+		public boolean isBlank();
+		public boolean isStatic();
+		public boolean isSynthetic();
+
+		public TypeDecl hostType();
+
+		public Expr getInit();
+		public boolean hasInit();
+
+		public Constant constant();
+
+		public Modifiers getModifiers();
+	}
+}

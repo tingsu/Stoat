@@ -1,0 +1,19 @@
+/**
+ * Abstract superclass for catch clauses.
+ */
+abstract CatchClause ::= Block;
+
+/**
+ * A catch clause that can catch a single exception type.
+ */
+BasicCatch : CatchClause ::= Parameter:ParameterDeclaration Block;
+
+/**
+ * A catch clause that can catch a multiple exception types.
+ */
+MultiCatch : CatchClause ::= Parameter:CatchParameterDeclaration Block;
+
+/**
+ * A catch parameter with disjunct exception type.
+ */
+CatchParameterDeclaration ::= Modifiers TypeAccess:Access* <ID:String>;

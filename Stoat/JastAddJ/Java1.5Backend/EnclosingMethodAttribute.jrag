@@ -1,0 +1,38 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect EnclosingMethodAttribute {
+  // 4.8.6
+  refine GenericsCodegen eq TypeDecl.attributes() {
+    Collection c = refined();
+    if(isLocalClass() || isAnonymous()) {
+      c.add(new EnclosingMethod(constantPool(), this));
+    }
+    return c;
+  }
+
+  class EnclosingMethod extends Attribute {
+    public EnclosingMethod(ConstantPool cp, TypeDecl typeDecl) {
+      super(cp, "EnclosingMethod");
+      u2(cp.addClass(typeDecl.enclosingType().constantPoolName()));
+      BodyDecl b = typeDecl.enclosingBodyDecl();
+      if(b instanceof MethodDecl) {
+        MethodDecl m = (MethodDecl)b;
+        u2(cp.addNameAndType(m.name(), m.descName()));
+      }
+      else if(b instanceof ConstructorDecl) {
+        ConstructorDecl m = (ConstructorDecl)b;
+        u2(cp.addNameAndType(m.name(), m.descName()));
+      }
+      else {
+        u2(0);
+      }
+    }
+  }
+}

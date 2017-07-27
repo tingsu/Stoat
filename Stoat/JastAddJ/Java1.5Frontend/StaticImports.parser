@@ -1,0 +1,10 @@
+ImportDecl import_declaration =
+      single_static_import_declaration.s {:  return s;  :}
+    |  static_import_on_demand_declaration.t {:  return t;  :}
+    ;
+
+ImportDecl single_static_import_declaration =
+      IMPORT STATIC name.n DOT IDENTIFIER SEMICOLON {: return new SingleStaticImportDecl(n, IDENTIFIER);  :};
+
+ImportDecl static_import_on_demand_declaration =
+      IMPORT STATIC name.n DOT MULT SEMICOLON {: return new StaticImportOnDemandDecl(n);  :};

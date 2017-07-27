@@ -1,0 +1,11 @@
+BodyDecl intertype_member_declaration =
+  intertype_field_declaration
+  ;
+
+BodyDecl intertype_field_declaration =
+    modifiers.m? type name.targetType DOT IDENTIFIER SEMICOLON 
+    {: return new IntertypeFieldDeclaration(new Modifiers(m), type, IDENTIFIER, new Opt(), targetType); :}
+  | modifiers.m? type name.targetType DOT IDENTIFIER EQ variable_initializer.i SEMICOLON 
+    {: return new IntertypeFieldDeclaration(new Modifiers(m), type, IDENTIFIER, new Opt(i), targetType); :}
+  ;
+

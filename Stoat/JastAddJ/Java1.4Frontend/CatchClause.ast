@@ -1,0 +1,11 @@
+/**
+ * Abstract superclass for catch clauses.
+ */
+abstract CatchClause ::= Block;
+
+/**
+ * A catch clause which can catch a single exception type.
+ */
+BasicCatch : CatchClause ::= Parameter:ParameterDeclaration Block;
+
+

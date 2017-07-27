@@ -1,0 +1,130 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect BoundNames {
+  public Access FieldDeclaration.createQualifiedBoundAccess() {
+    if(isStatic())
+      return hostType().createQualifiedAccess().qualifiesAccess(new BoundFieldAccess(this));
+    else
+      return new ThisAccess("this").qualifiesAccess(
+        new BoundFieldAccess(this));
+  }
+
+  // The memberMethods(String name) attribute is used to lookup member methods.
+  // It uses the methodsNameMap() map where a name is mapped to a list of member
+  // methods. We extend the map with the declaration m by either appending
+  // it to an existing list of declarations or adding a new list. That list
+  // will be used to name bind a new qualified name access.
+  public MethodDecl TypeDecl.addMemberMethod(MethodDecl m) {
+    addBodyDecl(m);
+    return (MethodDecl)getBodyDecl(getNumBodyDecl()-1);
+    /*
+    HashMap map = methodsNameMap();
+    ArrayList list = (ArrayList)map.get(m.name());
+    if(list == null) {
+      list = new ArrayList(4);
+      map.put(m.name(), list);
+    }
+    list.add(m);
+    if(!memberMethods(m.name()).contains(m))
+      throw new Error("The method " + m.signature() + " added to " + typeName() + " can not be found using lookupMemberMethod");
+    */
+  }
+
+  public ConstructorDecl TypeDecl.addConstructor(ConstructorDecl c) {
+    addBodyDecl(c);
+    return (ConstructorDecl)getBodyDecl(getNumBodyDecl()-1);
+  }
+
+  public ClassDecl TypeDecl.addMemberClass(ClassDecl c) {
+    addBodyDecl(new MemberClassDecl(c));
+    return ((MemberClassDecl)getBodyDecl(getNumBodyDecl()-1)).getClassDecl();
+  }
+
+
+  // the new field must be unique otherwise an error occurs
+  public FieldDeclaration TypeDecl.addMemberField(FieldDeclaration f) {
+    addBodyDecl(f);
+    return (FieldDeclaration)getBodyDecl(getNumBodyDecl()-1);
+    //if(!memberFields(f.name()).contains(f))
+    //  throw new Error("The field " + f.name() + " added to " + typeName() + " can not be found using lookupMemberField");
+  }
+
+  // A BoundMethodAccess is a MethodAccess where the name analysis is bypassed by explicitly setting the desired binding
+  // this is useful when name binding is cached and recomputation is undesired
+  public BoundMethodAccess.BoundMethodAccess(String name, List args, MethodDecl methodDecl) {
+    this(name, args);
+    this.methodDecl = methodDecl;
+  }
+  private MethodDecl BoundMethodAccess.methodDecl;
+  eq BoundMethodAccess.decl() = methodDecl;
+
+  public BoundFieldAccess.BoundFieldAccess(FieldDeclaration f) {
+    this(f.name(), f);
+  }
+
+  eq BoundFieldAccess.decl() = getFieldDeclaration();
+  public boolean BoundFieldAccess.isExactVarAccess() {
+    return false;
+  }
+
+  public Access MethodDecl.createBoundAccess(List args) {
+    if(isStatic()) {
+      return hostType().createQualifiedAccess().qualifiesAccess(
+        new BoundMethodAccess(name(), args, this)
+      );
+    }
+    return new BoundMethodAccess(name(), args, this);
+  }
+
+  public Access FieldDeclaration.createBoundFieldAccess() {
+    return createQualifiedBoundAccess();
+  }
+
+  public TypeAccess TypeDecl.createBoundAccess() {
+    return new BoundTypeAccess("", name(), this);
+  }
+  eq BoundTypeAccess.decls() = SimpleSet.emptySet.add(getTypeDecl());
+
+  rewrite BytecodeTypeAccess {
+    to Access {
+      if(name().indexOf("$") == -1)
+        return new TypeAccess(packageName(), name());
+      else {
+        String[] names = name().split("\\$");
+        Access a = null; // the resulting access
+        String newName = null; // the subname to try
+        TypeDecl type = null; // qualifying type if one
+        for(int i = 0; i < names.length; i++) {
+          newName = newName == null ? names[i] : (newName + "$" + names[i]);
+          SimpleSet set;
+          if(type != null)
+            set = type.memberTypes(newName);
+          else if(packageName().equals(""))
+            set = lookupType(newName);
+          else {
+            TypeDecl typeDecl = lookupType(packageName(), newName);
+            set = SimpleSet.emptySet;
+            if(typeDecl != null)
+              set = set.add(typeDecl);
+          }
+          if(!set.isEmpty()) {
+            a = a == null ? (Access)new TypeAccess(packageName(), newName) : (Access)a.qualifiesAccess(new TypeAccess(newName));
+            type = (TypeDecl)set.iterator().next();
+            newName = null; // reset subname
+          }
+        }
+        if(a == null) {
+          a = new TypeAccess(packageName(), name());
+        }
+        return a;
+      }
+    }
+  }
+}

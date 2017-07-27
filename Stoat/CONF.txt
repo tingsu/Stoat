@@ -1,0 +1,32 @@
+# Android SDK Configurations
+ANDROID_SDK_DIR = /home/suting/Android/Sdk
+ANDROID_LIB_DIR = /home/suting/Android/Sdk/platforms/android-18/android.jar
+
+# Stoat Tool Dir 
+STOAT_TOOL_DIR = /home/suting/proj/fsmdroid
+
+# Timeout Command, use "timeout" for Linux, use "gtimeout" for MacOS
+TIMEOUT_CMD = timeout 
+
+# Client Side (Model Construction) Running Parameters
+# the name of coverage result file
+EMMA_COVERAGE_RESULT_FILE_NAME = coverage.txt
+# wait time for app start/restart (in seconds)
+APP_START_WAIT_TIME = 3 
+
+# Server side (MCMC Sampling) Parameters
+# enable/disable static analysis: "yes"/"no"
+STATIC_ANALYSIS = yes
+# the max iterations of mcmc sampling
+MAX_MCMC_ITERATION = 1000
+# the max size of the generated test suite
+MAX_TEST_SUITE_SIZE = 30
+# the max length of the generated test sequence in the test suite
+MAX_TEST_SEQUENCE_LENGTH = 20
+# the max number of test suite to generate when comparing models
+MAX_TEST_SUITE_SIZE_COMPARE_MODEL = 400
+# the prob. model, 1 for the model with prob., 2 for the model without prob. 
+PROB_MODEL_MODE = 1
+# the prob. model file name, "initial_markov_model.txt" or "optimal_markov_model.txt"
+PROB_MODEL_FILE_NAME = optimal_markov_model.txt
+

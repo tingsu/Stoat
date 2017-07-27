@@ -1,0 +1,42 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+/**
+ * Extensions to the generated Abstract Syntax Tree.
+ */
+aspect JastAddExtensions {
+
+	/**
+	 * Create a deep copy of this subtree.
+	 * The copy is dangling, i.e. has no parent.
+	 *
+	 * @return a dangling copy of the subtree at this node
+	 */
+	public ASTNode ASTNode.cloneSubtree() {
+		try {
+			ASTNode tree = (ASTNode) clone();
+			tree.setParent(null);// make dangling
+			if (children != null) {
+				tree.children = new ASTNode[children.length];
+				for (int i = 0; i < children.length; ++i) {
+					if (children[i] == null) {
+						tree.children[i] = null;
+					} else {
+						tree.children[i] = children[i].cloneSubtree();
+						tree.children[i].setParent(tree);
+					}
+				}
+			}
+			return tree;
+		} catch (CloneNotSupportedException e) {
+			throw new Error("Error: clone not supported for " +
+					getClass().getName());
+		}
+	}
+}
+

@@ -1,0 +1,105 @@
+// poor man's alias analysis
+aspect Alias {
+	interface Location { 
+		boolean isHeapLocation();
+		boolean mayAlias(Location l);
+		boolean mustAlias(Location l);
+	}
+
+	Variable extends Location;
+	public boolean Variable.isHeapLocation() { return false; }
+	public boolean FieldDeclaration.isHeapLocation() { return !isConstant(); }
+	
+	public boolean Variable.mayAlias(Location l) { return this == l; }
+	public boolean FieldDeclaration.mayAlias(Location l) { return this == l || l instanceof AnyHeapLocation; }
+
+	public boolean FieldDeclaration.mustAlias(Location l) { return isStatic() && this == l;	}
+	public boolean ParameterDeclaration.mustAlias(Location l) { return mayAlias(l); }
+	public boolean VariableDeclaration.mustAlias(Location l) { return mayAlias(l); }
+	
+	class ArrayElementLocation implements Location {
+		private TypeDecl type;
+		
+		public ArrayElementLocation(TypeDecl type) {
+			this.type = type;
+		}
+
+		public boolean isHeapLocation() {
+			return true;
+		}
+		
+		public boolean mayAlias(Location l) {
+			return l instanceof ArrayElementLocation &&
+					((ArrayElementLocation)l).type.castingConversionTo(type)
+				|| l instanceof AnyHeapLocation;
+		}
+		
+		public boolean mustAlias(Location l) {
+			return false;
+		}
+	}
+	syn lazy ArrayElementLocation ArrayDecl.getElementLocation() = new ArrayElementLocation(componentType());
+	
+	class AnyHeapLocation implements Location {
+		private AnyHeapLocation() { }
+		public static final AnyHeapLocation instance = new AnyHeapLocation();
+		
+		public boolean isHeapLocation() { return true; }
+		public boolean mayAlias(Location l) { return l != null && l.isHeapLocation(); }
+		public boolean mustAlias(Location l) { return false; }
+	}
+	
+	syn lazy Location Access.getLocation() = null;
+	eq AbstractDot.getLocation() = getRight().getLocation();
+	eq ArrayAccess.getLocation() = ((ArrayDecl)type().arrayType()).getElementLocation();
+	eq VarAccess.getLocation() = decl();
+	eq MethodAccess.getLocation() = decl().isPure() ? null : AnyHeapLocation.instance;
+	eq ConstructorAccess.getLocation() = decl().isPure() ? null : AnyHeapLocation.instance;
+	eq ClassInstanceExpr.getLocation() = isPure() ? null : AnyHeapLocation.instance;
+	
+	/* crude approximation of when a method is pure */
+	syn lazy boolean MethodDecl.isPure() {
+		// Object.getClass() is pure
+		if(name().equals("getClass") && getNumParameter() == 0)
+			return true;
+		// if the method could be overridden or we don't have access to its body, assume the worst
+		if(!isStatic() && !isPrivate() || !hasBlock())
+			return false;
+		// if the body is 'return c;' for a constant c, the method is pure
+		Block body = getBlock();
+		if(body.getNumStmt() != 1)
+			return false;
+		if(!(body.getStmt(0) instanceof ReturnStmt))
+			return false;
+		ReturnStmt ret = (ReturnStmt)body.getStmt(0);
+		return !ret.hasResult() || ret.getResult().isConstant() || ret.getResult() instanceof NullLiteral;
+	}
+	
+	syn boolean ConstructorDecl.isPure() = false;
+		
+	// all locations read in a subtree
+	syn lazy Collection<Location> ASTNode.locationsRead() = locationsRead(new HashSet<Location>());
+	public Collection<Location> ASTNode.locationsRead(Collection<Location> res) {
+		for(int i=0;i<getNumChild();++i)
+			getChild(i).locationsRead(res);
+		return res;
+	}
+	public Collection<Location> Access.locationsRead(Collection<Location> res) {
+		if(isSource() && getLocation() != null)
+			res.add(getLocation());
+		return super.locationsRead(res);
+	}
+	
+	// all locations written in a subtree
+	syn lazy Collection<Location> ASTNode.locationsWritten() = locationsWritten(new HashSet<Location>());
+	public Collection<Location> ASTNode.locationsWritten(Collection<Location> res) {
+		for(int i=0;i<getNumChild();++i)
+			getChild(i).locationsWritten(res);
+		return res;
+	}
+	public Collection<Location> Access.locationsWritten(Collection<Location> res) {
+		if(isDef() && getLocation() != null)
+			res.add(getLocation());
+		return super.locationsWritten(res);
+	}
+}

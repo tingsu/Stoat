@@ -1,0 +1,1080 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import soot.*;
+import soot.util.*;
+import soot.jimple.*;
+import soot.coffi.ClassFile;
+import soot.coffi.method_info;
+import soot.coffi.CONSTANT_Utf8_info;
+import soot.tagkit.SourceFileTag;
+
+aspect EmitJimple {
+  public void Program.jimplify1() {
+    for(Iterator iter = compilationUnitIterator(); iter.hasNext(); ) {
+      CompilationUnit u = (CompilationUnit)iter.next();
+      if(u.fromSource())
+        u.jimplify1phase1();
+    }
+    for(Iterator iter = compilationUnitIterator(); iter.hasNext(); ) {
+      CompilationUnit u = (CompilationUnit)iter.next();
+      if(u.fromSource())
+        u.jimplify1phase2();
+    }
+  }
+  
+  syn lazy SootClass TypeDecl.getSootClassDecl() {
+    if(compilationUnit().fromSource()) {
+      return sootClass();
+    }
+    else {
+      if(options().verbose())
+        System.out.println("Loading .class file " + jvmName());
+      SootClass sc = Scene.v().loadClass(jvmName(), SootClass.SIGNATURES);
+      sc.setLibraryClass();
+      return sc;
+    }
+  }
+  eq ArrayDecl.getSootClassDecl() = typeObject().getSootClassDecl();
+  
+  syn lazy Type TypeDecl.getSootType() = getSootClassDecl().getType();
+  eq BooleanType.getSootType() = soot.BooleanType.v();
+  eq ByteType.getSootType() = soot.ByteType.v();
+  eq ShortType.getSootType() = soot.ShortType.v();
+  eq IntType.getSootType() = soot.IntType.v();
+  eq LongType.getSootType() = soot.LongType.v();
+  eq CharType.getSootType() = soot.CharType.v();
+  eq FloatType.getSootType() = soot.FloatType.v();
+  eq DoubleType.getSootType() = soot.DoubleType.v();
+  eq VoidType.getSootType() = soot.VoidType.v();
+  eq ArrayDecl.getSootType() = soot.ArrayType.v(elementType().getSootType(), dimension());
+
+  syn soot.RefType TypeDecl.sootRef() = (soot.RefType)getSootType();
+
+  public void ASTNode.jimplify1phase1() {
+    for(int i = 0; i < getNumChild(); i++)
+      getChild(i).jimplify1phase1();
+  }
+  
+  syn lazy SootClass TypeDecl.sootClass() = null;
+  eq ClassDecl.sootClass() {
+    if(options().verbose())
+      System.out.println("Creating from source " + jvmName());
+    SootClass sc = new SootClass(jvmName(), sootTypeModifiers()); 
+    Scene.v().addClass(sc);
+    sc.setApplicationClass();
+    if (!isObject())
+      sc.setSuperclass(typeObject().getSootClassDecl());
+    return sc;
+  }
+  eq InterfaceDecl.sootClass() {
+    if(options().verbose())
+      System.out.println("Creating from source " + jvmName());
+    SootClass sc = new SootClass(jvmName(), sootTypeModifiers());
+    Scene.v().addClass(sc);
+    sc.setApplicationClass();
+    return sc;
+  }
+  
+  syn String TypeDecl.sourceNameWithoutPath() {
+    String s = sourceFile();
+    return s != null ? s.substring(s.lastIndexOf(java.io.File.separatorChar)+1) : "Unknown";
+  }
+
+  syn int TypeDecl.sootTypeModifiers() {
+    int result = 0;
+    if(isNestedType()) {
+      result |= soot.Modifier.PUBLIC;
+    }
+    else {
+      if(isPublic()) result |= soot.Modifier.PUBLIC;
+      if(isProtected()) result |= soot.Modifier.PROTECTED;
+      if(isPrivate()) result |= soot.Modifier.PRIVATE;
+    }
+    if(isFinal()) result |= soot.Modifier.FINAL;
+    if(isStatic()) result |= soot.Modifier.STATIC;
+    if(isAbstract()) result |= soot.Modifier.ABSTRACT;
+    return result;
+  }
+  eq InterfaceDecl.sootTypeModifiers() = super.sootTypeModifiers() | soot.Modifier.INTERFACE;
+
+  syn int MethodDecl.sootTypeModifiers() {
+    int result = 0;
+    if(isPublic()) result |= soot.Modifier.PUBLIC;
+    if(isProtected()) result |= soot.Modifier.PROTECTED;
+    if(isPrivate()) result |= soot.Modifier.PRIVATE;
+    if(isFinal()) result |= soot.Modifier.FINAL;
+    if(isStatic()) result |= soot.Modifier.STATIC;
+    if(isAbstract()) result |= soot.Modifier.ABSTRACT;
+    if(isSynchronized()) result |= soot.Modifier.SYNCHRONIZED;
+    if(isStrictfp()) result |= soot.Modifier.STRICTFP;
+    if(isNative()) result |= soot.Modifier.NATIVE;
+    return result;
+  }
+  syn int ConstructorDecl.sootTypeModifiers() {
+    int result = 0;
+    if(isPublic()) result |= soot.Modifier.PUBLIC;
+    if(isProtected()) result |= soot.Modifier.PROTECTED;
+    if(isPrivate()) result |= soot.Modifier.PRIVATE;
+    return result;
+  }
+  syn int FieldDeclaration.sootTypeModifiers() {
+    int result = 0;
+    if(isPublic()) result |= soot.Modifier.PUBLIC;
+    if(isProtected()) result |= soot.Modifier.PROTECTED;
+    if(isPrivate()) result |= soot.Modifier.PRIVATE;
+    if(isFinal()) result |= soot.Modifier.FINAL;
+    if(isStatic()) result |= soot.Modifier.STATIC;
+    return result;
+  }
+  
+  public void ASTNode.jimplify1phase2() {
+    for(int i = 0; i < getNumChild(); i++)
+      getChild(i).jimplify1phase2();
+  }
+
+
+  public SootMethod TypeDecl.clinit = null;
+
+  public void TypeDecl.jimplify1phase2() {
+    if(needsClinit() && !getSootClassDecl().declaresMethod("<clinit>", new ArrayList())) {
+      clinit = new SootMethod("<clinit>", new ArrayList(), soot.VoidType.v(), soot.Modifier.STATIC, new ArrayList());
+      getSootClassDecl().addMethod(clinit);
+    }
+
+    for(Iterator iter = nestedTypes().iterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      typeDecl.jimplify1phase2();
+    }
+    for(int i = 0; i < getNumBodyDecl(); i++)
+      if(getBodyDecl(i).generate())
+        getBodyDecl(i).jimplify1phase2();
+    addAttributes();
+  }
+
+  syn boolean BodyDecl.generate() = true;
+
+  public void ClassDecl.jimplify1phase2() {
+    SootClass sc = getSootClassDecl();
+    sc.setResolvingLevel(SootClass.DANGLING);
+    sc.setModifiers(sootTypeModifiers());
+    sc.setApplicationClass();
+    SourceFileTag st = new soot.tagkit.SourceFileTag(sourceNameWithoutPath());
+    st.setAbsolutePath(compilationUnit().pathName());
+    sc.addTag(st);
+    if(hasSuperclass()) {
+      sc.setSuperclass(superclass().getSootClassDecl());
+    }
+    for(Iterator iter = interfacesIterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      if(!sc.implementsInterface(typeDecl.getSootClassDecl().getName()))
+        sc.addInterface(typeDecl.getSootClassDecl());
+    }
+    if(isNestedType())
+      sc.setOuterClass(enclosingType().getSootClassDecl());
+    sc.setResolvingLevel(SootClass.HIERARCHY);
+    super.jimplify1phase2();
+    sc.setResolvingLevel(SootClass.SIGNATURES);
+  }
+
+  public void InterfaceDecl.jimplify1phase2() {
+    SootClass sc = getSootClassDecl();
+    sc.setResolvingLevel(SootClass.DANGLING);
+    sc.setModifiers(sootTypeModifiers());
+    sc.setApplicationClass();
+    SourceFileTag st = new soot.tagkit.SourceFileTag(sourceNameWithoutPath());
+    st.setAbsolutePath(compilationUnit().pathName());
+    sc.addTag(st);
+    sc.setSuperclass(typeObject().getSootClassDecl());
+    for(Iterator iter = superinterfacesIterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      if(typeDecl != typeObject() && !sc.implementsInterface(typeDecl.getSootClassDecl().getName()))
+        sc.addInterface(typeDecl.getSootClassDecl());
+    }
+    if(isNestedType())
+      sc.setOuterClass(enclosingType().getSootClassDecl());
+    sc.setResolvingLevel(SootClass.HIERARCHY);
+    super.jimplify1phase2();
+    sc.setResolvingLevel(SootClass.SIGNATURES);
+  }
+  
+  public void BodyDecl.jimplify1phase2() {
+  }
+
+  public void MethodDecl.jimplify1phase2() {
+    String name = name();
+    ArrayList parameters = new ArrayList();
+    ArrayList paramnames = new ArrayList();
+    for(int i = 0; i < getNumParameter(); i++) {
+      parameters.add(getParameter(i).type().getSootType());
+      paramnames.add(getParameter(i).name());
+    }
+    soot.Type returnType = type().getSootType();
+    int modifiers = sootTypeModifiers();
+    ArrayList throwtypes = new ArrayList();
+    for(int i = 0; i < getNumException(); i++)
+      throwtypes.add(getException(i).type().getSootClassDecl());
+    String signature = SootMethod.getSubSignature(name, parameters, returnType);
+    if(!hostType().getSootClassDecl().declaresMethod(signature)) {
+      SootMethod m = new SootMethod(name, parameters, returnType, modifiers, throwtypes);
+      hostType().getSootClassDecl().addMethod(m);
+      m.addTag(new soot.tagkit.ParamNamesTag(paramnames));
+      sootMethod = m;
+    } else {
+	sootMethod = hostType().getSootClassDecl().getMethod(signature);
+    }
+    addAttributes();
+  }
+  public void ConstructorDecl.jimplify1phase2() {
+    String name = "<init>";
+    ArrayList parameters = new ArrayList();
+    ArrayList paramnames = new ArrayList();
+    // this$0
+    TypeDecl typeDecl = hostType();
+    if(typeDecl.needsEnclosing())
+      parameters.add(typeDecl.enclosingType().getSootType());
+    if(typeDecl.needsSuperEnclosing()) {
+      TypeDecl superClass = ((ClassDecl)typeDecl).superclass();
+      parameters.add(superClass.enclosingType().getSootType());
+    }
+    // args
+    for(int i = 0; i < getNumParameter(); i++) {
+      parameters.add(getParameter(i).type().getSootType());
+      paramnames.add(getParameter(i).name());
+    }
+    soot.Type returnType = soot.VoidType.v();
+    int modifiers = sootTypeModifiers();
+    ArrayList throwtypes = new ArrayList();
+    for(int i = 0; i < getNumException(); i++)
+      throwtypes.add(getException(i).type().getSootClassDecl());
+    String signature = SootMethod.getSubSignature(name, parameters, returnType);
+    if(!hostType().getSootClassDecl().declaresMethod(signature)) {
+      SootMethod m = new SootMethod(name, parameters, returnType, modifiers, throwtypes);
+      hostType().getSootClassDecl().addMethod(m);
+      m.addTag(new soot.tagkit.ParamNamesTag(paramnames));
+      sootMethod = m;
+    } else {
+    	sootMethod = hostType().getSootClassDecl().getMethod(signature);
+    }
+    addAttributes();
+  }
+
+  public SootMethod MethodDecl.sootMethod;
+  syn lazy SootMethod MethodDecl.sootMethod() {
+    ArrayList list = new ArrayList();
+    for(int i = 0; i < getNumParameter(); i++)
+      list.add(getParameter(i).type().getSootType());
+    if(hostType().isArrayDecl())
+      return typeObject().getSootClassDecl().getMethod(name(), list, type().getSootType());
+    return hostType().getSootClassDecl().getMethod(name(), list, type().getSootType());
+  }
+  inh TypeDecl MethodDecl.typeObject();
+
+  syn lazy SootMethodRef MethodDecl.sootRef() {
+    ArrayList parameters = new ArrayList();
+    for(int i = 0; i < getNumParameter(); i++)
+      parameters.add(getParameter(i).type().getSootType());
+    SootMethodRef ref = Scene.v().makeMethodRef(
+      hostType().getSootClassDecl(),
+      name(),
+      parameters,
+      type().getSootType(),
+      isStatic()
+    );
+    return ref;
+  }
+
+
+  public SootMethod ConstructorDecl.sootMethod;
+  syn lazy SootMethod ConstructorDecl.sootMethod() {
+    ArrayList list = new ArrayList();
+    // this$0
+    TypeDecl typeDecl = hostType();
+    if(typeDecl.needsEnclosing())
+      list.add(typeDecl.enclosingType().getSootType());
+    if(typeDecl.needsSuperEnclosing()) {
+      TypeDecl superClass = ((ClassDecl)typeDecl).superclass();
+      list.add(superClass.enclosingType().getSootType());
+    }
+    // args
+    for(int i = 0; i < getNumParameter(); i++)
+      list.add(getParameter(i).type().getSootType());
+    return hostType().getSootClassDecl().getMethod("<init>", list, soot.VoidType.v());
+  }
+  syn lazy SootMethodRef ConstructorDecl.sootRef() {
+    ArrayList parameters = new ArrayList();
+    TypeDecl typeDecl = hostType();
+    if(typeDecl.needsEnclosing())
+      parameters.add(typeDecl.enclosingType().getSootType());
+    if(typeDecl.needsSuperEnclosing()) {
+      TypeDecl superClass = ((ClassDecl)typeDecl).superclass();
+      parameters.add(superClass.enclosingType().getSootType());
+    }
+    for(int i = 0; i < getNumParameter(); i++)
+      parameters.add(getParameter(i).type().getSootType());
+    SootMethodRef ref = Scene.v().makeConstructorRef(
+      hostType().getSootClassDecl(),
+      parameters
+    );
+    return ref;
+  }
+  
+
+  public void FieldDeclaration.jimplify1phase2() {
+    String name = name();
+    soot.Type type = type().getSootType();
+    int modifiers = sootTypeModifiers();
+    if(!hostType().getSootClassDecl().declaresFieldByName(name)) {
+      SootField f = new SootField(name, type, modifiers);
+      hostType().getSootClassDecl().addField(f);
+      if(isStatic() && isFinal() && isConstant() && (type().isPrimitive() || type().isString())) {
+        if(type().isString())
+          f.addTag(new soot.tagkit.StringConstantValueTag(constant().stringValue()));
+        else if(type().isLong())
+          f.addTag(new soot.tagkit.LongConstantValueTag(constant().longValue()));
+        else if(type().isDouble())
+          f.addTag(new soot.tagkit.DoubleConstantValueTag(constant().doubleValue()));
+        else if(type().isFloat())
+          f.addTag(new soot.tagkit.FloatConstantValueTag(constant().floatValue()));
+        else if(type().isIntegralType())
+          f.addTag(new soot.tagkit.IntegerConstantValueTag(constant().intValue()));
+      }
+      sootField = f;
+    } else {
+	sootField = hostType().getSootClassDecl().getFieldByName(name);
+    }
+    addAttributes();
+  }
+  public SootField FieldDeclaration.sootField;
+  syn lazy SootFieldRef FieldDeclaration.sootRef() =
+    Scene.v().makeFieldRef(hostType().getSootClassDecl(), name(), type().getSootType(), isStatic());
+   // hostType().getSootClassDecl().getField(name(), type().getSootType()).makeRef();
+  
+  public void Program.jimplify2() {
+    for(Iterator iter = compilationUnitIterator(); iter.hasNext(); ) {
+      CompilationUnit u = (CompilationUnit)iter.next();
+      if(u.fromSource())
+        u.jimplify2();
+    }
+  }
+  public void ASTNode.jimplify2() {
+    for(int i = 0; i < getNumChild(); i++)
+      getChild(i).jimplify2();
+  }
+
+  public void ASTNode.jimplify2(Body b) {
+    for(int i = 0; i < getNumChild(); i++)
+      getChild(i).jimplify2(b);
+  }
+
+
+  public void VariableDeclaration.jimplify2(Body b) {
+    b.setLine(this);
+    local = b.newLocal(name(), type().getSootType());
+    if(hasInit()) {
+      b.add(
+        b.newAssignStmt(
+          local,
+          asRValue(b,
+            getInit().type().emitCastTo(b, // Assign conversion
+              getInit(),
+              type()
+            )
+          ),
+          this
+        )
+      );
+    }
+  }
+  public Local VariableDeclaration.local;
+
+  public void ParameterDeclaration.jimplify2(Body b) {
+    b.setLine(this);
+    local = b.newLocal(name(), type().getSootType());
+    b.add(b.newIdentityStmt(local, b.newParameterRef(type().getSootType(), localNum(), this),this));
+  }
+  public Local ParameterDeclaration.local;
+
+
+  public soot.Immediate ASTNode.asImmediate(Body b, soot.Value v) {
+    if(v instanceof soot.Immediate) return (soot.Immediate)v;
+    return b.newTemp(v);
+  }
+  public soot.Local ASTNode.asLocal(Body b, soot.Value v) {
+    if(v instanceof soot.Local) return (soot.Local)v;
+    return b.newTemp(v);
+  }
+  public soot.Local ASTNode.asLocal(Body b, soot.Value v, Type t) {
+    if(v instanceof soot.Local) return (soot.Local)v;
+    soot.Local local = b.newTemp(t);
+    b.add(b.newAssignStmt(local, v, null));
+    b.copyLocation(v, local);
+    return local;
+  }
+  public soot.Value ASTNode.asRValue(Body b, soot.Value v) {
+    if(v instanceof soot.Local) return v;
+    if(v instanceof soot.jimple.Constant) return v;
+    if(v instanceof soot.jimple.ConcreteRef) return v;
+    if(v instanceof soot.jimple.Expr) return v;
+    throw new Error("Need to convert " + v.getClass().getName() + " to RValue");
+  }
+
+  public soot.Value TypeDecl.emitCastTo(Body b, Expr expr, TypeDecl type) {
+    if(expr.isConstant())
+      return emitConstant(type.cast(expr.constant()));
+    return emitCastTo(b, expr.eval(b), type, expr);
+  }
+
+  public soot.Value TypeDecl.emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
+    if(this == type)
+      return v;
+    if(isReferenceType() && type.isReferenceType() && instanceOf(type))
+      return v;
+    if((isLong() || this instanceof FloatingPointType) && type.isIntegralType()) {
+      v = b.newCastExpr(
+        asImmediate(b, v), typeInt().getSootType(), location);
+      return typeInt().emitCastTo(b, v, type, location);
+    }
+
+    return b.newCastExpr(
+      asImmediate(b, v),
+      type.getSootType(),
+      location
+    );
+  }
+  public soot.Value NullType.emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
+    return v;
+  }
+
+  class Body {
+    int nextTempIndex = 0;
+    soot.jimple.JimpleBody body;
+    java.util.Stack chains;
+    TypeDecl typeDecl;
+    public Body(TypeDecl typeDecl, soot.jimple.JimpleBody body, ASTNode container) {
+      this.typeDecl = typeDecl;
+      this.body = body;
+      chains = new java.util.Stack();
+      chains.push(body.getUnits());
+      setLine(container);
+      if(!body.getMethod().isStatic())
+        emitThis(typeDecl);
+    }
+    public Local getParam(int i)
+    {
+      return body.getParameterLocal(i);
+    }
+    public Local newTemp(soot.Type type) {
+      Local local = Jimple.v().newLocal("temp$" + nextTempIndex++, type);
+      body.getLocals().add(local);
+      return local;
+    }
+    public Local newTemp(soot.Value v) {
+      if (v == NullConstant.v())
+        throw new UnsupportedOperationException(
+            "Cannot create a temporary local for null literal");
+      Local local = newTemp(v.getType());
+      if(v instanceof soot.jimple.ParameterRef) {
+        add(newIdentityStmt(local, (soot.jimple.ParameterRef)v, null));
+      }
+      else {
+        add(newAssignStmt(local, v, null));
+      }
+      copyLocation(v, local);
+      return local;
+    }
+    public Local newLocal(String name, soot.Type type) {
+      Local local = Jimple.v().newLocal(name, type);
+      body.getLocals().add(local);
+      if(name.equals("this") && thisName == null)
+        thisName = local;
+      return local;
+    }
+
+    private soot.tagkit.Tag lineTag;
+    public void setLine(ASTNode node)
+    {
+      if(node.getStart() != 0 && node.getEnd() != 0) { 
+        int line = node.getLine(node.getStart());
+        int column = node.getColumn(node.getStart());
+        int endLine = node.getLine(node.getEnd());
+        int endColumn = node.getColumn(node.getEnd());
+        String s = node.sourceFile();
+        s = s != null ? s.substring(s.lastIndexOf(java.io.File.separatorChar)+1) : "Unknown";
+        lineTag = new soot.tagkit.SourceLnNamePosTag(s, line, endLine, column, endColumn);
+      }
+      else {
+        lineTag = new soot.tagkit.LineNumberTag(node.lineNumber());
+      }
+    }
+    private soot.tagkit.Tag currentSourceRangeTag()
+    {
+      return lineTag;
+    }
+
+    public Body add(soot.jimple.Stmt stmt) {
+      if(list != null) {
+        list.add(stmt);
+        list = null;
+      }
+      stmt.addTag(currentSourceRangeTag());
+      soot.PatchingChain<Unit> chain = (soot.PatchingChain<Unit>)chains.peek();
+      if(stmt instanceof IdentityStmt && chain.size() != 0) {
+        IdentityStmt idstmt = (IdentityStmt) stmt;
+        if(!(idstmt.getRightOp() instanceof CaughtExceptionRef)) {
+          soot.Unit s = chain.getFirst();
+          while(s instanceof IdentityStmt)
+            s = chain.getSuccOf((soot.jimple.Stmt)s);
+          if(s != null) {
+            chain.insertBefore(stmt, (soot.jimple.Stmt)s);
+            return this;
+          }
+        }
+      }
+      chain.add(stmt);
+      return this;
+    }
+    public void pushBlock(soot.PatchingChain c) {
+      chains.push(c);
+    }
+    public void popBlock() {
+      chains.pop();
+    }
+
+    public soot.jimple.Stmt newLabel() {
+      return soot.jimple.Jimple.v().newNopStmt();
+    }
+    public Body addLabel(soot.jimple.Stmt label) {
+      add(label);
+      return this;
+    }
+
+    public soot.Local emitThis(TypeDecl typeDecl) {
+      if(thisName == null) {
+        thisName = newLocal("this", typeDecl.getSootType());
+        if(body.getMethod().isStatic())
+          add(Jimple.v().newIdentityStmt(thisName, Jimple.v().newParameterRef(typeDecl.getSootType(), 0)));
+        else
+          add(Jimple.v().newIdentityStmt(thisName, Jimple.v().newThisRef(typeDecl.sootRef())));
+      }
+      return thisName;
+    }
+    Local thisName;
+
+    public Body addTrap(TypeDecl type, soot.jimple.Stmt firstStmt, soot.jimple.Stmt lastStmt, soot.jimple.Stmt handler) {
+      body.getTraps().add(Jimple.v().newTrap(type.getSootClassDecl(), firstStmt, lastStmt, handler));
+      return this;
+    }
+
+    public soot.jimple.Stmt previousStmt() {
+      PatchingChain<Unit> o = (PatchingChain<Unit>)chains.lastElement();
+      return (soot.jimple.Stmt)o.getLast();
+    }
+    public void addNextStmt(java.util.ArrayList list) {
+      this.list = list;
+    }
+    java.util.ArrayList list = null;
+    public soot.jimple.BinopExpr newXorExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newXorExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newUshrExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newUshrExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newSubExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newSubExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newShrExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newShrExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newShlExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newShlExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newRemExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newRemExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newOrExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newOrExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newNeExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newNeExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newMulExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newMulExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newLeExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newLeExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newGeExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newGeExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newEqExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newEqExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newDivExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newDivExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newCmplExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newCmplExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newCmpgExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newCmpgExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newCmpExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newCmpExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newGtExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newGtExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newLtExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newLtExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newAddExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newAddExpr(op1, op2), location, op1, op2); }
+    public soot.jimple.BinopExpr newAndExpr(soot.Value op1, soot.Value op2, ASTNode location) { return updateTags(Jimple.v().newAndExpr(op1, op2), location, op1, op2); }
+
+    public soot.jimple.UnopExpr newNegExpr(soot.Value op, ASTNode location) { return updateTags(Jimple.v().newNegExpr(op), location, op); }
+    public soot.jimple.UnopExpr newLengthExpr(soot.Value op, ASTNode location) { return updateTags(Jimple.v().newLengthExpr(op), location, op); }
+
+    public soot.jimple.CastExpr newCastExpr(Value op1, Type t, ASTNode location) {
+      soot.jimple.CastExpr expr = Jimple.v().newCastExpr(op1, t);
+      createTag(expr, location);
+      soot.tagkit.Tag op1tag = getTag(op1);
+      if(op1tag != null) expr.getOpBox().addTag(op1tag);
+      return expr;
+    }
+
+    public soot.jimple.InstanceOfExpr newInstanceOfExpr(Value op1, Type t, ASTNode location) {
+      soot.jimple.InstanceOfExpr expr = Jimple.v().newInstanceOfExpr(op1, t);
+      createTag(expr, location);
+      soot.tagkit.Tag op1tag = getTag(op1);
+      if(op1tag != null) expr.getOpBox().addTag(op1tag);
+      return expr;
+    }
+
+    public soot.jimple.NewExpr newNewExpr(RefType type, ASTNode location) {
+      soot.jimple.NewExpr expr = Jimple.v().newNewExpr(type);
+      createTag(expr, location);
+      return expr;
+    }
+
+    public soot.jimple.NewArrayExpr newNewArrayExpr(Type type, Value size, ASTNode location) {
+      soot.jimple.NewArrayExpr expr = Jimple.v().newNewArrayExpr(type, size);
+      createTag(expr, location);
+      soot.tagkit.Tag tag = getTag(size);
+      if(tag != null) expr.getSizeBox().addTag(tag);
+      return expr;
+    }
+
+    public soot.jimple.NewMultiArrayExpr newNewMultiArrayExpr(ArrayType type, java.util.List sizes, ASTNode location) {
+      soot.jimple.NewMultiArrayExpr expr = Jimple.v().newNewMultiArrayExpr(type, sizes);
+      createTag(expr, location);
+      for(int i = 0; i < sizes.size(); i++) {
+        soot.tagkit.Tag tag = getTag((Value)sizes.get(i));
+        if(tag != null) expr.getSizeBox(i).addTag(tag);
+      }
+      return expr;
+    }
+
+    public soot.jimple.StaticInvokeExpr newStaticInvokeExpr(SootMethodRef method, java.util.List args, ASTNode location) {
+      soot.jimple.StaticInvokeExpr expr = Jimple.v().newStaticInvokeExpr(method, args);
+      createTag(expr, location);
+      for(int i = 0; i < args.size(); i++) {
+        soot.tagkit.Tag tag = getTag((Value)args.get(i));
+        if(tag != null) expr.getArgBox(i).addTag(tag);
+      }
+      return expr;
+    }
+
+    public soot.jimple.SpecialInvokeExpr newSpecialInvokeExpr(Local base, SootMethodRef method, java.util.List args, ASTNode location) {
+      soot.jimple.SpecialInvokeExpr expr = Jimple.v().newSpecialInvokeExpr(base, method, args);
+      createTag(expr, location);
+      for(int i = 0; i < args.size(); i++) {
+        soot.tagkit.Tag tag = getTag((Value)args.get(i));
+        if(tag != null) expr.getArgBox(i).addTag(tag);
+      }
+      return expr;
+    }
+
+    public soot.jimple.VirtualInvokeExpr newVirtualInvokeExpr(Local base, SootMethodRef method, java.util.List args, ASTNode location) {
+      soot.jimple.VirtualInvokeExpr expr = Jimple.v().newVirtualInvokeExpr(base, method, args);
+      createTag(expr, location);
+      for(int i = 0; i < args.size(); i++) {
+        soot.tagkit.Tag tag = getTag((Value)args.get(i));
+        if(tag != null) expr.getArgBox(i).addTag(tag);
+      }
+      return expr;
+    }
+
+    public soot.jimple.InterfaceInvokeExpr newInterfaceInvokeExpr(Local base, SootMethodRef method, java.util.List args, ASTNode location) {
+      soot.jimple.InterfaceInvokeExpr expr = Jimple.v().newInterfaceInvokeExpr(base, method, args);
+      createTag(expr, location);
+      for(int i = 0; i < args.size(); i++) {
+        soot.tagkit.Tag tag = getTag((Value)args.get(i));
+        if(tag != null) expr.getArgBox(i).addTag(tag);
+      }
+      return expr;
+    }
+
+    public soot.jimple.StaticInvokeExpr newStaticInvokeExpr(SootMethodRef method, ASTNode location) {
+      return newStaticInvokeExpr(method, new ArrayList(), location);
+    }
+    public soot.jimple.SpecialInvokeExpr newSpecialInvokeExpr(Local base, SootMethodRef method, ASTNode location) {
+      return newSpecialInvokeExpr(base, method, new ArrayList(), location);
+    }
+    public soot.jimple.VirtualInvokeExpr newVirtualInvokeExpr(Local base, SootMethodRef method, ASTNode location) {
+      return newVirtualInvokeExpr(base, method, new ArrayList(), location);
+    }
+    public soot.jimple.InterfaceInvokeExpr newInterfaceInvokeExpr(Local base, SootMethodRef method, ASTNode location) {
+      return newInterfaceInvokeExpr(base, method, new ArrayList(), location);
+    }
+    public soot.jimple.StaticInvokeExpr newStaticInvokeExpr(SootMethodRef method, Value arg, ASTNode location) {
+      return newStaticInvokeExpr(method, Arrays.asList(new Value[] { arg }), location);
+    }
+    public soot.jimple.SpecialInvokeExpr newSpecialInvokeExpr(Local base, SootMethodRef method, Value arg, ASTNode location) {
+      return newSpecialInvokeExpr(base, method, Arrays.asList(new Value[] { arg }), location);
+    }
+    public soot.jimple.VirtualInvokeExpr newVirtualInvokeExpr(Local base, SootMethodRef method, Value arg, ASTNode location) {
+      return newVirtualInvokeExpr(base, method, Arrays.asList(new Value[] { arg }), location);
+    }
+    public soot.jimple.InterfaceInvokeExpr newInterfaceInvokeExpr(Local base, SootMethodRef method, Value arg, ASTNode location) {
+      return newInterfaceInvokeExpr(base, method, Arrays.asList(new Value[] { arg }), location);
+    }
+
+    public soot.jimple.ThrowStmt newThrowStmt(Value op, ASTNode location) {
+      soot.jimple.ThrowStmt stmt = Jimple.v().newThrowStmt(op);
+      soot.tagkit.Tag tag = getTag(op);
+      if(tag != null) stmt.getOpBox().addTag(tag);
+      return stmt;
+    }
+
+    public soot.jimple.ExitMonitorStmt newExitMonitorStmt(Value op, ASTNode location) {
+      soot.jimple.ExitMonitorStmt stmt = Jimple.v().newExitMonitorStmt(op);
+      soot.tagkit.Tag tag = getTag(op);
+      if(tag != null) stmt.getOpBox().addTag(tag);
+      return stmt;
+    }
+
+    public soot.jimple.EnterMonitorStmt newEnterMonitorStmt(Value op, ASTNode location) {
+      soot.jimple.EnterMonitorStmt stmt = Jimple.v().newEnterMonitorStmt(op);
+      soot.tagkit.Tag tag = getTag(op);
+      if(tag != null) stmt.getOpBox().addTag(tag);
+      return stmt;
+    }
+
+    public soot.jimple.GotoStmt newGotoStmt(Unit target, ASTNode location) {
+      soot.jimple.GotoStmt stmt = Jimple.v().newGotoStmt(target);
+      return stmt;
+    }
+
+    public soot.jimple.ReturnVoidStmt newReturnVoidStmt(ASTNode location) {
+      return Jimple.v().newReturnVoidStmt();
+    }
+
+    public soot.jimple.ReturnStmt newReturnStmt(Value op, ASTNode location) {
+      soot.jimple.ReturnStmt stmt = Jimple.v().newReturnStmt(op);
+      soot.tagkit.Tag tag = getTag(op);
+      if(tag != null) stmt.getOpBox().addTag(tag);
+      return stmt;
+    }
+
+    public soot.jimple.IfStmt newIfStmt(Value op, Unit target, ASTNode location) {
+      soot.jimple.IfStmt stmt = Jimple.v().newIfStmt(op, target);
+      soot.tagkit.Tag tag = getTag(op);
+      if(tag != null) stmt.getConditionBox().addTag(tag);
+      return stmt;
+    }
+    
+    public soot.jimple.IdentityStmt newIdentityStmt(Value local, Value identityRef, ASTNode location) {
+      soot.jimple.IdentityStmt stmt = Jimple.v().newIdentityStmt(local, identityRef);
+      soot.tagkit.Tag left = getTag(local);
+      if(left != null) stmt.getLeftOpBox().addTag(left);
+      soot.tagkit.Tag right = getTag(identityRef);
+      if(right != null) stmt.getRightOpBox().addTag(right);
+      return stmt;
+    }
+
+    public soot.jimple.AssignStmt newAssignStmt(Value variable, Value rvalue, ASTNode location) {
+      soot.jimple.AssignStmt stmt = Jimple.v().newAssignStmt(variable, rvalue);
+      soot.tagkit.Tag left = getTag(variable);
+      if(left != null) stmt.getLeftOpBox().addTag(left);
+      soot.tagkit.Tag right = getTag(rvalue);
+      if(right != null) stmt.getRightOpBox().addTag(right);
+      return stmt;
+    }
+
+    public soot.jimple.InvokeStmt newInvokeStmt(Value op, ASTNode location) {
+      soot.jimple.InvokeStmt stmt = Jimple.v().newInvokeStmt(op);
+      soot.tagkit.Tag tag = getTag(op);
+      if(tag != null) stmt.getInvokeExprBox().addTag(tag);
+      return stmt;
+    }
+
+    public soot.jimple.TableSwitchStmt newTableSwitchStmt(Value key, int lowIndex, int highIndex, java.util.List targets, Unit defaultTarget, ASTNode location) {
+      soot.jimple.TableSwitchStmt stmt = Jimple.v().newTableSwitchStmt(key, lowIndex, highIndex, targets, defaultTarget);
+      soot.tagkit.Tag tag = getTag(key);
+      if(tag != null) stmt.getKeyBox().addTag(tag);
+      return stmt;
+    }
+
+    public soot.jimple.LookupSwitchStmt newLookupSwitchStmt(Value key, java.util.List lookupValues, java.util.List targets, Unit defaultTarget, ASTNode location) {
+      soot.jimple.LookupSwitchStmt stmt = Jimple.v().newLookupSwitchStmt(key, lookupValues, targets, defaultTarget);
+      soot.tagkit.Tag tag = getTag(key);
+      if(tag != null) stmt.getKeyBox().addTag(tag);
+      return stmt;
+    }
+
+    public soot.jimple.StaticFieldRef newStaticFieldRef(SootFieldRef f, ASTNode location) {
+      soot.jimple.StaticFieldRef ref = Jimple.v().newStaticFieldRef(f);
+      createTag(ref, location);
+      return ref;
+    }
+    
+    public soot.jimple.ThisRef newThisRef(RefType t, ASTNode location) {
+      soot.jimple.ThisRef ref = Jimple.v().newThisRef(t);
+      createTag(ref, location);
+      return ref;
+    }
+
+    public soot.jimple.ParameterRef newParameterRef(Type paramType, int number, ASTNode location) {
+      soot.jimple.ParameterRef ref = Jimple.v().newParameterRef(paramType, number);
+      createTag(ref, location);
+      return ref;
+    }
+
+    public soot.jimple.InstanceFieldRef newInstanceFieldRef(Value base, SootFieldRef f, ASTNode location) {
+      soot.jimple.InstanceFieldRef ref = Jimple.v().newInstanceFieldRef(base, f);
+      createTag(ref, location);
+      soot.tagkit.Tag tag = getTag(base);
+      if(tag != null) ref.getBaseBox().addTag(tag);
+      return ref;
+    }
+
+    public soot.jimple.CaughtExceptionRef newCaughtExceptionRef(ASTNode location) {
+      soot.jimple.CaughtExceptionRef ref = Jimple.v().newCaughtExceptionRef();
+      createTag(ref, location);
+      return ref;
+    }
+
+    public soot.jimple.ArrayRef newArrayRef(Value base, Value index, ASTNode location) {
+      soot.jimple.ArrayRef ref = Jimple.v().newArrayRef(base, index);
+      createTag(ref, location);
+      soot.tagkit.Tag baseTag = getTag(base);
+      if(baseTag != null) ref.getBaseBox().addTag(baseTag);
+      soot.tagkit.Tag indexTag = getTag(index);
+      if(indexTag != null) ref.getIndexBox().addTag(indexTag);
+      return ref;
+    }
+
+    private soot.jimple.BinopExpr updateTags(soot.jimple.BinopExpr binary, ASTNode binaryLocation, soot.Value op1, soot.Value op2) {
+      createTag(binary, binaryLocation);
+      soot.tagkit.Tag op1tag = getTag(op1);
+      if(op1tag != null) binary.getOp1Box().addTag(op1tag);
+      soot.tagkit.Tag op2tag = getTag(op2);
+      if(op2tag != null) binary.getOp2Box().addTag(op2tag);
+      return binary;
+    }
+    private soot.jimple.UnopExpr updateTags(soot.jimple.UnopExpr unary, ASTNode unaryLocation, soot.Value op) {
+      createTag(unary, unaryLocation);
+      soot.tagkit.Tag optag = getTag(op);
+      if(optag != null) unary.getOpBox().addTag(optag);
+      return unary;
+    }
+
+    private java.util.HashMap<soot.Value, soot.tagkit.Tag> tagMap = new java.util.HashMap<soot.Value, soot.tagkit.Tag>();
+    private soot.tagkit.Tag getTag(soot.Value value) {
+      return tagMap.get(value);
+    }
+    private void createTag(soot.Value value, ASTNode node) {
+      if(node == null || tagMap.containsKey(value))
+        return;
+      if(node.getStart() != 0 && node.getEnd() != 0) { 
+        int line = node.getLine(node.getStart());
+        int column = node.getColumn(node.getStart());
+        int endLine = node.getLine(node.getEnd());
+        int endColumn = node.getColumn(node.getEnd());
+        String s = node.sourceFile();
+        s = s != null ? s.substring(s.lastIndexOf(java.io.File.separatorChar)+1) : "Unknown";
+        tagMap.put(value, new soot.tagkit.SourceLnNamePosTag(s, line, endLine, column, endColumn));
+      }
+      else {
+        tagMap.put(value, new soot.tagkit.LineNumberTag(node.lineNumber()));
+      }
+    }
+    public void copyLocation(soot.Value fromValue, soot.Value toValue) {
+      soot.tagkit.Tag tag = tagMap.get(fromValue);
+      if(tag != null)
+        tagMap.put(toValue, tag);
+    }
+  }
+
+  protected soot.jimple.Stmt ASTNode.newLabel() {
+    return soot.jimple.Jimple.v().newNopStmt();
+  }
+
+
+
+  inh TypeDecl CatchClause.hostType();
+  
+  syn lazy boolean TypeDecl.needsClinit() {
+    for(int i = 0; i < getNumBodyDecl(); i++) {
+      BodyDecl b = getBodyDecl(i);
+      if(b instanceof FieldDeclaration) {
+        FieldDeclaration f = (FieldDeclaration)b;
+        if(f.isStatic() && f.hasInit() && f.generate()) {
+          return true;
+        }
+      }
+      else if(b instanceof StaticInitializer && b.generate()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void TypeDecl.jimplify2clinit() {
+      SootMethod m = clinit;
+      JimpleBody body = Jimple.v().newBody(m);
+      m.setActiveBody(body);
+      Body b = new Body(this, body, this);
+      for(int i = 0; i < getNumBodyDecl(); i++) {
+        BodyDecl bodyDecl = getBodyDecl(i);
+        if(bodyDecl instanceof FieldDeclaration && bodyDecl.generate()) {
+          FieldDeclaration f = (FieldDeclaration)bodyDecl;
+          if(f.isStatic() && f.hasInit()) {
+            Local l = asLocal(b, 
+              f.getInit().type().emitCastTo(b, f.getInit(), f.type()), // AssignConversion
+              f.type().getSootType()
+            );
+            b.setLine(f);
+            b.add(b.newAssignStmt(
+              b.newStaticFieldRef(f.sootRef(), f),
+              l,
+              f
+            ));
+          }
+        }
+        else if(bodyDecl instanceof StaticInitializer && bodyDecl.generate()) {
+          bodyDecl.jimplify2(b);
+        }
+      }
+      b.add(b.newReturnVoidStmt(null));
+  }
+
+  public void TypeDecl.jimplify2() {
+    super.jimplify2();
+    if(clinit != null)
+      jimplify2clinit();
+    for(Iterator iter = nestedTypes().iterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      typeDecl.jimplify2();
+    }
+    // add inner class attribute
+    ArrayList tags = new ArrayList();
+    for(Iterator iter = innerClassesAttributeEntries().iterator(); iter.hasNext(); ) {
+      TypeDecl type = (TypeDecl)iter.next();
+      tags.add(
+        new soot.tagkit.InnerClassTag(
+          type.jvmName().replace('.', '/'),
+          type.isMemberType() ? type.enclosingType().jvmName().replace('.', '/') : null,
+          type.isAnonymous() ? null : type.name(),
+          type.sootTypeModifiers()
+        )
+      );
+    }
+    if(!tags.isEmpty())
+      getSootClassDecl().addTag(new soot.tagkit.InnerClassAttribute(tags));
+    addAttributes();
+    getSootClassDecl().setResolvingLevel(SootClass.BODIES);
+  }
+
+  public void ASTNode.addAttributes() {
+  }
+
+  syn lazy Collection TypeDecl.innerClassesAttributeEntries() {
+    HashSet list = new HashSet();
+    if(isNestedType())
+      list.add(this);
+    for(Iterator iter = nestedTypes().iterator(); iter.hasNext(); )
+      list.add(iter.next());
+    for(Iterator iter = usedNestedTypes().iterator(); iter.hasNext(); )
+      list.add(iter.next());
+    return list;
+  }
+
+  public void BodyDecl.jimplify2() {
+  }
+
+  public void MethodDecl.jimplify2() {
+    if(!generate() || sootMethod().hasActiveBody() || sootMethod().getSource() != null) return;
+    try {
+      if(hasBlock() && sootMethod().isConcrete() && !(hostType().isInterfaceDecl())) {
+        JimpleBody body = Jimple.v().newBody(sootMethod());
+        sootMethod().setActiveBody(body);
+        Body b = new Body(hostType(), body, this);
+        b.setLine(this);
+        for(int i = 0; i < getNumParameter(); i++)
+          getParameter(i).jimplify2(b);
+        getBlock().jimplify2(b);
+        if(type() instanceof VoidType)
+          b.add(b.newReturnVoidStmt(null));
+      }
+    } catch (RuntimeException e) {
+      System.err.println("Error generating " + hostType().typeName() + ": " + this); 
+      throw e;
+    }
+  }
+
+  syn lazy SootField TypeDecl.getSootField(String name, TypeDecl type) {
+    SootField f = new SootField(name, type.getSootType(), 0);
+    getSootClassDecl().addField(f);
+    return f;
+  }
+
+  public void ConstructorDecl.jimplify2() {
+    if(!generate() || sootMethod().hasActiveBody() || sootMethod().getSource() != null) return;
+    JimpleBody body = Jimple.v().newBody(sootMethod());
+    sootMethod().setActiveBody(body);
+    Body b = new Body(hostType(), body, this);
+    b.setLine(this);
+    for(int i = 0; i < getNumParameter(); i++)
+      getParameter(i).jimplify2(b);
+
+    boolean needsInit = true;
+
+    if(hasConstructorInvocation()) {
+      getConstructorInvocation().jimplify2(b);
+      Stmt stmt = getConstructorInvocation();
+      if(stmt instanceof ExprStmt) {
+        ExprStmt exprStmt = (ExprStmt)stmt;
+        Expr expr = exprStmt.getExpr();
+        if(!expr.isSuperConstructorAccess())
+          needsInit = false;
+
+      }
+    }
+
+    if(hostType().needsEnclosing()) {
+      TypeDecl type = hostType().enclosingType();
+      b.add(b.newAssignStmt(
+        b.newInstanceFieldRef(
+          b.emitThis(hostType()),
+          hostType().getSootField("this$0", type).makeRef(),
+          this
+        ),
+        asLocal(b, b.newParameterRef(type.getSootType(), 0, this)),
+        this
+      ));
+    }
+    
+    for(Iterator iter = hostType().enclosingVariables().iterator(); iter.hasNext(); ) {
+      Variable v = (Variable)iter.next();
+      ParameterDeclaration p = (ParameterDeclaration)parameterDeclaration("val$" + v.name()).iterator().next();
+      b.add(b.newAssignStmt(
+        b.newInstanceFieldRef(
+          b.emitThis(hostType()),
+          hostType().getSootClassDecl().getField("val$" + v.name(), v.type().getSootType()).makeRef(),
+          this
+        ),
+        p.local,
+        this
+      ));
+    }
+
+    if(needsInit) {
+      TypeDecl typeDecl = hostType();
+      for(int i = 0; i < typeDecl.getNumBodyDecl(); i++) {
+        BodyDecl bodyDecl = typeDecl.getBodyDecl(i);
+        if(bodyDecl instanceof FieldDeclaration && bodyDecl.generate()) {
+          FieldDeclaration f = (FieldDeclaration)bodyDecl;
+          if(!f.isStatic() && f.hasInit()) {
+            soot.Local base = b.emitThis(hostType());
+            Local l = asLocal(b,
+              f.getInit().type().emitCastTo(b, f.getInit(), f.type()), // AssignConversion
+              f.type().getSootType()
+            );
+            b.setLine(f);
+            b.add(b.newAssignStmt(
+              b.newInstanceFieldRef(base, f.sootRef(), this),
+              l,
+              this
+            ));
+          }
+        }
+        else if(bodyDecl instanceof InstanceInitializer && bodyDecl.generate()) {
+          bodyDecl.jimplify2(b);
+        }
+      }
+    }
+    getBlock().jimplify2(b);
+    b.add(b.newReturnVoidStmt(null));
+  }
+}

@@ -1,0 +1,29 @@
+TypeDecl type_declaration =
+  aspect_declaration                                     {: return aspect_declaration; :}
+  ;
+
+BodyDecl class_member_declaration =
+  aspect_declaration.a                                 {: return new MemberClassDecl(a); :}
+  ;
+BodyDecl interface_member_declaration =
+  aspect_declaration.a                                 {: return new MemberClassDecl(a); :}
+  ;
+
+AspectDecl aspect_declaration =
+    modifiers.m? ASPECT IDENTIFIER super.c? interfaces.d? aspect_body          
+    {: return new AspectDecl(new Modifiers(m), IDENTIFIER, aspect_body, c, d); :}
+  ;
+
+List aspect_body =
+  LBRACE aspect_body_declarations? RBRACE             {: return aspect_body_declarations; :};
+
+List aspect_body_declarations =
+    aspect_body_declaration.d                            {: return d != null ? new List().add(d) : new List(); :}
+  | aspect_body_declarations.l aspect_body_declaration.d {: return d != null ? l.add(d) : l; :}
+  ;
+  
+BodyDecl aspect_body_declaration =
+    class_body_declaration                               {: return class_body_declaration; :}
+  ;
+
+Modifier modifier = PRIVILEGED {: return new Modifier("privileged"); :};

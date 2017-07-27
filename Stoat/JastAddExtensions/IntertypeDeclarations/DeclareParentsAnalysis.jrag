@@ -1,0 +1,508 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect DeclareParentsAnalysis {
+
+/* Declare parents changes the type hierarchy for non-local non-anonymous classes and interfaces and aspects.
+   A superclass S may be added to a class C extends D as long as S is a subclass of D
+   New interfaces may be added to a class C
+   New superinterfaces may be added to an interface I
+
+   The subtype relation computation includes types from declare parents clauses
+  
+   Member methods in C include methods from declare parents clauses
+   Member fields in C include fields from declare parents clauses
+   Member types in C do NOT include types from declare parents clauses
+     unless a type with that name is visible in a superclass of C
+*/
+
+/* affected attributes:
+  LookupConstructor eq ClassDecl.lookupSuperConstructor()
+  LookupMethod eq ClassDecl.methodsSignatureMap()
+  LookupMethod/AncestorMethods eq ClassDecl.ancestorMethods(String signature)
+  LookupVariable eq ClassDecl.fields(String name)
+  Modifiers eq ClassDecl.unimplementedMethods()
+  TypeAnalysis eq ClassDecl.isSupertypeOfClassDecl(ClassDecl type)
+  TypeAnalysis eq InterfaceDecl.isSupertypeOfClassDecl(ClassDecl type)
+
+  alternatively modify:
+    LookupType eq ClassDecl.memberTypes(String name);
+  */
+
+
+/*
+ * NOTE: currently not used, trying demand driven arroach instead
+ * Bind all visible types including member types
+ * type check declare parents
+ * change hierarchy to include new parents
+ * flush caches
+ *   if a node is final then
+ *     flush its caches
+ *     visit its children
+ * continue computation
+ */
+
+  refine AccessControl eq TypeDecl.accessibleFrom(TypeDecl type) {
+    if(refined(type))
+      return true;
+    if(type instanceof ClassDecl && ((ClassDecl)type).introducedSuperclass() == this)
+      return true;
+    for(Iterator iter = type.introducedInterfaces().iterator(); iter.hasNext(); )
+      if(iter.next() == this) 
+        return true;
+    return false;
+  }
+  refine AccessControl eq TypeDecl.accessibleFromExtend(TypeDecl type) {
+    if(refined(type))
+      return true;
+    if(type instanceof ClassDecl && ((ClassDecl)type).introducedSuperclass() == this)
+      return true;
+    return false;
+  }
+  refine AccessControl eq ConstructorDecl.accessibleFrom(TypeDecl type) {
+    if(refined(type))
+      return true;
+    if(type instanceof ClassDecl && ((ClassDecl)type).introducedSuperclass() == hostType())
+      return true;
+    return false;
+  }
+
+  refine AspectErrorCheck public void ClassDecl.typeCheck() {
+    refined();
+    if(introducedSuperclass() != null && superclassWithoutDeclareParents() != null) {
+       if(!introducedSuperclass().instanceOf(superclassWithoutDeclareParents())
+       && !superclassWithoutDeclareParents().instanceOf(introducedSuperclass()))
+        error("declared parent " + introducedSuperclass().typeName() + " is not a subclass of " + 
+            superclassWithoutDeclareParents().typeName());
+       else if(superclassWithoutDeclareParents().instanceOf(introducedSuperclass())) {
+         for(Iterator iter = declareParentsExtends().iterator(); iter.hasNext(); ) {
+           DeclareParentsExtends e = (DeclareParentsExtends)iter.next();
+           if(e.getPattern().matchesType(this)) {
+             for(int i = 0; i < e.getNumTypeAccess(); i++) {
+               TypeDecl typeDecl = e.getTypeAccess(i).type();
+               if(typeDecl instanceof ClassDecl) {
+                 // TODO: this gives unexpected errors in the test suite
+                 // why did I add this in the first place?
+                 // e.warning("does not alter the parent of " + typeName());
+               }
+             }
+           }
+         }
+       }
+    }
+    for(Iterator iter = declareParentsImplements().iterator(); iter.hasNext(); ) {
+      DeclareParentsImplements e = (DeclareParentsImplements)iter.next();
+      if(e.getPattern().matchesType(this)) {
+        for(int i = 0; i < e.getNumTypeAccess(); i++) {
+          TypeDecl typeDecl = e.getTypeAccess(i).type();
+          if(typeDecl.isClassDecl() && !typeDecl.isUnknown())
+            e.error("class " + typeDecl.typeName() + " may not be a parent of " + typeName());
+        }
+      }
+    }
+  }
+
+  public void InterfaceDecl.typeCheck() {
+    super.typeCheck();
+    for(Iterator iter = declareParentsImplements().iterator(); iter.hasNext(); ) {
+      DeclareParentsImplements e = (DeclareParentsImplements)iter.next();
+      if(e.getPattern().matchesType(this)) {
+        for(int i = 0; i < e.getNumTypeAccess(); i++) {
+          TypeDecl typeDecl = e.getTypeAccess(i).type();
+          if(typeDecl.isClassDecl() && !typeDecl.isUnknown())
+            e.error("class " + typeDecl.typeName() + " may not be a parent of " + typeName());
+        }
+      }
+    }
+    for(Iterator iter = declareParentsExtends().iterator(); iter.hasNext(); ) {
+      DeclareParentsExtends e = (DeclareParentsExtends)iter.next();
+      if(e.getPattern().matchesType(this)) {
+        for(int i = 0; i < e.getNumTypeAccess(); i++) {
+          TypeDecl typeDecl = e.getTypeAccess(i).type();
+          if(typeDecl.isClassDecl() && !typeDecl.isUnknown())
+            e.error("class " + typeDecl.typeName() + " may not be a parent of " + typeName());
+        }
+      }
+    }
+  }
+  
+  public ClassDecl ClassDecl.superclassWithoutDeclareParents() {
+    if(isObject())
+      return null;
+    if(hasSuperClassAccess() && !isCircularWithoutDeclareParents() && getSuperClassAccess().type().isClassDecl())
+      return (ClassDecl)getSuperClassAccess().type();
+    return (ClassDecl)typeObject();
+  }
+
+  refine TypeScopePropagation eq ClassDecl.memberTypes(String name) {
+    SimpleSet set = localTypeDecls(name);
+    if(!set.isEmpty()) return set;
+    for(Iterator outerIter = interfacesIteratorWithoutDeclareParents(); outerIter.hasNext(); ) {
+      TypeDecl type = (TypeDecl)outerIter.next();
+      for(Iterator iter = type.memberTypes(name).iterator(); iter.hasNext(); ) {
+        TypeDecl decl = (TypeDecl)iter.next();
+        if(!decl.isPrivate() && decl.accessibleFrom(this))
+          set = set.add(decl);
+      }
+    }
+    if(hasSuperclass()) {
+      for(Iterator iter = superclassWithoutDeclareParents().memberTypes(name).iterator(); iter.hasNext(); ) {
+        TypeDecl decl = (TypeDecl)iter.next();
+        if(!decl.isPrivate() && decl.accessibleFrom(this)) {
+          boolean found = false;
+          if(introducedSuperclass() != null && !superclassWithoutDeclareParents().instanceOf(introducedSuperclass())) {
+            ClassDecl c = introducedSuperclass();
+            for(Iterator i2 = c.localTypeDecls(name).iterator(); i2.hasNext(); ) {
+	      TypeDecl typeDecl = (TypeDecl)i2.next();
+	      set = set.add(typeDecl);
+	      found = true;
+	    }
+          }
+          if(!found)
+            set = set.add(decl);
+        }
+      }
+    }
+    return set;
+  }
+
+  refine SuperClasses public ClassDecl ClassDecl.superclass() {
+    if(introducedSuperclass() != null && !superclassWithoutDeclareParents().instanceOf(introducedSuperclass()))
+      return introducedSuperclass();
+    return refined();
+  }
+
+  refine SuperClasses public Iterator ClassDecl.interfacesIterator() {
+    return new Iterator() {
+      public boolean hasNext() {
+        computeNextCurrent();
+        return current != null;
+      }
+      public Object next() {
+        return current;
+      }
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+      private int index = 0;
+      private TypeDecl current = null;
+      private Iterator iter = null;
+      private void computeNextCurrent() {
+        current = null;
+        if(isObject() || isCircular())
+          return;
+        while(index < getNumImplements()) {
+          TypeDecl typeDecl = getImplements(index++).type();
+          if(!typeDecl.isCircular() && typeDecl.isInterfaceDecl()) {
+            current = typeDecl;
+            return;
+          }
+        }
+        if(iter == null)
+          iter = introducedInterfaces().iterator();
+        if(iter.hasNext()) {
+          current = (TypeDecl)iter.next();
+          return;
+        }
+      }
+    };
+  }
+
+  public Iterator ClassDecl.interfacesIteratorWithoutDeclareParents() {
+    return new Iterator() {
+      public boolean hasNext() {
+        computeNextCurrent();
+        return current != null;
+      }
+      public Object next() {
+        return current;
+      }
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+      private int index = 0;
+      private TypeDecl current = null;
+      private void computeNextCurrent() {
+        current = null;
+        if(isObject() || isCircularWithoutDeclareParents())
+          return;
+        while(index < getNumImplements()) {
+          TypeDecl typeDecl = getImplements(index++).type();
+          if(!typeDecl.isCircularWithoutDeclareParents() && typeDecl.isInterfaceDecl()) {
+            current = typeDecl;
+            return;
+          }
+        }
+      }
+    };
+  }
+
+  syn lazy boolean TypeDecl.isCircularWithoutDeclareParents() circular [true] = false;
+  eq ClassDecl.isCircularWithoutDeclareParents() {
+    if(hasSuperClassAccess()) {
+      Access a = getSuperClassAccess().lastAccess();
+      while(a != null) {
+        if(a.type().isCircularWithoutDeclareParents())
+          return true;
+        a = (a.isQualified() && a.qualifier().isTypeAccess()) ? (Access)a.qualifier() : null;
+      }
+    }
+    for(int i = 0; i < getNumImplements(); i++) {
+      Access a = getImplements(i).lastAccess();
+      while(a != null) {
+        if(a.type().isCircularWithoutDeclareParents())
+          return true;
+        a = (a.isQualified() && a.qualifier().isTypeAccess()) ? (Access)a.qualifier() : null;
+      }
+    }
+    return false;
+  }
+  eq InterfaceDecl.isCircularWithoutDeclareParents() {
+    for(int i = 0; i < getNumSuperInterfaceId(); i++) {
+      Access a = getSuperInterfaceId(i).lastAccess();
+      while(a != null) {
+        if(a.type().isCircularWithoutDeclareParents())
+          return true;
+        a = (a.isQualified() && a.qualifier().isTypeAccess()) ? (Access)a.qualifier() : null;
+      }
+    }
+    return false;
+  }
+
+  refine TypeScopePropagation eq InterfaceDecl.memberTypes(String name) {
+    SimpleSet set = localTypeDecls(name);
+    if(!set.isEmpty()) return set;
+    for(Iterator outerIter = superinterfacesIteratorWithoutDeclareParents(); outerIter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)outerIter.next();
+      for(Iterator iter = typeDecl.memberTypes(name).iterator(); iter.hasNext(); ) {
+        TypeDecl decl = (TypeDecl)iter.next();
+        if(!decl.isPrivate())
+          set = set.add(decl);
+      }
+    }
+    return set;
+  }
+
+  refine SuperClasses public Iterator InterfaceDecl.superinterfacesIterator() {
+    return new Iterator() {
+      public boolean hasNext() {
+        computeNextCurrent();
+        return current != null;
+      }
+      public Object next() {
+        return current;
+      }
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+      private int index = 0;
+      private Iterator iter = null;
+      private TypeDecl current = null;
+      private void computeNextCurrent() {
+        current = null;
+        if(isCircular()) return;
+        while(index < getNumSuperInterfaceId()) {
+          TypeDecl typeDecl = getSuperInterfaceId(index++).type();
+          if(!typeDecl.isCircular() && typeDecl.isInterfaceDecl()) {
+            current = typeDecl;
+            return;
+          }
+        }
+        if(iter == null)
+          iter = introducedInterfaces().iterator();
+        while(iter.hasNext()) {
+          TypeDecl typeDecl = (TypeDecl)iter.next();
+          if(!typeDecl.isCircular() && typeDecl.isInterfaceDecl()) {
+            current = typeDecl;
+            return;
+          }
+        }
+      }
+    };
+  }
+
+  refine Circularity eq InterfaceDecl.isCircular() {
+    if(refined())
+      return true;
+    for(Iterator iter = introducedInterfaces().iterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      if(typeDecl.isCircular())
+        return true;
+    }
+    return false;
+  }
+  refine Circularity eq ClassDecl.isCircular() {
+    if(refined())
+      return true;
+    if(introducedSuperclass() != null && introducedSuperclass().isCircular())
+      return true;
+    for(Iterator iter = introducedInterfaces().iterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      if(typeDecl.isCircular())
+        return true;
+    }
+    return false;
+  }
+
+  public Iterator InterfaceDecl.superinterfacesIteratorWithoutDeclareParents() {
+    return new Iterator() {
+      public boolean hasNext() {
+        computeNextCurrent();
+        return current != null;
+      }
+      public Object next() {
+        return current;
+      }
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+      private int index = 0;
+      private TypeDecl current = null;
+      private void computeNextCurrent() {
+        current = null;
+        if(isCircularWithoutDeclareParents()) return;
+        while(index < getNumSuperInterfaceId()) {
+          TypeDecl typeDecl = getSuperInterfaceId(index++).type();
+          if(!typeDecl.isCircularWithoutDeclareParents() && typeDecl.isInterfaceDecl()) {
+            current = typeDecl;
+            return;
+          }
+        }
+      }
+    };
+  }
+
+  syn lazy ClassDecl ClassDecl.introducedSuperclass() {
+    for(Iterator iter = declareParentsExtends().iterator(); iter.hasNext(); ) {
+      DeclareParentsExtends e = (DeclareParentsExtends)iter.next();
+      if(e.getPattern().matchesType(this)) {
+        for(int i = 0; i < e.getNumTypeAccess(); i++) {
+          TypeDecl typeDecl = e.getTypeAccess(i).type();
+          if(typeDecl instanceof ClassDecl)
+            return (ClassDecl)typeDecl;
+        }
+      }    
+    }
+    return null;
+  }
+
+  syn lazy Collection TypeDecl.introducedInterfaces() {
+    Collection c = new HashSet(); // the same interface may be introduced multiple times
+    for(Iterator iter = declareParentsImplements().iterator(); iter.hasNext(); ) {
+      DeclareParentsImplements e = (DeclareParentsImplements)iter.next();
+      if(e.getPattern().matchesType(this)) {
+        for(int i = 0; i < e.getNumTypeAccess(); i++) {
+          TypeDecl typeDecl = e.getTypeAccess(i).type();
+          if(typeDecl instanceof InterfaceDecl)
+            c.add(typeDecl);
+        }
+      }
+    }
+    return c;
+  }
+  eq ClassDecl.introducedInterfaces() {
+    Collection c = super.introducedInterfaces();
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      boolean found = false;
+      if(typeDecl == this)
+        found  = true;
+      for(Iterator i2 = interfacesIteratorWithoutDeclareParents(); !found && i2.hasNext(); )
+        if(i2.next() == typeDecl)
+          found = true;
+      if(found)
+        iter.remove();
+    }
+    return c;
+  }
+  eq InterfaceDecl.introducedInterfaces() {
+    Collection c = super.introducedInterfaces();
+    for(Iterator iter = declareParentsExtends().iterator(); iter.hasNext(); ) {
+      DeclareParentsExtends e = (DeclareParentsExtends)iter.next();
+      if(e.getPattern().matchesType(this)) {
+        for(int i = 0; i < e.getNumTypeAccess(); i++) {
+          TypeDecl typeDecl = e.getTypeAccess(i).type();
+          if(typeDecl instanceof InterfaceDecl)
+            c.add(typeDecl);
+        }
+      }
+    }
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      TypeDecl typeDecl = (TypeDecl)iter.next();
+      boolean found = false;
+      if(typeDecl == this)
+        found  = true;
+      for(Iterator i2 = superinterfacesIteratorWithoutDeclareParents(); !found && i2.hasNext(); )
+        if(i2.next() == typeDecl)
+          found = true;
+      if(found)
+        iter.remove();
+    }
+    return c;
+  }
+
+  inh Collection TypeDecl.declareParentsExtends();
+  eq Program.getChild().declareParentsExtends() {
+    String key = "declare_parents_extends";
+    if(intertypeParentDecls().containsKey(key))
+      return (Collection)intertypeParentDecls().get(key);
+    return Collections.EMPTY_LIST;
+  }
+
+  // add declare precedences to generic inter-type collection phase
+  protected void DeclareParentsExtends.collectIntertypeParentDecls(HashMap map) {
+    super.collectIntertypeParentDecls(map);
+    String key = "declare_parents_extends";
+    if(!map.containsKey(key))
+      map.put(key, new ArrayList());
+    Collection c = (Collection)map.get(key);
+    c.add(this);
+  }
+
+  inh Collection TypeDecl.declareParentsImplements();
+  eq Program.getChild().declareParentsImplements() {
+    String key = "declare_parents_implements";
+    if(intertypeParentDecls().containsKey(key))
+      return (Collection)intertypeParentDecls().get(key);
+    return Collections.EMPTY_LIST;
+  }
+
+  // add declare precedences to generic inter-type collection phase
+  protected void DeclareParentsImplements.collectIntertypeParentDecls(HashMap map) {
+    super.collectIntertypeParentDecls(map);
+    String key = "declare_parents_implements";
+    if(!map.containsKey(key))
+      map.put(key, new ArrayList());
+    Collection c = (Collection)map.get(key);
+    c.add(this);
+  }
+
+  syn boolean TypeDecl.affectedByDeclareParents() =
+    !declareParentsImplements().isEmpty() || !declareParentsExtends().isEmpty();
+
+  public void DeclareParentsExtends.generateIntertypeDecls() {
+    for(int i = 0; i < getNumTypeAccess(); i++) {
+      TypeDecl typeDecl = getTypeAccess(i).type();
+      typeDecl.mustBePublic = true;
+    }
+  }
+  public void DeclareParentsImplements.generateIntertypeDecls() {
+    for(int i = 0; i < getNumTypeAccess(); i++) {
+      TypeDecl typeDecl = getTypeAccess(i).type();
+      typeDecl.mustBePublic = true;
+    }
+  }
+  public boolean TypeDecl.mustBePublic = false;
+  public boolean ClassDecl.isPublic() {
+    return super.isPublic() || mustBePublic;
+  }
+  public boolean InterfaceDecl.isPublic() {
+    return super.isPublic() || mustBePublic;
+  }
+}

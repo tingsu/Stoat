@@ -1,0 +1,17 @@
+// 9.6 Annotation Types
+AnnotationDecl : InterfaceDecl ::= /SuperInterfaceId:Access*/;
+AnnotationMethodDecl : MethodDecl ::= [DefaultValue:ElementValue];
+
+// 9.7 Annotations
+Annotation : Modifier ::= <ID> Access ElementValuePair*;
+
+ElementValuePair ::= <Name> ElementValue;
+
+abstract ElementValue;
+ElementConstantValue : ElementValue ::= Expr;
+ElementAnnotationValue : ElementValue ::= Annotation;
+ElementArrayValue : ElementValue ::= ElementValue*;
+
+// 7.4.1.1 Package Annotations
+AnnotatedCompilationUnit : CompilationUnit ::= Modifiers;
+

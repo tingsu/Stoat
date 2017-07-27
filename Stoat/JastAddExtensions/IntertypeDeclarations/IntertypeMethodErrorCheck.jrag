@@ -1,0 +1,361 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect IntertypeMethodErrorCheck {
+
+  // public, private, default ok
+  public void IntertypeMethodDecl.checkModifiers() {
+    if(hostType().isClassDecl()) {
+      // 8.4.3.1
+      if(isAbstract() && !hostType().isAbstract())
+        error("class must be abstract to include abstract methods");
+      // 8.4.3.1
+      // 8.4.3.1
+      // 8.4.3.2
+      if(isAbstract() && isStatic())
+        error("method may not be abstract and static");
+      if(isAbstract() && isSynchronized())
+        error("method may not be abstract and synchronized");
+      // 8.4.3.4
+      if(isAbstract() && isNative())
+        error("method may not be abstract and native");
+      if(isAbstract() && isStrictfp())
+        error("method may not be abstract and strictfp");
+      if(isNative() && isStrictfp())
+        error("method may not be native and strictfp");
+    }
+    else if(hostType().isInterfaceDecl()) {
+
+      if(isStatic())
+        error("interface method " + signature() + " in " +
+            hostType().typeName() +  " may not be static");
+      if(isStrictfp())
+        error("interface method " + signature() + " in " +
+            hostType().typeName() +  " may not be strictfp");
+      if(isNative())
+        error("interface method " + signature() + " in " +
+            hostType().typeName() +  " may not be native");
+      if(getModifiers().isAbstract() && isSynchronized())
+        error("interface method " + signature() + " in " +
+            hostType().typeName() +  " may not be abstract and synchronized");
+    }
+    if(isProtected())
+      error("Inter-type method declarations may not be protected");
+    // TODO: not enforced by ajc? The access modifier of abstract inter-type
+    // methods has one constraint: It is illegal to declare an abstract
+    // non-public inter-type method on a public interface. This is illegal
+    // because it would say that a public interface has a constraint that only
+    // non-public implementors must fulfill. This would not be compatible with
+    // Java's type system.
+    if(isAbstract() && !isPublic() && introducedType().isInterfaceDecl() && introducedType().isPublic())
+      error("it is illegal to declare an abstract non-public inter-type method on a public interface");
+  }
+
+  // override behavior in MethodDecl to change the condition for multiply declared
+  public void IntertypeMethodDecl.nameCheck() {
+      for(Iterator iter = introducedType().methodsSignature(signature()).iterator(); iter.hasNext(); ) {
+        MethodDecl v = (MethodDecl)iter.next();
+        if(v != this && v.accessibleFrom(hostAspect()) && !isAbstract()) {
+          if(v instanceof IntertypeMethodDecl) {
+            IntertypeMethodDecl m = (IntertypeMethodDecl)v;
+            boolean overriddenInSubAspect = m.hostAspect().instanceOf(hostAspect()) && m.hostAspect() != hostAspect();
+            boolean precedence = m.hostAspect().precedes(hostAspect()) && !hostAspect().precedes(m.hostAspect());
+            if(!overriddenInSubAspect && !precedence)
+              error("method is multiply declared in type " + hostType().typeName() + " by " + v);
+          }
+          else {
+            error("method is multiply declared in type " + hostType().typeName() + " by " + v);
+          }
+        }
+          //&& (!(v instanceof IntertypeMethodDecl) || (!zaps(v) && !v.zaps(this))))
+          //error("method is multiply declared in type " + hostType().typeName() + " by " + v);
+      }
+
+    // 8.4
+    // 8.4.2
+    //if(!visibleOrZapped())
+    //  error("method with signature " + signature() + " is multiply declared in type " + hostType().typeName());
+    // 8.4.3.4
+    if(isNative() && hasBlock())
+      error("native methods must have an empty semicolon body");
+    // 8.4.5
+    if(isAbstract() && hasBlock())
+      error("abstract methods must have an empty semicolon body");
+    // 8.4.5
+    if(!hasBlock() && !(isNative() || isAbstract()))
+      error("only abstract and native methods may have an empty semicolon body");
+    if(hasBlock() && !introducedType().isUnknown() && !introducedType().compilationUnit().weavable())
+      error("Host of an intertype method declaration must be a weavable class");
+  }
+
+  refine NameCheck public void MethodDecl.nameCheck() {
+    if(!hostType().methodsSignature(signature()).contains(this)) {
+      boolean allZap = true;
+      for(Iterator iter = hostType().methodsSignature(signature()).iterator(); allZap && iter.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter.next();
+        if(!m.zaps(this))
+          allZap = false;
+      }
+      if(!allZap)
+        error("method with signature " + signature() + " is multiply declared in type " + hostType().typeName());
+    }
+    if(isNative() && hasBlock())
+      error("native methods must have an empty semicolon body");
+    // 8.4.5
+    if(isAbstract() && hasBlock())
+      error("abstract methods must have an empty semicolon body");
+    // 8.4.5
+    if(!hasBlock() && !(isNative() || isAbstract()))
+      error("only abstract and native methods may have an empty semicolon body");
+  }
+
+
+  
+  refine DeclareParentsAnalysis public void ClassDecl.typeCheck() {
+    refined();
+    // method implementations introduced through interfaces may not
+    // override other method implementations
+    /*
+    if(hasSuperclass()) {
+      for(Iterator iter1 = introducedMethods().iterator(); iter1.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter1.next();
+        if(!m.isAbstract() && m instanceof IntertypeMethodDecl) {
+          for(Iterator iter = superclass().methodsSignature(m.signature()).iterator(); iter.hasNext(); ) {
+            MethodDecl n = (MethodDecl)iter.next();
+            if(m != n && m.couldOverride(n) && !n.isAbstract())
+              error("there is already an implementation in " + n.hostType().typeName());
+            //checkMethods(m, n);
+          }
+        }
+      }
+      */
+      for(Iterator iter1 = interfacesMethodsIterator(); iter1.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter1.next();
+        if(!m.isAbstract() && m instanceof IntertypeMethodDecl) {
+          for(Iterator iter = ancestorMethods(m.signature()).iterator(); iter.hasNext(); ) {
+            MethodDecl n = (MethodDecl)iter.next();
+            if(m != n && !m.couldOverride(n) && !n.isAbstract())
+              m.error("there is already an implementation in " + n.hostType().typeName());
+            if(m != n)
+              checkMethods(m, n);
+          }
+        }
+      }
+    /*
+    }
+    */
+  }
+
+  inh TypeDecl MethodDecl.visibilityContext();
+
+  refine TypeHierarchyCheck public void TypeDecl.typeCheck() {
+    refined();
+    for(Iterator iter = methodsSignatureMap().values().iterator(); iter.hasNext(); ) {
+      SimpleSet set = (SimpleSet)iter.next();
+      if(set.size() > 1) {
+        SimpleSet implSet = SimpleSet.emptySet;
+        for(Iterator i2 = set.iterator(); i2.hasNext(); ) {
+          MethodDecl m = (MethodDecl)i2.next();
+          boolean found = false;
+          for(Iterator i3 = set.iterator(); !found && i3.hasNext(); ) {
+            MethodDecl n = (MethodDecl)i3.next();
+            if(m != n && !m.isAbstract() && !n.isAbstract() && m instanceof IntertypeMethodDecl && m.accessibleFrom(n.visibilityContext()) && m.hostType() != n.hostType()) {
+              found = true;
+            }
+          }
+          if(found)
+            m.error("causes multiple implementation in " + typeName());
+        }
+      }
+    }
+    for(Iterator iter1 = introducedMethods().iterator(); iter1.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter1.next();
+      if(!methodsSignature(m.signature()).contains(m)) {
+        boolean found = false;
+        ASTNode target = m;
+        for(Iterator i2 = methodsSignature(m.signature()).iterator(); i2.hasNext(); ) {
+          MethodDecl decl = (MethodDecl)i2.next();
+          if(m != decl) {
+            found = true;
+            checkMethods(m, decl);
+          }
+        }
+        if(!found) {
+          for(Iterator i2 = ancestorMethods(m.signature()).iterator(); i2.hasNext(); ) {
+            MethodDecl decl = (MethodDecl)i2.next();
+            if(m != decl)
+              checkMethods(m, decl);
+            //if(m != decl && m.couldOverride(decl) && !decl.isAbstract())
+            //  m.error("there is already an implementation in " + decl.hostType().typeName());
+          }
+        }
+      }
+    }
+  }
+    protected void TypeDecl.checkMethods(MethodDecl m, MethodDecl decl) {
+      ASTNode target = m;
+          if(!m.isStatic() && decl.isStatic())
+            target.error("an instance method may not override a static method");
+          if(m.isStatic() && !decl.isStatic())
+            target.error("a static method may not hide an instance method");
+ 
+          // 8.4.6.3
+          if(!m.isStatic() && !m.mayOverrideReturn(decl))
+            target.error("Ythe return type of method " + m.signature() + " in " + m.hostType().typeName() + " does not match the return type of method " + decl.signature() + " in " + decl.hostType().typeName() + " and may thus not be overriden");
+          if(m.isStatic() && m.type() != decl.type())
+            target.error("can not hide a method with a different return type");
+
+          // 8.4.4
+          for(int i = 0; i < m.getNumException(); i++) {
+            Access e = m.getException(i);
+            boolean found = false;
+            for(int j = 0; !found && j < decl.getNumException(); j++) {
+              if(e.type().instanceOf(decl.getException(j).type()))
+                found = true;
+            }
+            if(!found && e.type().isUncheckedException())
+              target.error(m.signature() + " in " + m.hostType().typeName() + " may not throw more checked exceptions than overridden method " +
+               decl.signature() + " in " + decl.hostType().typeName());
+          }
+          // 8.4.6.3
+          if(decl.isPublic() && !m.isPublic())
+            target.error("trying to assign weaker than method in " + decl.hostType().typeName());
+          // 8.4.6.3
+          if(decl.isProtected() && !(m.isPublic() || m.isProtected()))
+            target.error("trying to assign weaker than method in " + decl.hostType().typeName());
+          // 8.4.6.3
+          if((!decl.isPrivate() && !decl.isProtected() && !decl.isPublic()) && m.isPrivate())
+            target.error("trying to assign weaker than method in " + decl.hostType().typeName());
+ 
+          // regardless of overriding
+          if(decl.isFinal())
+            target.error("method " + m.signature() + " in " + hostType().typeName() + " can not override final method " + decl.signature() + " in " + decl.hostType().typeName());
+    }
+
+  refine TypeHierarchyCheck private void ClassDecl.interfaceMethodCompatibleWithInherited(MethodDecl m, MethodDecl n) {
+    if(m.isAbstract())
+      refined(m, n);
+  }
+
+  syn boolean IntertypeMethodDecl.visibleOrZapped() {
+    SimpleSet set = hostType().methodsSignature(signature());
+    if(set.contains(this))
+      return true;
+    String signature = introducedType().fullName() + "." + signature();
+    if(hostAspect().localIntertypeMethodsSignatureMap().get(signature) != this)
+      return false;
+    return zapped();
+  }
+
+  syn boolean IntertypeMethodDecl.zapped() {
+    for(Iterator iter = hostType().introducedMethods().iterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(m.zaps(this)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Do not include intertype methods in an aspect as local methods
+  // override behavior in LookupMethod.jrag
+  // signature -> method declaration
+  eq AspectDecl.localMethodsSignatureMap() {
+    HashMap map = new HashMap(getNumBodyDecl());
+    for(int i = 0; i < getNumBodyDecl(); i++) {
+      if(getBodyDecl(i) instanceof MethodDecl && !(getBodyDecl(i) instanceof IntertypeMethodDecl)) {
+        MethodDecl decl = (MethodDecl)getBodyDecl(i);
+        map.put(decl.signature(), decl);
+      }
+    }
+    return map;
+  }
+
+  syn HashMap TypeDecl.localIntertypeMethodsSignatureMap() = new HashMap();
+  eq AspectDecl.localIntertypeMethodsSignatureMap() {
+    HashMap map = new HashMap(getNumBodyDecl());
+    for(int i = 0; i < getNumBodyDecl(); i++) {
+      if(getBodyDecl(i) instanceof IntertypeMethodDecl) {
+        IntertypeMethodDecl decl = (IntertypeMethodDecl)getBodyDecl(i);
+        map.put(decl.introducedType().fullName() + "." + decl.signature(), decl);
+      }
+    }
+    return map;
+  }
+
+  // Override behavior and remove non abstract methods introduced through interfaces
+  refine Modifiers eq ClassDecl.unimplementedMethods() {
+    Collection c = new ArrayList();
+    for(Iterator iter = interfacesMethodsIterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(m.isAbstract()) {
+      boolean implemented = false;
+      SimpleSet set = (SimpleSet)localMethodsSignature(m.signature());
+      for(Iterator i2 = set.iterator(); i2.hasNext(); ) {
+        MethodDecl n = (MethodDecl)i2.next();
+        if(!n.isAbstract() && n.overrides(m))
+          implemented = true;
+      }
+      if(!implemented) {
+        set = (SimpleSet)ancestorMethods(m.signature());
+        for(Iterator i2 = set.iterator(); i2.hasNext(); ) {
+          MethodDecl n = (MethodDecl)i2.next();
+          if(!n.isAbstract())
+            implemented = true;
+        }
+      }
+      if(!implemented) {
+        c.add(m);
+      }
+      }
+    }
+
+    if(hasSuperclass()) {
+      for(Iterator iter = superclass().unimplementedMethods().iterator(); iter.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter.next();
+        SimpleSet set = (SimpleSet)localMethodsSignature(m.signature());
+        boolean implemented = false;
+        for(Iterator i2 = set.iterator(); i2.hasNext(); ) {
+          MethodDecl n = (MethodDecl)i2.next();
+          if(!n.isAbstract() && n.couldOverride(m))
+            implemented = true;
+        }
+        if(!implemented) {
+          set = (SimpleSet)interfacesMethodsSignature(m.signature());
+          for(Iterator i2 = set.iterator(); i2.hasNext(); ) {
+            MethodDecl n = (MethodDecl)i2.next();
+            if(!n.isAbstract())
+              implemented = true;
+          }
+        }
+        if(!implemented)
+          c.add(m);
+      }
+    }
+
+    for(Iterator iter = localMethodsIterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(m.isAbstract()) {
+        c.add(m);
+      }
+    }
+    for(Iterator iter = c.iterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(!m.isAbstract()) {
+        iter.remove();
+      }
+    }
+    return c;
+  }
+
+  // Override behavior to not make IntertypeMethodDecl abstract in interfaces
+  eq IntertypeMethodDecl.isAbstract() = getModifiers().isAbstract();
+  // Override behavior to not make IntertypeMethodDecl implicilty public when introduced on interfaces
+  eq IntertypeMethodDecl.isPublic() = getModifiers().isPublic();
+}

@@ -1,0 +1,205 @@
+ClassDecl class_declaration =
+	modifiers.m? CLASS IDENTIFIER type_parameters.p super.s? interfaces.i? class_body.b 
+		{:  return new GenericClassDecl(new Modifiers(m), IDENTIFIER, s, i, b, p);  :}
+	;
+
+InterfaceDecl interface_declaration =
+	modifiers.m? INTERFACE IDENTIFIER type_parameters.p extends_interfaces.i? interface_body.b 
+		{:  return new GenericInterfaceDecl(new Modifiers(m), IDENTIFIER, i, b, p);  :}
+	;
+
+Access class_or_interface =
+    name.n {: return n; :}
+  | class_or_interface.n LT type_argument_list_1.l DOT name.end {: return new ParTypeAccess(n, l).qualifiesAccess(end); :}
+  ;
+
+Access class_or_interface_type :=
+    class_or_interface.n {: return n; :}
+  | class_or_interface.n LT type_argument_list_1.l {: return new ParTypeAccess(n, l); :}
+	;
+Access array_type =
+    class_or_interface.t LT type_argument_list_1.l DOT name.n dims.d 
+    {: return new ParTypeAccess(t, l).qualifiesAccess(n).addArrayDims(d); :}
+	|	class_or_interface.t LT type_argument_list_1.l dims.d 
+		{: return new ParTypeAccess(t, l).addArrayDims(d); :}
+	;
+
+List type_arguments =
+		LT type_argument_list_1.l {:  return l;  :}
+	;
+      
+Access wildcard =
+		QUESTION                             {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type.t    {: return new WildcardExtends(t); :}
+    |	QUESTION SUPER reference_type.t    {: return new WildcardSuper(t); :}
+    ;
+   
+Access wildcard_1 =
+		QUESTION GT                          {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type_1.t  {: return new WildcardExtends(t); :}
+	|	QUESTION SUPER reference_type_1.t    {: return new WildcardSuper(t); :}
+	;
+	
+Access wildcard_2 =
+		QUESTION RSHIFT                      {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type_2.t  {: return new WildcardExtends(t); :}
+	|	QUESTION SUPER reference_type_2.t    {: return new WildcardSuper(t); :}
+	;
+	
+Access wildcard_3 =
+		QUESTION URSHIFT                     {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type_3.t  {: return new WildcardExtends(t); :}
+	|	QUESTION SUPER reference_type_3.t    {: return new WildcardSuper(t); :}
+	;
+
+Expr class_instance_creation_expression :=
+    NEW class_or_interface_type.t LPAREN argument_list.l? RPAREN subclass_body.b?
+    {: return new ClassInstanceExpr(t, l, b); :}
+  |	NEW type_arguments.a class_or_interface_type.t LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return new ParClassInstanceExpr(t, l, b, a); :}
+	|	primary.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(id, l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	primary.n DOT NEW simple_name.id type_arguments.a LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(new ParTypeAccess(id, a), l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	primary.n DOT NEW type_arguments.ca simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(id, l, b, ca)); :}
+	|	primary.n DOT NEW type_arguments.ca simple_name.id type_arguments.ta LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(new ParTypeAccess(id, ta), l, b, ca)); :}
+	|	name.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(id, l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	name.n DOT NEW simple_name.id type_arguments.a LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(new ParTypeAccess(id, a), l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	name.n DOT NEW type_arguments.ca simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(id, l, b, ca)); :}
+	|	name.n DOT NEW type_arguments.ca simple_name.id type_arguments.ta LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(new ParTypeAccess(id, ta), l, b, ca)); :}
+	;
+
+List type_argument_list =
+		type_argument.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument.a {:  return l.add(a);  :}
+	;
+	
+List type_argument_list_1 =
+		type_argument_1.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument_1.a {:  return l.add(a);  :}
+	;
+	
+List type_argument_list_2 =
+		type_argument_2.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument_2.a {:  return l.add(a);  :}
+	;
+	
+List type_argument_list_3 =
+		type_argument_3.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument_3.a {:  return l.add(a);  :}
+	;
+	
+Access type_argument =
+		reference_type.t {:  return t;  :}
+	|	wildcard.w {: return w; :}
+	;
+	
+Access type_argument_1 =
+		reference_type_1.t {:  return t;  :}
+	|	wildcard_1.w {: return w; :}
+	;
+	
+Access type_argument_2 =
+		reference_type_2.t {:  return t;  :}
+	|	wildcard_2.w {: return w; :}
+	;
+	
+Access type_argument_3 =
+		reference_type_3.t {:  return t;  :}
+	|	wildcard_3.w {: return w; :}
+	;
+  
+Access reference_type_1 =
+		reference_type.t GT {:  return t;  :}
+	|	class_or_interface.t LT type_argument_list_2.l {:  return new ParTypeAccess(t, l);  :}
+	;
+	
+Access reference_type_2 =
+		reference_type.t RSHIFT {:  return t;  :}
+	|	class_or_interface.t LT type_argument_list_3.l {:  return new ParTypeAccess(t, l);  :}
+	;
+	
+Access reference_type_3 =
+		reference_type.t URSHIFT {:  return t;  :}
+	;
+Expr cast_expression =
+		LPAREN name.n LT type_argument_list_1.a dims.d? RPAREN unary_expression_not_plus_minus.e 
+		{:  return new CastExpr(new ParTypeAccess(n, a).addArrayDims(d), e);  :}
+	|	LPAREN name.n LT type_argument_list_1.a DOT class_or_interface_type.t dims.d? RPAREN unary_expression_not_plus_minus.e 
+		{:  return new CastExpr(new ParTypeAccess(n, a).qualifiesAccess(t).addArrayDims(d), e);  :}
+  ;
+
+List type_parameters =
+		LT type_parameter_list_1.l {:  return l;  :}
+	;
+	
+List type_parameter_list =
+		type_parameter_list.l COMMA type_parameter.p {:  return l.add(p);  :}
+	|	type_parameter.p {:  return new List().add(p);  :}
+	;
+	
+List type_parameter_list_1 =
+		type_parameter_1.p {:  return new List().add(p);  :}
+	|	type_parameter_list.l COMMA type_parameter_1.p {:  return l.add(p);  :}
+	;
+	
+TypeVariable type_parameter =
+		IDENTIFIER              {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), new List());  :}
+	|	IDENTIFIER type_bound.l {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), l); :}
+	;
+	
+TypeVariable type_parameter_1 =
+		IDENTIFIER GT             {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), new List());  :}
+  |	IDENTIFIER type_bound_1.l {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), l);  :}
+	;
+	
+List type_bound =
+		EXTENDS reference_type.t {:  return new List().add(t);  :}
+	|	EXTENDS reference_type.t additional_bound_list.l {:  l.insertChild(t,0); return l; :}
+    ;
+    
+List type_bound_1 =
+		EXTENDS reference_type_1.t {:  return new List().add(t);  :}
+	|	EXTENDS reference_type.t additional_bound_list_1.l {:  l.insertChild(t,0); return l; :}
+    ;
+    
+List additional_bound_list =
+		additional_bound.b additional_bound_list.l {:  l.insertChild(b,0); return l; :}
+	|	additional_bound.b {:  return new List().add(b);  :}
+    ;
+    
+List additional_bound_list_1 =
+		additional_bound.b additional_bound_list_1.l {:  l.insertChild(b,0); return l; :}
+	|	additional_bound_1.b {:  return new List().add(b);  :}
+    ;
+    
+Access additional_bound =
+		AND interface_type.t {:  return t;  :}
+	;
+	
+Access additional_bound_1 =
+		AND reference_type_1.t {:  return t;  :}
+	;
+

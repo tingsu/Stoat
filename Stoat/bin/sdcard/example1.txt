@@ -1,0 +1,35 @@
+I see a lot of posts about writing to the SD card, but I believe my problem is different. I am unable to create the SD card during the process of building an AVD.
+
+I initially tried to use the Android SDK and AVD Manager to do this, selecting 
+Name: my_avd 
+Target: Android 2.2 - API Level 8 
+SD Card: Size: 1024 MiB 
+Skin: Built-In: Default (HVGA) 
+Hardware: Property: Abstracted LCD Density, Value: 160
+
+This pops up a window with the message: 
+"Result of creating AVD 'my_avd': 
+Error: Failed to create the SD card."
+
+I tried to repeat the process from the command line, receiving a similar error:
+
+alex@alex-desktop:~$ android create avd -n my_avd -t 1 -c 1024M
+Android 2.2 is a basic Android platform.
+Do you wish to create a custom hardware profile [no]no
+Error: Failed to create the SD card.
+Attempting to follow instructions for using mksdcard was equally unproductive; I think my basic lack of linux experience may be causing me a problem here. When I try to use mksdcard, it just reports that it cannot find the file or directory. Is the mksdcard tool available for use this way in linux?
+
+alex@alex-desktop:~$ mksdcard 1024M ./sdcard.iso
+bash: /home/alex/android-sdk-linux_x86/tools/mksdcard: No such file or directory
+alex@alex-desktop:~$ sudo android create avd -n my_avd -t 1 -c 1024M
+I've added the android tools directory to my PATH variable, but I feel like there is obviously something else I'm missing. Perhaps some kind of access rights?
+
+Attempting to run the android command with sudo did not seem to help either:
+
+alex@alex-desktop:~/android-sdk-linux_x86/tools$ sudo ./android create avd -n my_avd -t 1 -c 1024M
+Android 2.2 is a basic Android platform.
+Do you wish to create a custom hardware profile [no]no
+Error: Failed to create the SD card.
+I even tried installing Eclipse and the ADT plugin and running the manager from there to no avail. Any tips would be most appreciated. Advanced warning that I am somewhat of a novice Linux user, so even if it seems like a no-brainer obvious thing to check, I could still have missed it.
+
+Thanks!

@@ -1,0 +1,5 @@
+soot.loc=../../libs/sootclasses-custom.jar
+jasmin.loc=../../libs/jasminclasses-custom.jar
+polyglot.cupclasses.loc=../../libs/java_cup.jar
+frontend=../../JastAddJ/Java1.4Frontend
+backend=../../JastAddJ/Java1.4Backend

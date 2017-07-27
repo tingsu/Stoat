@@ -1,0 +1,114 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import java.util.*;
+
+aspect Names {
+  // simple names
+  syn String ParseName.name() = getID();
+  syn String PackageOrTypeAccess.name() = getID();
+  syn String AmbiguousAccess.name() = getID();
+  syn String VarAccess.name() = getID();
+  syn String MethodAccess.name() = getID();
+  syn String ConstructorAccess.name() = "this";
+  syn String SuperConstructorAccess.name() = "super";
+  syn String TypeAccess.name() = getID();
+  
+  syn String PackageAccess.name() = getPackage();
+  
+  syn String Expr.packageName() = "";
+  eq TypeAccess.packageName() = getPackage();
+  
+  eq PackageAccess.packageName() {
+    StringBuffer s = new StringBuffer();
+    if(hasPrevExpr()) {
+      s.append(prevExpr().packageName());
+      s.append(".");
+    }
+    s.append(getPackage());
+    return s.toString();
+  }
+  eq PackageOrTypeAccess.packageName() {
+    StringBuffer s = new StringBuffer();
+    if(hasPrevExpr()) {
+      s.append(prevExpr().packageName());
+      s.append(".");
+    }
+    s.append(name());
+    return s.toString();
+  }
+
+
+  // human readable qualified names
+  syn String TypeAccess.nameWithPackage() = getPackage().equals("") ? name() : (getPackage() + "." + name());
+
+  syn String ImportDecl.typeName() {
+    Access a = getAccess().lastAccess();
+    String name = a.isTypeAccess() ? ((TypeAccess)a).nameWithPackage() : "";
+    while(a.hasPrevExpr() && a.prevExpr() instanceof Access) {
+      Access pred = (Access)a.prevExpr();
+      if(pred.isTypeAccess())
+        name = ((TypeAccess)pred).nameWithPackage() + "." + name;
+      a = pred;
+    }
+    return name;
+  }
+  syn String Expr.typeName() = "";
+  eq AbstractDot.typeName() = lastAccess().typeName();
+  eq TypeAccess.typeName() = isQualified() ? (qualifier().typeName() + "." + name()) : nameWithPackage();
+}
+
+aspect TypeName {
+  syn String TypeDecl.name() = getID();
+
+  syn lazy String TypeDecl.fullName() {
+    if(isNestedType())
+      return enclosingType().fullName() + "." + name();
+    String packageName = packageName();
+    if(packageName.equals(""))
+      return name();
+    return packageName + "." + name();
+  }
+
+  syn lazy String TypeDecl.typeName() {
+    if(isNestedType())
+      return enclosingType().typeName() + "." + name();
+    String packageName = packageName();
+    if(packageName.equals("") || packageName.equals(PRIMITIVE_PACKAGE_NAME))
+      return name();
+    return packageName + "." + name();
+  }
+  eq ArrayDecl.typeName() = componentType().typeName() + "[]";
+
+  inh lazy String TypeDecl.packageName();
+  eq CompilationUnit.getChild().packageName() = packageName();
+
+  syn lazy String CompilationUnit.packageName() {return getPackageDecl();}
+}
+
+aspect CreateQualifiedAccesses {
+  public Access TypeDecl.createQualifiedAccess() {
+    if(isLocalClass() || isAnonymous()) {
+      return new TypeAccess(name());
+    }
+    else if(!isTopLevelType()) {
+      return enclosingType().createQualifiedAccess().qualifiesAccess(new TypeAccess(name()));
+    }
+    else {
+      return new TypeAccess(packageName(), name());
+    }
+  }
+
+  public Access PrimitiveType.createQualifiedAccess() {
+    return new PrimitiveTypeAccess(name());
+  }
+}
+
+
+

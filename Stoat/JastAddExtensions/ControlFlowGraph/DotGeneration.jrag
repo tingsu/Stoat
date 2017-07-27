@@ -1,0 +1,291 @@
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+
+
+aspect DotGeneration {
+	
+	public void ASTNode.dot() {
+		for(int i=0;i<getNumChild();++i)
+			getChild(i).dot();
+	}
+	
+	public void Program.dot() {
+		System.out.println("digraph " + String.valueOf(hashCode()) + " {");
+		super.dot();
+		System.out.println("}");
+	}
+	
+	public void CompilationUnit.dot() {
+		if(!fromSource())
+			return;
+		super.dot();
+	}
+	
+	syn lazy String CFGNode.dotLabel() {
+		String label = toString();
+		label = label.replace('"', '\'').replace('\n', ' ');
+		if(label.length() > 20)
+			label = label.substring(0, 10) + label.substring(label.length()-10, label.length());
+		return label;
+	}
+	
+	eq EntryStmt.dotLabel() {
+		if(getParent() instanceof ConstructorDecl) {
+			return ((ConstructorDecl)getParent()).name() + ".<entry>";
+		} else if(getParent() instanceof MethodDecl) {
+			return ((MethodDecl)getParent()).name() + ".<entry>";
+		} else {
+			return "<entry>";
+		}
+	}
+	
+	eq ExitStmt.dotLabel() {
+		if(getParent() instanceof ConstructorDecl) {
+			return ((ConstructorDecl)getParent()).name() + ".<exit>";
+		} else if(getParent() instanceof MethodDecl) {
+			return ((MethodDecl)getParent()).name() + ".<exit>";
+		} else {
+			return "<exit>";
+		}
+	}
+	
+	syn lazy String CFGNode.dotNode() {
+		String n = String.valueOf(hashCode());
+		String label = dotLabel();
+		System.out.println("\t" + n + "[label=\"" + label + "\"];");
+		return n;
+	}
+	
+	public void BodyDecl.dot() {
+		entry().dot();
+		exit().dot();
+		super.dot();
+	}
+	
+	public void CFGNode.dot() {
+		String thisName = String.valueOf(hashCode());
+		for(CFGNode that : succ())
+			System.out.println("\t" + this.dotNode() + " -> " + that.dotNode() + ";");
+		super.dot();
+	}
+
+	/*public void ASTNode.findDotRoots(LinkedList rootList) {
+		for (int i = 0; i < getNumChild(); i++) {
+			getChild(i).findDotRoots(rootList);
+		}
+	}
+
+	public void Program.findDotRoots(LinkedList rootList) {
+		for (int i = 0; i < getNumCompilationUnit(); i++) {
+			CompilationUnit unit = getCompilationUnit(i);
+			if (unit.fromSource()) {
+				unit.findDotRoots(rootList);
+			}
+		}
+	}
+
+	public void CompilationUnit.emitDotDescription() {
+		LinkedList rootList = new LinkedList();
+		findDotRoots(rootList);  
+
+		int methodNbr = 0;
+		for (Iterator itr = rootList.iterator(); itr.hasNext(); methodNbr++) {
+			String dotDesc = (String)itr.next();
+
+			// Write to file
+			try {
+
+				File file = new File("./dot/method" + String.valueOf(methodNbr) + ".dot");
+				System.out.println("Generating dot description for method " + methodNbr);
+				if (file.exists())
+					file.delete();
+				file.createNewFile();
+				FileOutputStream out = new FileOutputStream(file);
+				out.write(dotDesc.getBytes());
+				out.close();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void MethodDecl.findDotRoots(LinkedList rootList) {
+		StringBuffer dotDesc = new StringBuffer();
+		HashMap nodeSet = new HashMap();
+		dotDesc.append("digraph " + String.valueOf(hashCode()) + " {\n");
+		genDotDesc(dotDesc, nodeSet);
+		entry().genDotDesc(dotDesc, nodeSet);
+		exit().genDotDesc(dotDesc, nodeSet);
+		for (Iterator itr = nodeSet.values().iterator(); itr.hasNext();) {
+			String node = (String)itr.next();
+			dotDesc.append(node);
+		}
+
+		if (entry() != null)
+			entry().addControlFlowToDot(dotDesc, nodeSet, new HashSet());
+		if (exit() != null)
+			exit().addReverseControlFlowToDot(dotDesc, nodeSet, new HashSet());
+
+		dotDesc.append("}\n");
+
+		rootList.add(dotDesc.toString());
+		super.findDotRoots(rootList);
+	}
+
+	syn boolean ASTNode.hasDotLabel() = false;
+	eq Stmt.hasDotLabel() = true;
+	eq MethodDecl.hasDotLabel() = true;
+	eq Expr.hasDotLabel() = true;
+
+	syn boolean Stmt.hasCondBranch() = false;
+	eq IfStmt.hasCondBranch() = true;
+	eq WhileStmt.hasCondBranch() = true;
+	eq DoStmt.hasCondBranch() = true;
+	eq ForStmt.hasCondBranch() = true;
+	eq SwitchStmt.hasCondBranch() = true;
+
+	syn boolean Expr.hasCondBranch() = false;
+
+
+	syn String ASTNode.dotLabel(String thisName) = null;
+	eq Stmt.dotLabel(String thisName) {
+		StringBuffer style = new StringBuffer();
+		String thisClass = this.getClass().getName();
+		String thisLabel = thisClass;
+		int lastDotIndex = thisClass.lastIndexOf('.');
+		if (lastDotIndex > 0) {
+			thisLabel = thisClass.substring(lastDotIndex+1, thisClass.length());
+		}
+		style.append("\t" + thisName + " [label=" + thisLabel);
+		if (hasCondBranch()) 
+			style.append(",shape=box");
+		if (getEntry() == this)
+			style.append(",color=lightblue,peripheries=2");
+		if (getExit() == this) 
+			style.append(",style=filled, color=lightblue");
+		style.append("];\n");
+		return style.toString();
+	}
+	eq Expr.dotLabel(String thisName) {
+		StringBuffer style = new StringBuffer();
+		String thisClass = this.getClass().getName();
+		String thisLabel = thisClass;
+		int lastDotIndex = thisClass.lastIndexOf('.');
+		if (lastDotIndex > 0) {
+			thisLabel = thisClass.substring(lastDotIndex+1, thisClass.length());
+		}
+		style.append("\t" + thisName + " [label=" + thisLabel);
+		if (hasCondBranch()) 
+			style.append(",shape=box");
+		style.append("];\n");
+		return style.toString();
+	}
+
+	eq MethodDecl.dotLabel(String thisName) {
+		StringBuffer style = new StringBuffer();
+		String thisClass = this.getClass().getName();
+		String thisLabel = thisClass;
+		int lastDotIndex = thisClass.lastIndexOf('.');
+		if (lastDotIndex > 0) {
+			thisLabel = thisClass.substring(lastDotIndex+1, thisClass.length());
+		}
+		style.append("\t" + thisName + " [label=" + thisLabel + "];\n");
+		return style.toString();
+	}
+	syn boolean ASTNode.includeInDotDesc() = false;
+	eq MethodDecl.includeInDotDesc() = true;
+	eq Stmt.includeInDotDesc() = true;
+	eq Expr.includeInDotDesc() = true;
+
+	public Collection ASTNode.genDotDesc(StringBuffer buf, HashMap nodeSet) {
+		Collection list = new ArrayList();
+		if (includeInDotDesc()) {
+			String thisName = String.valueOf(hashCode());
+			if (!nodeSet.containsKey(thisName)) {
+				if (hasDotLabel()) {
+					nodeSet.put(this, dotLabel(thisName));
+				} 
+			}
+			for (int i = 0; i < getNumChild(); i++) {
+				ASTNode child = getChild(i);
+				Collection childList = child.genDotDesc(buf, nodeSet);
+				for (Iterator itr = childList.iterator(); itr.hasNext();) {
+					String childName = (String)itr.next();
+					buf.append("\t" + thisName + " -> " + childName + ";\n");
+				}
+			}
+			list.add(thisName);
+			return list;
+		}
+		for (int i = 0; i < getNumChild(); i++) {
+			ASTNode child = getChild(i);
+			list.addAll(child.genDotDesc(buf, nodeSet));
+		}
+		return list;
+	}
+	public Collection MethodDecl.genDotDesc(StringBuffer buf, HashMap nodeSet) {
+		Collection list = new ArrayList();
+		if (includeInDotDesc()) {
+			String thisName = String.valueOf(hashCode());
+			if (!nodeSet.containsKey(thisName)) {
+				if (hasDotLabel()) {
+					nodeSet.put(this, dotLabel(thisName));
+				} 
+			}
+			if(hasBlock()) {
+				ASTNode child = getBlock();
+				Collection childList = child.genDotDesc(buf, nodeSet);
+				for (Iterator itr = childList.iterator(); itr.hasNext();) {
+					String childName = (String)itr.next();
+					buf.append("\t" + thisName + " -> " + childName + ";\n");
+				}
+			}
+			list.add(thisName);
+			return list;
+		}
+		if(hasBlock()) {
+			ASTNode child = getBlock();
+			list.addAll(child.genDotDesc(buf, nodeSet));
+		}
+		return list;
+	}
+
+	public void CFGNode.addControlFlowToDot(StringBuffer dotDesc, HashMap nodeSet, HashSet visitedNodes) {
+		if (visitedNodes.contains(this)) 
+			return;
+		visitedNodes.add(this);
+		String thisName = String.valueOf(hashCode());
+
+		for (Iterator itr = succ().iterator(); itr.hasNext();) {
+			CFGNode succ = (CFGNode)itr.next();
+			String succName = String.valueOf(succ.hashCode());
+			String prefix = succ == getExit() ? "" : "constraint=false,";
+			dotDesc.append("\t" + thisName + " -> " + succName + " [" + prefix + "color=lightblue];\n");
+			succ.addControlFlowToDot(dotDesc, nodeSet, visitedNodes);
+		}
+	}
+
+	public void CFGNode.addReverseControlFlowToDot(StringBuffer dotDesc, HashMap nodeSet, HashSet visitedNodes) {
+		if(visitedNodes.contains(this)) 
+			return;
+		visitedNodes.add(this);
+		String thisName = String.valueOf(hashCode());
+
+		for (Iterator itr = pred().iterator(); itr.hasNext();) {
+			CFGNode pred = (CFGNode)itr.next();
+			String predName = String.valueOf(pred.hashCode());
+			String prefix = pred == getEntry() ? "" : "constraint=false,";
+			dotDesc.append("\t" + thisName + " -> " + predName + " [" + prefix + "color=green,style=dotted];\n");
+			pred.addReverseControlFlowToDot(dotDesc, nodeSet, visitedNodes);
+		}
+	}
+
+	inh Stmt CFGNode.getEntry();
+	inh Stmt CFGNode.getExit();
+	eq Program.getChild().getEntry() = null;
+	eq Program.getChild().getExit() = null;
+	eq BodyDecl.getChild().getEntry() = entry();
+	eq BodyDecl.getChild().getExit() = exit();*/
+}

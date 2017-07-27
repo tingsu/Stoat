@@ -1,0 +1,25 @@
+aspect GlueCodegen {
+    refine VariableArityParametersCodegen public void MethodAccess.transformation()
+  to refine IntertypeMethodCodegeneration public void MethodAccess.transformation() {
+    if(decl().isVariableArity() && !invokesVariableArityAsArray()) {
+      // arguments to normal parameters
+      List list = new List();
+      for(int i = 0; i < decl().getNumParameter() - 1; i++)
+        list.add(getArg(i).fullCopy());
+      // arguments to variable arity parameters
+      List last = new List();
+      for(int i = decl().getNumParameter() - 1; i < getNumArg(); i++)
+        last.add(getArg(i).fullCopy());
+      // build an array holding arguments
+      Access typeAccess = decl().lastParameter().type().elementType().createQualifiedAccess();
+      for(int i = 0; i < decl().lastParameter().type().dimension(); i++)
+        typeAccess = new ArrayTypeAccess(typeAccess);
+      list.add(new ArrayCreationExpr(typeAccess, new Opt(new ArrayInit(last))));
+      // replace argument list with augemented argument list
+      setArgList(list);
+    }
+    refined();
+  }
+
+
+}

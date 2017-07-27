@@ -1,0 +1,180 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect IntertypeFieldNameAnalysis {
+
+  eq IntertypeFieldDeclaration.isFinal() = getModifiers().isFinal();
+  eq IntertypeFieldDeclaration.isStatic() = getModifiers().isStatic();
+  eq IntertypeFieldDeclaration.isPublic() = getModifiers().isPublic();
+  eq IntertypeFieldDeclaration.isClassVariable() = isStatic();
+  eq IntertypeFieldDeclaration.isInstanceVariable() = !isStatic();
+
+  eq IntertypeFieldDeclaration.getTargetType().nameType() = NameType.TYPE_NAME;
+  
+  // hostAspect is the aspect that declares the intertype field decl
+  syn TypeDecl IntertypeFieldDeclaration.hostAspect() = (TypeDecl)getParent().getParent();
+  // introducedType is the type into which the intertype field decl is statically introduced
+  syn TypeDecl IntertypeFieldDeclaration.introducedType() = getTargetType().type();
+
+  // override ag-inherited attributes related to nested class structure 
+  // isNestedType() need not be changed since all types within a bodydecl are nested types
+  // isLocalClass() need not be changed
+  eq IntertypeFieldDeclaration.getInit().enclosingType() = introducedType();
+  eq IntertypeFieldDeclaration.getInit().isMemberType() = introducedType().isMemberType();
+  eq IntertypeFieldDeclaration.getInit().enclosingInstance() = introducedType();
+
+  // override ag-inherited attribute, this will cause an access bound to an
+  // IntertypeFieldDeclaration to access a field in the introducedType instead of the hostAspect
+  syn TypeDecl IntertypeFieldDeclaration.hostType() = introducedType();
+  eq IntertypeFieldDeclaration.getInit().hostType() = hostAspect();
+  
+  eq IntertypeFieldDeclaration.getInit().lookupVariable(String name) {
+    SimpleSet set = introducedType().memberFields(name);
+    if(!set.isEmpty())
+      return set;
+    return lookupVariable(name);
+  }
+  eq IntertypeFieldDeclaration.getInit().lookupMethod(String name) {
+    Collection c = introducedType().memberMethods(name);
+    if(!c.isEmpty()) return c;
+    return lookupMethod(name);
+  }
+  eq IntertypeFieldDeclaration.getInit().lookupType(String name) {
+    SimpleSet set = introducedType().memberTypes(name);
+    if(!set.isEmpty()) return set;
+    set = introducedType().lookupType(name);
+    if(!set.isEmpty()) return set;
+    return lookupType(name);
+  }
+
+
+  // add all introduced fields
+  refine Fields eq TypeDecl.localFields(String name) {
+    SimpleSet fields = refined(name);
+    for(Iterator iter = introducedFields().iterator(); iter.hasNext(); ) {
+      FieldDeclaration f = (FieldDeclaration)iter.next();
+      if(f.name().equals(name))
+        fields = fields.add(f);
+    }
+    return fields;
+  }
+
+  // filter fields that are not accessible from this context
+  refine VariableScopePropagation eq VarAccess.decls() {
+    SimpleSet set = lookupVariable(name());
+    if(set.size() > 1) {
+      SimpleSet s = SimpleSet.emptySet;
+      for(Iterator iter = set.iterator(); iter.hasNext(); ) {
+        Variable v = (Variable)iter.next();
+        if(v instanceof FieldDeclaration) {
+          FieldDeclaration f = (FieldDeclaration)v;
+          if(f.accessibleFrom(hostType()))
+            s = s.add(v);
+        }
+        else
+          s = s.add(v);
+      }
+      set = s;
+    }
+    if(set.size() == 1 && (isQualified() ? qualifier().staticContextQualifier() : inStaticContext())) {
+      Variable v = (Variable)set.iterator().next();
+      if(v.isInstanceVariable())
+        return SimpleSet.emptySet;
+    }
+    return set;
+  }
+
+  void IntertypeFieldDeclaration.collectIntertypeDecls(HashMap map) {
+    super.collectIntertypeDecls(map);
+    TypeDecl typeDecl = introducedType();
+    if(!map.containsKey(typeDecl))
+      map.put(typeDecl, new ArrayList());
+    Collection c = (Collection)map.get(typeDecl);
+    c.add(this);
+  }
+
+  syn lazy Collection TypeDecl.introducedFields() {
+    Collection c = new ArrayList();
+    for(Iterator iter = intertypeDecls().iterator(); iter.hasNext(); ) {
+      ASTNode node = (ASTNode)iter.next();
+      if(node instanceof IntertypeFieldDeclaration)
+        c.add(node);
+    }
+    return c;
+  }
+
+  syn lazy Collection InterfaceDecl.allIntroducedFields() {
+    Collection set = new HashSet();
+    for(Iterator iter = superinterfacesIterator(); iter.hasNext(); ) {
+      InterfaceDecl decl = (InterfaceDecl)iter.next();
+      set.addAll(decl.allIntroducedFields());
+    }
+    set.addAll(introducedFields());
+    return set;
+  }
+  syn Collection ClassDecl.introducedFieldsFromInterfaces() {
+    Collection set = new HashSet();
+    for(Iterator iter = interfacesIterator(); iter.hasNext(); ) {
+      InterfaceDecl decl = (InterfaceDecl)iter.next();
+      set.addAll(decl.allIntroducedFields());
+    }
+    return set;
+  }
+
+  eq IntertypeFieldDeclaration.accessibleFrom(TypeDecl type) {
+    if(isPublic())
+      return true;
+    else if(isProtected()) {
+      if(hostPackage().equals(type.hostPackage()))
+        return true;
+      if(type.withinBodyThatSubclasses(hostAspect()) != null)
+        return true;
+      return false;
+    }
+    else if(isPrivate())
+      return hostAspect().topLevelType() == type.topLevelType();
+    else
+      return hostPackage().equals(type.hostPackage());
+  }
+
+  refine VariableScope public boolean Expr.mayAccess(FieldDeclaration f) {
+    if(f instanceof IntertypeFieldDeclaration) {
+      IntertypeFieldDeclaration d = (IntertypeFieldDeclaration)f;
+      // intertype field declarations can not be protected
+      if(d.isPublic())
+        return true;
+      else if(d.isPrivate())
+        return d.hostAspect().topLevelType() == hostType().topLevelType();
+      else
+        return hostPackage().equals(d.hostAspect().hostPackage());
+    }
+    else {
+      if(f.isPublic()) 
+        return true;
+      else if(f.isProtected()) {
+        if(f.hostPackage().equals(hostPackage()))
+          return true;
+        TypeDecl C = f.hostType();
+        TypeDecl S = thisType().withinBodyThatSubclasses(C);
+        TypeDecl Q = type();
+        if(S == null)
+          return false;
+        if(f.isInstanceVariable() && !isSuperAccess())
+          return Q.instanceOf(S);
+        return true;
+      }
+      else if(f.isPrivate())
+        return f.hostType().topLevelType() == hostType().topLevelType();
+      else
+        return f.hostPackage().equals(hostType().hostPackage());
+    }
+    //return LookupVariable.Expr.mayAccess(f);
+  }
+
+}

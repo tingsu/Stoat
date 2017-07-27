@@ -1,0 +1,54 @@
+/**
+ * The abstract base class for all literals.
+ */
+abstract Literal : PrimaryExpr ::= <LITERAL:String>;
+
+/**
+ * Represents a Java boolean; either "true" or "false".
+ */
+BooleanLiteral : Literal ;
+
+/**
+ * Represents a single character.
+ * May not contain a Unicode escape sequence (Unicode escapes
+ * are transcoded by the scanner).
+ */
+CharacterLiteral : Literal ;
+
+/**
+ * String literal.
+ * May not contain Unicode escape sequences (Unicode escapes
+ * are transcoded by the scanner).
+ */
+StringLiteral : Literal ;
+
+/**
+ * Java null literal.
+ */
+NullLiteral : Literal ;
+
+/**
+ * Default Java integer literal. Should only be used for numbers
+ * that can be stored in 32 bits binary.
+ */
+IntegerLiteral : Literal ;
+
+/**
+ * Java long integer literal. Can store any number that fits in 64 bits
+ * of data, or less.
+ */
+LongLiteral : Literal ;
+
+/**
+ * Java floating point literal. Can store any value representable as an
+ * IEEE 754 32-bit single-precision floating point number.
+ */
+FloatingPointLiteral : Literal ;
+
+/**
+ * Java double-precision floating point literal.
+ * Can store any value representable as an
+ * IEEE 754 64-bit double-precision floating point number.
+ */
+DoubleLiteral : Literal ;
+

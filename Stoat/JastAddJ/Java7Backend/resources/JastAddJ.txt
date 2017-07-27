@@ -1,0 +1,2 @@
+jastaddj.Version=@VERSION@
+jastaddj.JavaCompiler=JastAddJ (JJ7)

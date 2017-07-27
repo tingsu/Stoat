@@ -1,0 +1,19 @@
+/**
+ * 7.5 Import Declarations
+ */
+abstract StaticImportDecl : ImportDecl;
+
+/**
+ * 7.5.3 A single-static-import declaration imports all accessible (§6.6) static members
+ * with a given simple name from a type. This makes these static members available
+ * under their simple name in the class and interface declarations of the
+ * compilation unit in which the single-static import declaration appears.
+ */
+SingleStaticImportDecl : StaticImportDecl ::= <ID:String>;
+
+/**
+ * 7.5.4 A static-import-on-demand declaration allows all accessible (§6.6) static
+ * members declared in the type named by a canonical name to be imported as
+ * needed.
+ */
+StaticImportOnDemandDecl : StaticImportDecl;

@@ -1,0 +1,164 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect UnreachableStatements {
+
+  void ASTNode.checkUnreachableStmt() {
+  }
+  void Stmt.checkUnreachableStmt() {
+    if(!reachable() && reportUnreachable())
+      error("statement is unreachable");
+  }
+  void StaticInitializer.checkUnreachableStmt() {
+    if(!getBlock().canCompleteNormally())
+      error("static initializer in " + hostType().fullName() + " can not complete normally");
+  }
+  void InstanceInitializer.checkUnreachableStmt() {
+    if(!getBlock().canCompleteNormally())
+      error("instance initializer in " + hostType().fullName() + " can not complete normally");
+  }
+
+  inh boolean Stmt.reachable();
+  inh boolean Block.reachable();
+  syn lazy boolean Stmt.canCompleteNormally() = true;
+  
+  eq ConstructorDecl.getConstructorInvocation().reachable() = true;
+  eq ConstructorDecl.getBlock().reachable() = !hasConstructorInvocation() ? true : getConstructorInvocation().canCompleteNormally();
+  eq MethodDecl.getBlock().reachable() = true;
+  eq StaticInitializer.getBlock().reachable() = true;
+  eq InstanceInitializer.getBlock().reachable() = true;
+
+  eq Block.canCompleteNormally() = getNumStmt() == 0 ? reachable() : getStmt(getNumStmt() - 1).canCompleteNormally();
+  eq Block.getStmt().reachable() = childIndex == 0 ? reachable() : getStmt(childIndex-1).canCompleteNormally();
+  
+  eq LocalClassDeclStmt.canCompleteNormally() = reachable();
+  
+  eq VarDeclStmt.canCompleteNormally() = reachable();
+
+  eq EmptyStmt.canCompleteNormally() = reachable();
+
+  eq LabeledStmt.canCompleteNormally() = getStmt().canCompleteNormally() || reachableBreak();
+  eq LabeledStmt.getStmt().reachable() = reachable();
+
+  syn lazy boolean BranchTargetStmt.reachableBreak() {
+    for(Iterator iter = targetBreaks().iterator(); iter.hasNext(); ) {
+      BreakStmt stmt = (BreakStmt)iter.next();
+      if(stmt.reachable())
+        return true;
+    }
+    return false;
+  }
+  
+  eq ExprStmt.canCompleteNormally() = reachable();
+
+  syn boolean SwitchStmt.lastStmtCanCompleteNormally() = getBlock().canCompleteNormally();
+
+  syn boolean SwitchStmt.noStmts() {
+    for(int i = 0; i < getBlock().getNumStmt(); i++)
+      if(!(getBlock().getStmt(i) instanceof Case))
+        return false;
+    return true;
+  }
+
+  syn boolean SwitchStmt.noStmtsAfterLastLabel() = 
+    getBlock().getNumStmt() > 0 && getBlock().getStmt(getBlock().getNumStmt()-1) instanceof Case;
+
+  syn boolean SwitchStmt.noDefaultLabel() {
+    for(int i = 0; i < getBlock().getNumStmt(); i++)
+      if(getBlock().getStmt(i) instanceof DefaultCase)
+        return false;
+    return true;
+  }
+
+  eq SwitchStmt.canCompleteNormally() =
+    lastStmtCanCompleteNormally() || noStmts() || noStmtsAfterLastLabel() || noDefaultLabel() || reachableBreak();
+
+  eq SwitchStmt.getBlock().reachable() = reachable();
+  syn boolean Case.reachable() = getParent().getParent() instanceof Block && ((Block)getParent().getParent()).reachable();
+  
+  eq WhileStmt.canCompleteNormally() = reachable() && (!getCondition().isConstant() || !getCondition().isTrue()) || reachableBreak();
+  eq WhileStmt.getStmt().reachable() = reachable() && !getCondition().isFalse();
+
+  eq DoStmt.canCompleteNormally() = getStmt().canCompleteNormally() && (!getCondition().isConstant() || !getCondition().isTrue())
+    || reachableContinue() && (!getCondition().isConstant() || !getCondition().isTrue()) || reachableBreak();
+
+  syn lazy boolean BranchTargetStmt.reachableContinue() {
+    for(Iterator iter = targetContinues().iterator(); iter.hasNext(); ) {
+      Stmt stmt = (Stmt)iter.next();
+      if(stmt.reachable())
+        return true;
+    }
+    return false;
+  }
+  
+  eq DoStmt.getStmt().reachable() = reachable();
+
+  eq ForStmt.canCompleteNormally() = reachable() && hasCondition() && (!getCondition().isConstant() || !getCondition().isTrue()) || reachableBreak();
+  eq ForStmt.getStmt().reachable() = reachable() && (!hasCondition() || (!getCondition().isConstant() || !getCondition().isFalse()));
+  
+  eq BreakStmt.canCompleteNormally() = false;
+  eq ContinueStmt.canCompleteNormally() = false;
+  eq ReturnStmt.canCompleteNormally() = false;
+  eq ThrowStmt.canCompleteNormally() = false;
+
+  eq SynchronizedStmt.canCompleteNormally() = getBlock().canCompleteNormally();
+  eq SynchronizedStmt.getBlock().reachable() = reachable();
+
+  eq TryStmt.canCompleteNormally() {
+     boolean anyCatchClauseCompleteNormally = false;
+     for(int i = 0; i < getNumCatchClause() && !anyCatchClauseCompleteNormally; i++)
+       anyCatchClauseCompleteNormally = getCatchClause(i).getBlock().canCompleteNormally();
+     return (getBlock().canCompleteNormally() || anyCatchClauseCompleteNormally) &&
+       (!hasFinally() || getFinally().canCompleteNormally());
+  }
+  eq TryStmt.getBlock().reachable() = reachable();
+  eq TryStmt.getFinally().reachable() = reachable();
+  eq BasicCatch.getBlock().reachable() = reachableCatchClause(getParameter().type());
+
+  /**
+   * @return true if an exception of type exceptionType is catchable by the catch clause
+   */
+  inh lazy boolean CatchClause.reachableCatchClause(TypeDecl exceptionType);
+  eq TryStmt.getCatchClause(int childIndex).reachableCatchClause(TypeDecl exceptionType) {
+    for(int i = 0; i < childIndex; i++)
+      if(getCatchClause(i).handles(exceptionType))
+        return false;
+    if(catchableException(exceptionType))
+      return true;
+    if(exceptionType.mayCatch(typeError()) || exceptionType.mayCatch(typeRuntimeException()))
+      return true;
+    return false;
+  }
+  inh lazy TypeDecl TryStmt.typeError();
+  inh lazy TypeDecl TryStmt.typeRuntimeException();
+  
+  eq IfStmt.canCompleteNormally() = (reachable() && !hasElse()) || (getThen().canCompleteNormally() ||
+    (hasElse() && getElse().canCompleteNormally()));
+  eq IfStmt.getThen().reachable() = reachable();
+  eq IfStmt.getElse().reachable() = reachable();
+
+
+  inh boolean Stmt.reportUnreachable();
+  eq Block.getStmt(int i).reportUnreachable() = i == 0 ? reachable() : getStmt(i-1).reachable();
+  eq IfStmt.getThen().reportUnreachable() = reachable();
+  eq IfStmt.getElse().reportUnreachable() = reachable();
+  eq ForStmt.getStmt().reportUnreachable() = reachable();
+  eq DoStmt.getStmt().reportUnreachable() = reachable();
+  eq WhileStmt.getStmt().reportUnreachable() = reachable();
+  eq TryStmt.getBlock().reportUnreachable() = reachable();
+  eq TryStmt.getCatchClause().reportUnreachable() = reachable();
+  eq TryStmt.getFinally().reportUnreachable() = reachable();
+  eq SynchronizedStmt.getBlock().reportUnreachable() = reachable();
+  eq SwitchStmt.getBlock().reportUnreachable() = reachable();
+  eq TypeDecl.getChild().reportUnreachable() = true;
+	// ES: switching to getChild to include compilation units moved to NTAs
+  //eq Program.getCompilationUnit().reportUnreachable() = true;
+	eq Program.getChild().reportUnreachable() = true;
+
+}

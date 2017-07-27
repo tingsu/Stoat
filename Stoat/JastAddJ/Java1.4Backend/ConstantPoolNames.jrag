@@ -1,0 +1,146 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect ConstantPoolNames {
+
+  syn lazy String TypeDecl.typeDescriptor() {
+    throw new Error("Can not compute typeDescriptor for " + getClass().getName());
+  }
+  eq ClassDecl.typeDescriptor() = "L" + constantPoolName() + ";";
+  eq InterfaceDecl.typeDescriptor() = "L" + constantPoolName() + ";";
+  eq BooleanType.typeDescriptor() = "Z";
+  eq    ByteType.typeDescriptor() = "B";
+  eq   ShortType.typeDescriptor() = "S";
+  eq     IntType.typeDescriptor() = "I";
+  eq    LongType.typeDescriptor() = "J";
+  eq    CharType.typeDescriptor() = "C";
+  eq   FloatType.typeDescriptor() = "F";
+  eq  DoubleType.typeDescriptor() = "D";
+  eq    VoidType.typeDescriptor() = "V";
+  eq   ArrayDecl.typeDescriptor() { 
+    StringBuffer dim = new StringBuffer();
+    for(int i = 0; i < dimension(); i++)
+      dim.append("[");
+    return dim.toString() + elementType().typeDescriptor(); 
+  }
+  eq UnknownType.typeDescriptor() { throw new Error("Trying to make a typeDescriptor() of Unknown"); }
+
+  syn lazy String MethodDecl.descName() {
+    StringBuffer b = new StringBuffer();
+    b.append("(");
+    for (int i=0; i<getNumParameter(); i++)
+      b.append(getParameter(i).type().typeDescriptor());
+    b.append(")");
+    if(type().elementType().isUnknown()) {
+      System.out.println(getTypeAccess().dumpTree());
+      throw new Error("Error generating descName for " + signature() + ", did not expect unknown return type");
+    }
+    b.append(type().typeDescriptor());
+    return b.toString();
+  }
+
+  syn lazy String ConstructorDecl.descName() {
+    StringBuffer b = new StringBuffer();
+    b.append("(");
+    // this$0
+    if(needsEnclosing())
+      b.append(enclosing().typeDescriptor());
+    if(needsSuperEnclosing())
+      b.append(superEnclosing().typeDescriptor());
+    // args
+    for (int i=0; i<getNumParameter(); i++)
+      b.append(getParameter(i).type().typeDescriptor());
+    b.append(")V");
+    return b.toString();
+  }
+
+
+  inh lazy String TypeDecl.destinationPath();
+  eq CompilationUnit.getTypeDecl(int index).destinationPath() = destinationPath();
+  eq CompilationUnit.getImportDecl(int index).destinationPath() = destinationPath();
+
+  syn lazy String CompilationUnit.destinationPath() {
+    if(options().hasValueForOption("-d")) {
+      return options().getValueForOption("-d");
+    }
+    else {
+      if(fromSource()) {
+        // /home/torbjorn/sandbox/JavaCompiler/JCK/javasoft/sqe/tests/lang/icls045/icls04591m11/icls04591m11_c.java
+        // package javasoft.sqe.tests.lang.icls045.icls04591m11_p class icls04591m11_c
+        // /home/torbjorn/sandbox/JavaCompiler/JCK/javasoft/sqe/tests/lang/icls045/icls04591m11/icls04591m11.java
+        // package javasoft.sqe.tests.lang.icls045.icls04591m11 class icls04591m11
+
+        // ta paketnamnet p och om det har fler än 3 delar så kontrollera om det finns som substring i pathen
+        // använd i så fall den delen av pathen
+        // fortsätt genom att ta bort sista delen i paketnamnet och gör om proceduren
+        // sluta när namnet är mindre är 3 eller mindre
+        
+        String sourceName = pathName(); //relativeName();         // ex AST/Defines_AST_hello
+        // extract source path including package directories
+        String sourcePath = null;
+        if(sourceName.lastIndexOf(java.io.File.separator) == -1)
+          sourcePath = ".";
+        else
+          sourcePath = sourceName.substring(0, sourceName.lastIndexOf(java.io.File.separator));
+        String sourcePathPattern = sourcePath.replace(java.io.File.separatorChar, '.');
+        String[] parts = packageName().split("\\.");
+        int num = parts.length;
+        while(num > 3) {
+          StringBuffer packagePattern = new StringBuffer();
+          for(int i = 0; i < num; i++) {
+            if(i != 0) packagePattern.append(".");
+            packagePattern.append(parts[i]);
+          }
+          int index = sourcePathPattern.lastIndexOf(packagePattern.toString());
+          if(index > 0) {
+            return sourcePath.substring(0, index-1);
+          }
+          num--;
+        }
+          
+        //System.err.println("SourcePath: " + sourcePath);
+        //String[] parts = packageName().split("\\.");
+        int k = parts.length - 1;
+        while(k >= 0 && !sourcePath.endsWith(parts[k])) {
+          //System.err.println(sourcePath + " does not end with " + parts[k]);
+          k--;
+        }
+        if(k >= 0) {
+          for(int i = k; i >= 0; i--) {
+            sourcePath = sourcePath.substring(0, sourcePath.lastIndexOf(parts[i]));
+            //System.err.println("new candidate is " + sourcePath);
+          }
+        }
+        if(sourcePath.equals(""))
+          sourcePath = ".";
+        //System.err.println("SourcePath after: " + sourcePath);
+        return sourcePath;
+        /*
+        // extract first part of package name
+        String prefix;
+        int pos = packageName().indexOf('.');       // AST
+        if(pos != -1)
+          prefix = packageName().substring(0, pos-1);
+        else
+          prefix = packageName();
+        // add separator
+        prefix = prefix + java.io.File.separator;
+        // find last occurance
+        pos = sourceName.lastIndexOf(prefix);
+        if(pos > 0 && !packageName().equals(""))
+          return sourceName.substring(0, pos-1);
+        */
+      }
+      if(pathName != null)
+        return pathName;
+      else
+        return ".";
+    }
+  }
+}

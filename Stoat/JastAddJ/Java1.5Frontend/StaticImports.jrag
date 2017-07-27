@@ -1,0 +1,219 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+
+aspect StaticImports {
+  /* 7.5.3 A single-static-import declaration imports all accessible (§6.6) static members
+  with a given simple name from a type. This makes these static members available
+  under their simple name in the class and interface declarations of the
+  compilation unit in which the single-static import declaration appears.*/
+  /* 7.5.4 A static-import-on-demand declaration allows all accessible (§6.6) static
+  members declared in the type named by a canonical name to be imported as
+  needed.*/
+
+  // The attribute is declared in original type lookup.
+  eq StaticImportDecl.importedTypes(String name) {
+    SimpleSet set = SimpleSet.emptySet;
+    for(Iterator iter = type().memberTypes(name).iterator(); iter.hasNext(); ) {
+      TypeDecl decl = (TypeDecl)iter.next();
+      if(decl.isStatic() && decl.accessibleFromPackage(packageName()))
+        set = set.add(decl);
+    }
+    return set;
+  }
+  syn lazy SimpleSet ImportDecl.importedFields(String name) = SimpleSet.emptySet;
+  eq StaticImportDecl.importedFields(String name) {
+    SimpleSet set = SimpleSet.emptySet;
+    for(Iterator iter = type().memberFields(name).iterator(); iter.hasNext(); ) {
+      FieldDeclaration decl = (FieldDeclaration)iter.next();
+      if(decl.isStatic() &&
+         (decl.isPublic() || (!decl.isPrivate() && decl.hostType().topLevelType().packageName().equals(packageName()))))
+        set = set.add(decl);
+    }
+    return set;
+  }
+  syn lazy Collection ImportDecl.importedMethods(String name) = Collections.EMPTY_LIST;
+  eq StaticImportDecl.importedMethods(String name) {
+    Collection set = new HashSet();
+    for(Iterator iter = type().memberMethods(name).iterator(); iter.hasNext(); ) {
+      MethodDecl decl = (MethodDecl)iter.next();
+      if(decl.isStatic() &&
+         (decl.isPublic() || (!decl.isPrivate() && decl.hostType().topLevelType().packageName().equals(packageName()))))
+        set.add(decl);
+    }
+    return set;
+  }
+  
+  syn TypeDecl StaticImportDecl.type();
+  eq SingleStaticImportDecl.type() = getAccess().type(); 
+  eq StaticImportOnDemandDecl.type() = getAccess().type(); 
+
+  // The isOnDemand attribute is used to make non-demand imports shadow demand imports.
+  eq StaticImportOnDemandDecl.isOnDemand() = true;
+
+  /* The TypeName must be the canonical name of a class or interface type*/
+  public void SingleStaticImportDecl.typeCheck() { 
+    if(!getAccess().type().typeName().equals(typeName()) && !getAccess().type().isUnknown())
+      error("Single-type import " + typeName() + " is not the canonical name of type " + getAccess().type().typeName());
+  }
+
+  /* 7.5.3 A compile-time error occurs if the named type does not exist. The named type must
+  be accessible (§6.6) or a compile-time error occurs.
+  Comment: Taken care of by name and type analysis */
+
+  /* 7.5.4 It is a compile-time error for a static-import-on-demand declaration to name a
+  type that does not exist or a type that is not accessible. Two or more
+  static-import-on-demand declarations in the same compilation unit may name the
+  same type or package; the effect is as if there was exactly one such
+  declaration. Two or more static-import-on-demand declarations in the same
+  compilation unit may name the same member; the effect is as if the member was
+  imported exactly once.
+
+  Note that it is permissable for one static-import-on-demand declaration to
+  import several fields or types with the same name, or several methods with the
+  same name and signature.
+
+  If a compilation unit contains both a static-import-on-demand declaration and a
+  type-import-on-demand (§7.5.2) declaration that name the same type, the effect
+  is as if the static member types of that type were imported only once.
+
+  A static-import-on-demand declaration never causes any other declaration to be shadowed.
+
+  Comment: Taken care of by the name and type analysis operating on sets */
+  
+  /* 7.5.3 The Identifier must name at least one static member of the named type; a 
+  compile-time error occurs if there is no member of that name or if all of the named
+  members are not accessible.*/
+  public void SingleStaticImportDecl.nameCheck() {
+    if(importedFields(name()).isEmpty() && importedMethods(name()).isEmpty() && importedTypes(name()).isEmpty() &&
+       !getAccess().type().isUnknown()) {
+      error("Semantic Error: At least one static member named " + name() + " must be available in static imported type " + type().fullName());
+    }
+  }
+  syn String SingleStaticImportDecl.name() = getID();
+
+  /* A single-static-import declaration d in a compilation unit c of package p that
+  imports a field named n shadows the declaration of any static field named n
+  imported by a static-import-on-demand declaration in c, throughout c.*/
+  eq CompilationUnit.getTypeDecl().lookupVariable(String name) {
+    SimpleSet set = importedFields(name);
+    if(!set.isEmpty()) return set;
+    set = importedFieldsOnDemand(name);
+    if(!set.isEmpty()) return set;
+    return lookupVariable(name);
+  }
+  inh SimpleSet CompilationUnit.lookupVariable(String name);
+  syn SimpleSet CompilationUnit.importedFields(String name) {
+    SimpleSet set = SimpleSet.emptySet;
+    for(int i = 0; i < getNumImportDecl(); i++)
+      if(!getImportDecl(i).isOnDemand())
+        for(Iterator iter = getImportDecl(i).importedFields(name).iterator(); iter.hasNext(); )
+          set = set.add(iter.next());
+    return set;
+  }
+  syn SimpleSet CompilationUnit.importedFieldsOnDemand(String name) {
+    SimpleSet set = SimpleSet.emptySet;
+    for(int i = 0; i < getNumImportDecl(); i++)
+      if(getImportDecl(i).isOnDemand())
+        for(Iterator iter = getImportDecl(i).importedFields(name).iterator(); iter.hasNext(); )
+          set = set.add(iter.next());
+    return set;
+  }
+
+  /* A single-static-import declaration d in a compilation unit c of package p that
+  imports a method named n with signature s shadows the declaration of any static
+  method named n with signature s imported by a static-import-on-demand
+  declaration in c, throughout c.*/
+  eq CompilationUnit.getTypeDecl().lookupMethod(String name) {
+    Collection list = importedMethods(name);
+    if(!list.isEmpty()) return list;
+    list = importedMethodsOnDemand(name);
+    if(!list.isEmpty()) return list;
+    return lookupMethod(name);
+  }
+  inh Collection CompilationUnit.lookupMethod(String name);
+  syn Collection CompilationUnit.importedMethods(String name) {
+    Collection list = new ArrayList();
+    for(int i = 0; i < getNumImportDecl(); i++)
+      if(!getImportDecl(i).isOnDemand())
+        list.addAll(getImportDecl(i).importedMethods(name));
+    return list;
+  }
+  syn Collection CompilationUnit.importedMethodsOnDemand(String name) {
+    Collection list = new ArrayList();
+    for(int i = 0; i < getNumImportDecl(); i++)
+      if(getImportDecl(i).isOnDemand())
+        list.addAll(getImportDecl(i).importedMethods(name));
+    return list;
+  }
+
+  /* A single-static-import declaration d in a compilation unit c of package p that
+  imports a type named n shadows the declarations of:
+    * any static type named n imported by a static-import-on-demand declaration in c.
+    * any top level type (§7.6) named n declared in another compilation unit (§7.3) of p.
+    * any type named n imported by a type-import-on-demand declaration (§7.5.2) in c. 
+  throughout c.
+  Comment: already implemented by original type lookup
+  */
+
+  /* Note that it is permissable for one single-static-import declaration to import
+  several fields or types with the same name, or several methods with the same
+  name and signature.
+  Comment: Name analysis already deals with sets*/
+
+  /* If a compilation unit contains both a single-static-import (§7.5.3) declaration
+  that imports a type whose simple name is n, and a single-type-import
+  declaration (§7.5.1) that imports a type whose simple name is n, a compile-time
+  error occurs.
+  Comment: javac6 interprets this as "another" type whose simple name is n. Then
+  nothing needs to be done.
+  */
+
+  /* If a single-static-import declaration imports a type whose simple name is n,
+  and the compilation unit also declares a top level type (§7.6) whose simple
+  name is n, a compile-time error occurs.*/
+  refine NameCheck public void CompilationUnit.nameCheck() {
+    refined();
+    for(int i = 0; i < getNumImportDecl(); i++) {
+      if(getImportDecl(i) instanceof SingleStaticImportDecl) {
+        SingleStaticImportDecl decl = (SingleStaticImportDecl)getImportDecl(i);
+        String name = decl.name();
+        if(!decl.importedTypes(name).isEmpty()) {
+          TypeDecl type = (TypeDecl)decl.importedTypes(name).iterator().next();
+          if(localLookupType(name).contains(type))
+            decl.error(packageName() + "." + name + " is already defined in this compilation unit");
+        }
+      }
+    }
+  }
+  // Implement additional analyses for new language constructs
+
+  // Exception handling
+  eq CompilationUnit.getImportDecl().handlesException(TypeDecl exceptionType) {
+    return !exceptionType.isUncheckedException();
+  }
+
+  // Expect a type name in this context
+  eq SingleStaticImportDecl.getAccess().nameType() = NameType.TYPE_NAME;
+  eq StaticImportOnDemandDecl.getAccess().nameType() = NameType.TYPE_NAME;
+
+  // PrettyPrinting
+  public void SingleStaticImportDecl.toString(StringBuffer s) {
+    s.append("import static ");
+    getAccess().toString(s);
+    s.append("." + getID());
+    s.append(";\n");
+  }
+  public void StaticImportOnDemandDecl.toString(StringBuffer s) {
+    s.append("import static ");
+    getAccess().toString(s);
+    s.append(".*;\n");
+  }
+
+}

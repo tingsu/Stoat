@@ -1,0 +1,173 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect GenericsPrettyPrint {
+  public void TypeVariable.toString(StringBuffer s) {
+    s.append(name());
+    if(getNumTypeBound() > 0) {
+      s.append(" extends ");
+      s.append(getTypeBound(0).type().fullName());
+      for(int i = 1; i < getNumTypeBound(); i++) {
+        s.append(" & ");
+        s.append(getTypeBound(i).type().fullName());
+      }
+    }
+  }
+
+  public void ParTypeAccess.toString(StringBuffer s) {
+    getTypeAccess().toString(s);
+    s.append("<");
+    for(int i = 0; i < getNumTypeArgument(); i++) {
+      if(i != 0)
+        s.append(", ");
+      getTypeArgument(i).toString(s);
+    }
+    s.append(">");
+  }
+
+  public void ParClassDecl.toString(StringBuffer s) {
+      getModifiers().toString(s);
+      s.append("class " + getID());
+      s.append('<');
+      if (getNumArgument() > 0) {
+	  getArgument(0).toString(s);
+	  for (int i = 1; i < getNumArgument(); i++) {
+	      s.append(", ");
+	      getArgument(i).toString(s);
+	  }
+      }
+      s.append('>');
+      if(hasSuperClassAccess()) {
+	  s.append(" extends ");
+	  getSuperClassAccess().toString(s);
+      }
+      if(getNumImplements() > 0) {
+	  s.append(" implements ");
+	  getImplements(0).toString(s);
+	  for(int i = 1; i < getNumImplements(); i++) {
+	      s.append(", ");
+	      getImplements(i).toString(s);
+	  }
+      }
+      ppBodyDecls(s);
+  }
+
+  private void GenericClassDecl.ppTypeParameters(StringBuffer s) {
+      s.append('<');
+      if (getNumTypeParameter() > 0) {
+	  getTypeParameter(0).toString(s);
+	  for (int i = 1; i < getNumTypeParameter(); i++) {
+	      s.append(", ");
+	      getTypeParameter(i).toString(s);
+	  }
+      }
+      s.append('>');
+  }
+
+	public void GenericClassDecl.toString(StringBuffer s) {
+		getModifiers().toString(s);
+		s.append("class " + getID());
+		ppTypeParameters(s);
+		if(hasSuperClassAccess()) {
+			s.append(" extends ");
+			getSuperClassAccess().toString(s);
+		}
+		if(getNumImplements() > 0) {
+			s.append(" implements ");
+			getImplements(0).toString(s);
+			for(int i = 1; i < getNumImplements(); i++) {
+				s.append(", ");
+				getImplements(i).toString(s);
+			}
+		}
+
+    /*
+    s.append(" instantiated with: ");
+    for(int i = 0; i < getNumParTypeDecl(); i++) {
+      if(i != 0) s.append(", ");
+      ParTypeDecl decl = getParTypeDecl(i);
+      s.append("<");
+      for(int j = 0; j < decl.getNumArgument(); j++) {
+        if(j != 0) s.append(", ");
+        s.append(decl.getArgument(j).type().fullName());
+      }
+      s.append(">");
+    }
+    */
+
+		ppBodyDecls(s);    
+    
+    /*
+    for(int i = 0; i < getNumParTypeDecl(); i++) {
+      ParClassDecl decl = getParTypeDecl(i);
+      decl.toString(s);
+    }
+    */
+    
+	}
+  
+	public void GenericInterfaceDecl.toString(StringBuffer s) {
+		getModifiers().toString(s);
+		s.append("interface " + getID());
+		s.append('<');
+    	if (getNumTypeParameter() > 0) {
+    		getTypeParameter(0).toString(s);
+    		for (int i = 1; i < getNumTypeParameter(); i++) {
+    			s.append(", ");
+    			getTypeParameter(i).toString(s);
+    		}
+    	}
+    	s.append('>');
+		if(getNumSuperInterfaceId() > 0) {
+			s.append(" extends ");
+			getSuperInterfaceId(0).toString(s);
+      for(int i = 1; i < getNumSuperInterfaceId(); i++) {
+        s.append(", ");
+			  getSuperInterfaceId(i).toString(s);
+      }
+    }
+
+    /*
+
+    s.append(" instantiated with: ");
+    for(int i = 0; i < getNumParTypeDecl(); i++) {
+      if(i != 0) s.append(", ");
+      ParTypeDecl decl = getParTypeDecl(i);
+      s.append("<");
+      for(int j = 0; j < decl.getNumArgument(); j++) {
+        if(j != 0) s.append(", ");
+        s.append(decl.getArgument(j).type().fullName());
+      }
+      s.append(">");
+    }
+    */
+    
+		ppBodyDecls(s);
+    
+    /*
+    for(int i = 0; i < getNumParTypeDecl(); i++) {
+      ParInterfaceDecl decl = getParTypeDecl(i);
+      decl.toString(s);
+    }
+    */
+	}
+
+	public void Wildcard.toString(StringBuffer s) {
+    s.append("?");
+  }
+  public void WildcardExtends.toString(StringBuffer s) {
+    s.append("? extends ");
+    getAccess().toString(s);
+  }
+  public void WildcardSuper.toString(StringBuffer s) {
+    s.append("? super ");
+    getAccess().toString(s);
+  }
+
+}

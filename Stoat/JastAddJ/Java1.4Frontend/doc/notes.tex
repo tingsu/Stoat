@@ -1,0 +1,893 @@
+\documentclass{article}
+\usepackage[pdftex]{color}
+\usepackage{times}
+\usepackage{listings}
+
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\nt}[1]{\texttt{#1}}
+\newcommand{\child}[1]{\texttt{#1}}
+\newcommand{\JastAddJ}{Jast\-AddJ}
+\definecolor{KWColor}{rgb}{0.5,0,0.67}
+
+\lstset{
+  language=[JastAdd]Java,keywordstyle=\bf\ttfamily\small\color{KWColor},
+  basicstyle=\ttfamily\small,
+  commentstyle=\footnotesize\rmfamily\emph,
+  morekeywords={lazy,circular,coll,contributes,to,when,with,root}
+}
+\newcommand{\code}[1]{\lstinline$#1$}
+
+\title{Some Notes on \JastAddJ}
+\author{}
+
+\begin{document}
+\maketitle
+\section{The Java 1.4 Frontend}
+The Java 1.4 Frontend implements parsing, type checking, and error checking for the Java 1.4 language.
+
+\subsection{Abstract Grammar}
+The abstract grammar of Java 1.4 is specified in the file \file{java.ast}. Here is a short summary of the most important AST node classes.
+
+\begin{itemize}
+\item \nt{Program}
+  \begin{lstlisting}[frame=single]
+ Program ::= CompilationUnit*
+  \end{lstlisting}
+
+  This node type represents an entire Java program. Its only child is a list
+  of compilation units.
+\item \nt{CompilationUnit}
+  \begin{lstlisting}[frame=single]
+ CompilationUnit ::= <PackageDecl:java.lang.String> 
+                     ImportDecl* TypeDecl*;
+  \end{lstlisting}
+
+  This node represents a compilation unit, i.e. either a source file or
+  a class file. \child{PackageDecl} is the name of the package
+  this compilation unit belongs to, \child{ImportDecl*} and \child{TypeDecl*}
+  are its import declarations and type declarations, respectively.
+
+%% // 7.5 Import Declarations
+%% abstract ImportDecl ::= Access;
+%% SingleTypeImportDecl : ImportDecl;
+%% TypeImportOnDemandDecl : ImportDecl;
+
+\item \nt{Access}
+  \begin{lstlisting}[frame=single]
+ abstract Access : Expr;
+  \end{lstlisting}
+  
+  An \nt{Access} is an expression that refers to a declared entity, such as
+  a package, a type, a variable, or a method. Roughly speaking, accesses are 
+  qualified names, including array accesses and method calls.
+
+\item \nt{AbstractDot}, \nt{Dot}
+  \begin{lstlisting}[frame=single]
+ AbstractDot : Access ::= Left:Expr Right:Access;
+ Dot : AbstractDot;
+  \end{lstlisting}
+
+  A \nt{Dot} is a qualified access, such as \code{this.x} or
+  \code{"aluis".length()}, with \child{Left} and \child{Right} being the
+  qualifier and the qualifiee, respectively. Note that \child{Left} can
+  be any expression, not necessarily an access (for example, it is
+  a string literal in the second example above), whereas \child{Right}
+  has to be an access.
+
+  The node type \nt{AbstractDot} represents both \nt{Dot}s and
+  array access expressions: for instance, \code{x[i++]} is represented
+  as an \nt{AbstractDot} whose \child{Left} child is the access \code{x},
+  and whose \child{Right} child is an \nt{ArrayAccess}, in turn containing
+  the expression \code{i++}.
+
+  Usually, it is more convenient to program against \nt{AbstractDot} instead
+  of \nt{Dot}, since the two cases can often be treated identically.
+
+\item \nt{VarAccess}
+  \begin{lstlisting}[frame=single]
+ VarAccess : Access ::= <ID:String>
+  \end{lstlisting}
+
+  A \nt{VarAccess} is an occurrence of a variable, whose name is given
+  by the terminal child \child{ID}.
+
+\item \nt{MethodAccess}
+  \begin{lstlisting}[frame=single]
+ MethodAccess : Access ::= <ID:String> Arg:Expr*;
+  \end{lstlisting}
+
+  A \nt{MethodAccess} is a call to a method \child{ID} with the list
+  of arguments \child{Arg}.
+
+\item \nt{ConstructorAccess}, \nt{SuperConstructorAccess}
+  \begin{lstlisting}[frame=single]
+ ConstructorAccess : Access ::= <ID:String> Arg:Expr*;
+ SuperConstructorAccess : ConstructorAccess;
+  \end{lstlisting}
+
+  A \nt{ConstructorAccess} is an explicit constructor invocation of
+  the form \code{this(x, y)}. The \child{ID} is always \code{"this"},
+  and \child{Arg} contains the list of arguments.
+
+  A \nt{SuperConstructorAccess} is an explicit super constructor
+  invocation such as \code{super(z)}. Here, \child{ID} is always
+  \code{"super"}, with \child{Arg} again giving the list of arguments.
+
+  It is important not to confuse these nodes with \nt{ClassInstanceExpr}:
+  the latter represents object construction through \code{new}, whereas
+  these two nodes are only for explicit constructor calls from within
+  other constructors.
+
+\item \nt{TypeAccess}
+  \begin{lstlisting}[frame=single]
+ TypeAccess : Access ::= <Package:String> <ID:String>;
+  \end{lstlisting}
+
+  A \nt{TypeAccess} is the equivalent of a \nt{VarAccess} for types. 
+  The name of the type being referenced is given by \child{ID}. As an optimisation,
+  if a type is accessed with a qualifier indicating its package, that
+  package is given by \child{Package} (which otherwise is \code{""}).
+
+  For example, in the declaration \code{String s}, the type access
+  \code{String} is represented as a \nt{TypeAccess} with \child{Package}
+  being the empty string and \child{ID} being \code{"String"}. If, on
+  the other hand, we have a declaration \code{java.lang.String s}, then
+  \child{Package} will be \code{"java.lang"}, and \child{ID} as before.
+
+\item \nt{PrimitiveTypeAccess}
+  \begin{lstlisting}[frame=single]
+ PrimitiveTypeAccess : TypeAccess ::= /<Package:String>/ 
+                            /<ID:String>/ <Name:String>;
+  \end{lstlisting}
+
+  A \nt{PrimitiveTypeAccess} is represents a keyword like \code{int} or 
+  \code{char} that accesses a primitive type. The name of the primitive type
+  is in \child{Name}, \child{Package} is the special string
+  \code{"@primitive"}, and \child{ID} is the same as \child{Name}.
+
+\item \nt{PrimitiveTypeAccess}
+  \begin{lstlisting}[frame=single]
+ ArrayTypeAccess : TypeAccess ::= /<Package:String>/ 
+                               /<ID:String>/ Access;
+ ArrayTypeWithSizeAccess : ArrayTypeAccess ::= Expr;
+  \end{lstlisting}
+
+  An \nt{ArrayTypeAccess} represents the array type whose component type is
+  represented by its child \nt{Access}. For example, the type
+  \code{String[][]} is represented by an \nt{ArrayTypeAccess} whose
+  child \child{Access} is another \linebreak
+  \nt{ArrayTypeAccess}, whose child is
+  a \nt{TypeAccess} with \child{ID} \code{"String"}.
+
+  Both \child{Package} and \child{ID} of an \nt{ArrayTypeAccess} are copied
+  from its \child{Access}.
+
+  An \nt{ArrayTypeWithSizeAccess} has additional information about the size
+  of the array type to represent type accesses like \code{String[42]}.
+
+\item \nt{ThisAccess}, \nt{SuperAccess}
+  \begin{lstlisting}[frame=single]
+ ThisAccess : Access ::= <ID:String>;
+ SuperAccess : Access ::= <ID:String>;
+  \end{lstlisting}
+
+  These node types represent, respectively, the accesses \code{this} and
+  \code{super}. Their \child{ID}s are \code{"this"} and
+  \code{"super"}.
+
+\item \nt{PackageAccess}
+  \begin{lstlisting}[frame=single]
+ PackageAccess : Access ::= <Package:String>;
+  \end{lstlisting}
+
+  A \nt{PackageAccess} represents a package name. Package names are not
+  hierarchical, i.e. an access to \nt{java.lang} is simply stored as a
+  \nt{PackageAccess} with \child{Package} being \code{"java.lang"}.
+
+  \nt{PackageAccess} nodes occur very rarely. Mostly, package names only
+  occur as qualifiers of type accesses, and are then merged into their
+  \nt{TypeAccess} node as explained above.
+
+\item \nt{ArrayAccess}
+  \begin{lstlisting}[frame=single]
+ ArrayAccess : Access ::= Expr;
+  \end{lstlisting}
+
+  An \nt{ArrayAccess} is an expression that indexes an array. As
+  explained above, an expression like \code{x[i++]} is represented by
+  an \code{AbstractDot} node, whose \code{Left} child represents the
+  array (here \code{x}); its \code{Right} child is an \code{ArrayAccess},
+  with the expression \code{i++} represented by its child \code{Expr}.
+
+%% ParseName : Access ::= <ID:String>;
+%% PackageOrTypeAccess : Access ::= <ID:String>;
+%% AmbiguousAccess : Access ::= <ID:String>;
+
+\item \nt{ClassInstanceExpr}
+  \begin{lstlisting}[frame=single]
+ ClassInstanceExpr : Access ::= Access Arg:Expr* 
+                                [TypeDecl];
+  \end{lstlisting}
+
+  A \nt{ClassInstanceExpression} is an object instantiation. The simplest
+  case would be an expression like \code{new ArrayList()}: It corresponds
+  to a\linebreak
+  \nt{ClassInstanceExpression} whose \child{Access} child holds
+  a \nt{TypeAccess} with \child{ID} \code{"ArrayList"}. The list \child{Arg}
+  is empty, and the \child{TypeDecl} child is an empty optional node.
+
+  A slightly more complicated example would be \code{new ArrayList(23)}.
+  This \nt{ClassInstanceExpression}'s \child{Access} child is the same as
+  before, but now \child{Arg} is the one-element list containing
+  the expression \code{23}. As before,\linebreak \child{TypeDecl} is empty.
+
+  Finally, in an anonymous class like \code{new MouseInputAdapter() \{ ... \}},
+  the declaration of the anonymous class becomes the value of the
+  \child{TypeDecl} field of the \code{ClassInstanceExpression}.
+
+\item \nt{ClassAccess}
+  \begin{lstlisting}[frame=single]
+ ClassAccess : Access ::= ;
+  \end{lstlisting}
+
+  A \nt{ClassAccess} is used to represent class literals. For example,
+  \code{String.class} corresponds to an \nt{AbstractDot} whose
+  \code{Left} child is the access to \code{String}, and whose \code{Right}
+  child is a \nt{ClassAccess}.
+
+  Note that despite their similar names \nt{TypeAccess} and \nt{ClassAccess}
+  are very different beasts.
+
+\item \nt{TypeDecl}
+  \begin{lstlisting}[frame=single]
+ abstract TypeDecl ::= Modifiers <ID:String> BodyDecl*;
+ abstract ReferenceType : TypeDecl;
+ Modifiers ::= Modifier*;
+ Modifier ::= <ID:String>;
+  \end{lstlisting}
+
+  \nt{TypeDecl} is an abstract super class representing all sorts of type
+  declarations. \nt{ReferenceType} more specifically represents class and
+  interface declarations.
+
+  All type declarations have \child{Modifiers} and a name, given by
+  \child{ID}, as well as some declarations (e.g., of member methods),
+  given by \child{BodyDecl*}.
+
+  Modifiers are simply given by their string representations in
+  \child{ID}.
+
+\item \nt{PrimitiveType}, \nt{NumericType}, \nt{BooleanType}, \nt{IntegralType},\linebreak
+  \nt{ByteType}, \nt{ShortType}, \nt{IntType}, \nt{LongType}, \nt{CharType},\linebreak
+  \nt{FloatingPointType}, \nt{FloatType}, \nt{DoubleType}, \nt{NullType},
+  \nt{VoidType}
+  \begin{lstlisting}[frame=single]
+ PrimitiveType : TypeDecl ::= Modifiers <ID:String> 
+               [SuperClassAccess:Access] BodyDecl*;
+ abstract NumericType : PrimitiveType;
+ BooleanType : PrimitiveType;
+ abstract IntegralType : NumericType;
+ ByteType : IntegralType;
+ ShortType : IntegralType;
+ IntType : IntegralType;
+ LongType : IntegralType;
+ CharType : IntegralType;
+ FloatingPointType : NumericType;
+ FloatType : FloatingPointType;
+ DoubleType : FloatingPointType;
+ NullType : TypeDecl;
+ VoidType : TypeDecl;
+  \end{lstlisting}
+
+  Node types to represent the builtin types of Java.
+
+\item \nt{EmptyType}, \nt{VoidType}
+  \begin{lstlisting}[frame=single]
+ EmptyType : PrimitiveType;
+ UnknownType : ClassDecl;
+  \end{lstlisting}
+
+  Convenience node types.
+
+\item \nt{ClassDecl}, \nt{InterfaceDecl}, \nt{ArrayDecl}
+  \begin{lstlisting}[frame=single]
+ ClassDecl : ReferenceType ::= Modifiers <ID:String> 
+        [SuperClassAccess:Access] Implements:Access* 
+                                           BodyDecl*;
+ InterfaceDecl : ReferenceType ::= Modifiers <ID:String> 
+                      SuperInterfaceId:Access* BodyDecl*;
+ ArrayDecl : ClassDecl;
+  \end{lstlisting}
+
+  A \nt{ClassDecl} represents a declaration of a class, and \nt{InterfaceDecl}
+  a declaration of an interface. Their children correspond straightforwardly
+  to the syntactic elements of the declarations.
+
+  An \nt{ArrayDecl} does not correspond to a source-level declaration;
+  it is created on-demand for every \nt{ArrayTypeAccess} occurring 
+  in the program.
+
+\item \nt{BodyDecl}, \nt{InstanceInitializer}, \nt{StaticInitalizer},\linebreak
+  \nt{ConstructorDecl}, \nt{MemberDecl}
+  \begin{lstlisting}[frame=single]
+ abstract BodyDecl;
+ InstanceInitializer : BodyDecl ::= Block;
+ StaticInitializer : BodyDecl ::= Block;
+ ConstructorDecl : BodyDecl ::= Modifiers <ID:String> 
+    Parameter:ParameterDeclaration* Exception:Access* 
+                  [ConstructorInvocation:Stmt] Block;
+ abstract MemberDecl : BodyDecl;
+  \end{lstlisting}
+
+  A \nt{BodyDecl} is any declaration that occurs within a type declaration.
+  Such a body declaration can be an initializer, either a
+  \nt{InstanceInitializer} or a \nt{StaticInitializer}, or a constructor
+  declaration (\nt{ConstructorDecl}), or a member declaration (\nt{MemberDecl}),
+  i.e. a declaration of a method or field.
+
+  Initializers only consist of a single \nt{Block} of statements. Constructor
+  declarations have modifiers, parameters, declared exceptions, and a block.
+  Their \nt{ID} is always the name of the surrounding class. The first statement
+  of a constructor may be an invocation of another constructor of the same class
+  or a constructor of the super class. Such a statement, although syntactically
+  part of the \nt{Block} making up the body of the constructor, is in many
+  ways special (for example, it can only occur in this precise syntactic
+  position), so it is treated specially in the syntax tree, and appears as
+  an optional child \nt{ConstructorInvocation} of the constructor declaration.
+
+\item %\nt{FieldDecl}, 
+  \nt{FieldDeclaration}
+%% FieldDecl : MemberDecl ::= Modifiers TypeAccess:Access VariableDecl*;
+%% VariableDecl ::= <ID:String> Dims* [Init:Expr];
+%% Dims ::= [Expr];
+  \begin{lstlisting}[frame=single]
+ FieldDeclaration : MemberDecl ::= Modifiers 
+               TypeAccess:Access <ID:String> [Init:Expr];
+ MethodDecl : MemberDecl ::= Modifiers TypeAccess:Access 
+               <ID:String> Parameter:ParameterDeclaration* 
+               Exception:Access* [Block];
+ ParameterDeclaration ::= Modifiers TypeAccess:Access 
+               <ID:String>;
+ abstract MemberTypeDecl : MemberDecl;
+ MemberClassDecl : MemberTypeDecl ::= ClassDecl;
+ MemberInterfaceDecl : MemberTypeDecl ::= InterfaceDecl;
+  \end{lstlisting}
+
+  Different kinds of member declarations for fields, methods, and member types.
+  The children correspond directly to the syntactic elements of the 
+  corresponding declarations.
+
+  Note that parameters can be declared \code{final}, hence
+  a \nt{ParameterDeclaration} has \child{Modifiers}.
+
+%% VarDeclStmt : Stmt ::= Modifiers TypeAccess:Access VariableDecl*;
+
+
+%% // 8.5 Member Type Declarations
+
+%% IdUse ::= <ID:String>;
+
+\item \nt{Expr}
+  \begin{lstlisting}[frame=single]
+ abstract Expr;
+  \end{lstlisting}
+
+  The abstract super type of all expressions.
+
+\item assignment expressions
+  \begin{lstlisting}[frame=single]
+ abstract AssignExpr : Expr ::= Dest:Expr Source:Expr;
+ AssignSimpleExpr : AssignExpr ;
+ abstract AssignMultiplicativeExpr : AssignExpr;
+ AssignMulExpr : AssignMultiplicativeExpr ;
+ AssignDivExpr : AssignMultiplicativeExpr ;
+ AssignModExpr : AssignMultiplicativeExpr ;
+ abstract AssignAdditiveExpr : AssignExpr;
+ AssignPlusExpr : AssignAdditiveExpr ;
+ AssignMinusExpr : AssignAdditiveExpr ;
+ abstract AssignShiftExpr : AssignExpr;
+ AssignLShiftExpr : AssignShiftExpr ;
+ AssignRShiftExpr : AssignShiftExpr ;
+ AssignURShiftExpr : AssignShiftExpr ;
+ abstract AssignBitwiseExpr : AssignExpr;
+ AssignAndExpr : AssignBitwiseExpr ;
+ AssignXorExpr : AssignBitwiseExpr ;
+ AssignOrExpr : AssignBitwiseExpr ;
+  \end{lstlisting}
+
+  Node types for the manifold assignment operators of Java. Every assignment
+  has a left hand side \nt{Dest} and a right hand side \nt{Source}, both
+  of which are expressions.
+
+\item Primary Expressions
+  \begin{lstlisting}[frame=single]
+ abstract PrimaryExpr : Expr;
+
+ abstract Literal : PrimaryExpr ::= <LITERAL:String>;
+ IntegerLiteral : Literal ;
+ LongLiteral : Literal ;
+ FloatingPointLiteral : Literal ;
+ DoubleLiteral : Literal ;
+ BooleanLiteral : Literal ;
+ CharacterLiteral : Literal ;
+ StringLiteral : Literal ;
+ NullLiteral : Literal ;
+
+ ParExpr : PrimaryExpr ::= Expr;
+  \end{lstlisting}
+
+  Primary expressions are the simplest kind of expressions. Literals
+  have a child \nt{LITERAL} that contains a string representation of
+  their constant value. For the \nt{NullLiteral}, this is always
+  \code{"null"}.
+
+  \nt{ParExpr} nodes represent parenthesised expressions. They are
+  not handled specially in any way, in particular they are not
+  automatically inserted when creating ASTs.
+
+\item \nt{ArrayCreationExpression}, \nt{ArrayInit}
+  \begin{lstlisting}[frame=single]
+ ArrayCreationExpr : PrimaryExpr ::= TypeAccess:Access 
+                                          [ArrayInit];
+ ArrayInit : Expr ::= Init:Expr*;
+  \end{lstlisting}
+
+  An \nt{ArrayCreationExpr} represents an expression that allocates
+  an array, such as \code{new int[] \{23, 42\}}. By contrast,
+  an \nt{ArrayInit} can only occur in the initialising expression
+  of a variable declaration, and represents an array literal like
+  \code{\{23, 42\}}.
+
+\item \nt{CastExpr}
+  \begin{lstlisting}[frame=single]
+ CastExpr : Expr ::= TypeAccess:Access Expr;
+  \end{lstlisting}
+
+  A \nt{CastExpr} node represents a cast, with the child expression
+  giving the expression to be casted, and \child{TypeAcess} the type
+  it is casted to.
+
+\item \nt{InstanceOfExpression}
+  \begin{lstlisting}[frame=single]
+ InstanceOfExpr : Expr ::= Expr TypeAccess:Access;
+  \end{lstlisting}
+
+  An \nt{InstanceOfExpression} represents a run-time type check using\linebreak
+  \code{instanceof}, with \child{Expr} the expression being checked,
+  and \child{TypeAccess} the type it is checked against.
+
+\item Unary Expressions
+  \begin{lstlisting}[frame=single]
+ abstract Unary : Expr ::= Operand:Expr;
+ PreIncExpr : Unary ;
+ PreDecExpr : Unary ;
+ MinusExpr : Unary ;
+ PlusExpr : Unary ;
+ BitNotExpr : Unary ;
+ LogNotExpr : Unary ;
+ abstract PostfixExpr : Unary;
+ PostIncExpr : PostfixExpr ;
+ PostDecExpr : PostfixExpr ;
+  \end{lstlisting}
+
+  Node types to represent unary expressions.
+
+\item Binary Expressions
+  \begin{lstlisting}[frame=single]
+ abstract Binary : Expr ::= LeftOperand:Expr 
+                           RightOperand:Expr;
+
+ abstract ArithmeticExpr : Binary;
+ abstract MultiplicativeExpr : ArithmeticExpr;
+ MulExpr : MultiplicativeExpr ;
+ DivExpr : MultiplicativeExpr ;
+ ModExpr : MultiplicativeExpr ;
+ abstract AdditiveExpr : ArithmeticExpr;
+ AddExpr : AdditiveExpr ;
+ SubExpr : AdditiveExpr ;
+
+ abstract ShiftExpr : Binary;
+ LShiftExpr : ShiftExpr ;
+ RShiftExpr : ShiftExpr ;
+ URShiftExpr : ShiftExpr ;
+
+ abstract BitwiseExpr : Binary;
+ AndBitwiseExpr : BitwiseExpr ;
+ OrBitwiseExpr : BitwiseExpr ;
+ XorBitwiseExpr : BitwiseExpr ;
+
+ abstract LogicalExpr : Binary;
+ AndLogicalExpr : LogicalExpr ;
+ OrLogicalExpr : LogicalExpr ;
+
+ abstract RelationalExpr : Binary;
+ LTExpr : RelationalExpr ;
+ GTExpr : RelationalExpr ;
+ LEExpr : RelationalExpr ;
+ GEExpr : RelationalExpr ;
+
+ abstract EqualityExpr : RelationalExpr;
+ EQExpr : EqualityExpr ;
+ NEExpr : EqualityExpr ;
+  \end{lstlisting}
+
+  Node types to represent binary expressions. In particular,
+  \nt{AndLogicalExpr} is \code{\&\&} and \nt{AndBitwiseExpr} is
+  \code{\&}.
+
+\item \nt{ConditionalExpression}
+  \begin{lstlisting}[frame=single]
+ ConditionalExpr : Expr ::= Condition:Expr TrueExpr:Expr 
+                                           FalseExpr:Expr;
+  \end{lstlisting}
+
+  The ternary conditional expression.
+
+\item \nt{Stmt}
+  \begin{lstlisting}[frame=single]
+ abstract Stmt;
+  \end{lstlisting}
+
+  An abstract node type to represent statements.
+
+\item \nt{VariableDeclaration}
+  \begin{lstlisting}[frame=single]
+ VariableDeclaration : Stmt ::= Modifiers TypeAccess:Access 
+                                    <ID:String> [Init:Expr];
+  \end{lstlisting}
+
+  Similar to a \nt{FieldDeclaration}, this node type represents a declaration
+  of a local variable with an optional initialisation expression.
+
+\item \nt{Block}, \nt{EmptyStmt}, \nt{ExprStmt}
+  \begin{lstlisting}[frame=single]
+ Block : Stmt ::= Stmt*;
+ EmptyStmt : Stmt;
+ ExprStmt : Stmt ::= Expr;
+  \end{lstlisting}
+
+  Three particularly simple kinds of statements: A \nt{Block} represents
+  a block of statements in curly braces, an \nt{EmptyStmt} is the do-nothing
+  statement ``\code{;}'', and an expression statement wraps an expression.
+
+\item Branch Target Statements
+  \begin{lstlisting}[frame=single]
+ abstract BranchTargetStmt : Stmt;
+ LabeledStmt : BranchTargetStmt ::= <Label:String> Stmt;
+ SwitchStmt : BranchTargetStmt ::= Expr Block;
+ WhileStmt : BranchTargetStmt ::= Condition:Expr Stmt;
+ DoStmt : BranchTargetStmt ::= Stmt Condition:Expr;
+ ForStmt : BranchTargetStmt ::= InitStmt:Stmt* 
+            [Condition:Expr] UpdateStmt:Stmt* Stmt;
+  \end{lstlisting}
+
+  A branch target statement is a statement that can be reached by a
+  \code{break} or \code{continue}. In particular, all the loops are
+  branch targets, but also switch statements and labeled statements.
+
+  Note that switch statements are represented amorphously as the \nt{Expr}
+  to be tested, and a block of statements, some of which may be case labels.
+
+\item \nt{Case}, \nt{ConstCase}, \nt{DefaultCase}
+  \begin{lstlisting}[frame=single]
+ abstract Case : Stmt;
+ ConstCase : Case ::= Value:Expr;
+ DefaultCase : Case;
+  \end{lstlisting}
+
+  These node types represent case labels in a switch statements. The AST
+  does not structurally guarantee that these labels only occur inside
+  a \nt{SwitchStmt}, this must be checked by the compiler frontend.
+
+\item \nt{IfStmt}
+  \begin{lstlisting}[frame=single]
+ IfStmt : Stmt ::= Condition:Expr Then:Stmt [Else:Stmt];
+  \end{lstlisting}
+
+  An \code{if} statement with optional \code{else} branch.
+
+\item Control Transfer Statements
+  \begin{lstlisting}[frame=single]
+ BreakStmt : Stmt ::= <Label:String>;
+ ContinueStmt : Stmt ::= <Label:String>;
+ ReturnStmt : Stmt ::= [Result:Expr];
+  \end{lstlisting}
+
+  Node types to represent the ``disguised gotos'' 
+  \code{break} and \code{continue}, and the \code{return} statement.
+
+  For the former two, the \child{Label} will be the empty string
+  if there is no explicit label.
+
+\item Synchronization
+  \begin{lstlisting}[frame=single]
+ SynchronizedStmt : Stmt ::= Expr Block;
+  \end{lstlisting}
+
+  A \code{synchronized} statement, which synchronizes execution
+  of \nt{Block} on the value of \nt{Expr}.
+
+\item Exception Handling
+  \begin{lstlisting}[frame=single]
+ ThrowStmt : Stmt ::= Expr;
+ TryStmt : Stmt ::= Block CatchClause* [Finally:Block];
+ CatchClause ::= Parameter:ParameterDeclaration Block;
+  \end{lstlisting}
+
+  These node types represent the Java exception handling constructs.
+
+\item Assertions
+  \begin{lstlisting}[frame=single]
+ AssertStmt : Stmt ::= first:Expr [Expr];
+  \end{lstlisting}
+
+  An \nt{AssertStmt} represents an assertion statement.
+
+\item Local and anonymous classes
+  \begin{lstlisting}[frame=single]
+ AnonymousDecl : ClassDecl ::= Modifiers <ID:String> 
+        /[SuperClassAccess:Access]/ /Implements:Access*/ 
+                                              BodyDecl*;
+ LocalClassDeclStmt : Stmt ::= ClassDecl;
+  \end{lstlisting}
+
+  An \nt{AnonymousDecl} represents a declaration of an anonymous
+  class occurring as part of a \nt{ClassInstanceExpression}; 
+  \nt{ID} is the name of the class it extends, whereas
+  \nt{BodyDecl*} are its body declarations.
+
+  A \nt{LocalClassDeclStmt} represents the declaration of a local
+  class within a constructor, method, or initialiser.
+\end{itemize}
+
+Another important node type is \nt{Variable}, declared in file\linebreak
+\file{VariableDeclaration.jrag}: It is an interface implemented by\linebreak
+ \nt{VariableDeclaration}, \nt{ParameterDeclaration}, and 
+\nt{FieldDeclaration} that provides a common API for different kinds of
+variables.
+
+\subsection{Name and Type Analysis}
+
+The code pertaining to name and type analysis is mainly contained within
+the following files:
+
+\begin{itemize}
+\item \file{AccessControl.jrag} defines attributes to implement accessibility
+  rules. In particular, it provides a family of attributes
+  \code{accessibleFrom}, where\linebreak \code{x.accessibleFrom(y)} holds if
+  the entity \code{x} can be accessed from node \code{y}.
+
+\item \file{LookupConstructor.jrag} defines a method \code{lookupConstructor}
+  to look up a constructor for a \nt{TypeDecl} by its signature. It also
+  provides an attribute \code{decl()} for classes \nt{ConstructorAccess} and
+  \nt{ClassInstanceExpression} that computes the \nt{ConstructorDecl} they
+  resolve to.
+
+\item \file{LookupMethod.jrag} defines an attribute \code{lookupMethod} to
+  look up a method by name. It also provides an attribute \code{decl()} on
+  class \nt{MethodAccess} that computes the \nt{MethodDecl} the call resolves
+  to.
+
+\item \file{LookupType.jrag} defines an attribute \code{lookupType} to look up
+  a type by its simple or qualified name. It also provides an attribute
+  \code{decl()} on class \nt{TypeAccess} that computes the \nt{TypeDecl}
+  the access refers to.
+
+\item \file{LookupVariable.jrag} defines an attribute \code{lookupVariable}
+  to look up a variable (i.e., field, parameter, or local variable) by name.
+  It also provides an attribute \code{decl()} on class \nt{VarAccess} that
+  computes the \nt{Variable} it binds to.
+
+\item \file{NameCheck.jrag} implements the name checks performed by the
+  compiler frontend.
+
+\item \file{TypeAnalysis.jrag} handles the different kinds of implicit 
+  conversions in Java, and defines an attribute \code{type()} on expression
+  nodes that computes their type.
+  
+\item \file{TypeCheck.jrag} and \file{TypeHierarchyCheck.jrag} implement 
+  the type checks performed by the compiler frontend.
+\end{itemize}
+
+The two most important attributes defined in this part of the frontend are
+\code{decl()} and \code{type()} to access a type's declaration, and an
+expression's type.
+
+\subsection{Definite Assignment}
+
+The file \file{DefiniteAssignment.jrag} checks that a program adheres to
+Java's definite assignment rule, which stipulates that every local variable
+must be provably assigned before it is used the first time.
+
+Two very useful attributes defined in this file are \code{isDest()} and
+\code{isSource()}, both defined on node type \nt{Expr}, which indicate
+whether an expression is an lvalue or an rvalue. Some expressions can be
+both, for example the \code{i} in \code{i++}.
+
+\section{Control Flow Analysis}
+
+The control flow analysis framework is not part of the compiler frontend
+proper; it resides in the project \file{ControlFlowGraph}. Its most important
+file is \linebreak
+\file{ControlFlowGraph.jrag}, which defines two attributes
+\file{pred()} and \file{succ()} that compute an AST node's control flow
+predecessors and successors, respectively.
+
+Control flow is tracked at the expression level, hence it makes sense to ask
+for the control flow successor of \code{x} in \code{x + y}. Since in
+general a node can have more than one control flow successor or predecessor,
+the attributes return sets of nodes. Note that the analysis is
+intra-procedural, i.e. only predecessors and successors within the same
+method (or constructor or initialiser) are computed.
+
+For efficiency reasons, a custom implementation of sets
+called \code{SmallSet} is used. It is defined in \code{Sets.jrag}.
+
+\appendix
+
+\section{JastAdd Syntax}
+
+\subsection{AST Node Types}
+AST node types are usually defined in files with the extension \file{.ast}. Every node type is given a (single) production, e.g.
+
+\begin{lstlisting}
+  TryStmt : Stmt ::= Block CatchClause* [Finally:Block];
+\end{lstlisting}
+
+This declares the node type \nt{TryStmt} as extending the node type \nt{Stmt}. It has three children: one of type \nt{Block}, a child of type \code{List<CatchClause>}, which holds a (potentially empty) list of nodes of type \nt{CatchClause}, and a child of type \code{Opt<Block>}, which holds either nothing or a node of type \nt{Block}. The third child is additionally given the name \child{Finally}.
+
+From this declaration, JastAdd generates the skeleton of a Java class with getter methods for the children that looks somewhat like this:
+
+\begin{lstlisting}
+  class TryStmt extends Stmt {
+    public TryStmt(Block p0, List<CatchClause> p1, Opt<Block> p2) {
+      ...
+    }
+
+    public Block getBlock() { ... }
+    public List<CatchClause> getCatchClauseList() { ... }
+    public Opt<Block> getFinallyOpt() { ... }
+
+    public int getNumCatchClause() { ... }
+    public CatchClause getCatchClause(int i) { ... }
+
+    public boolean hasFinally() { ... }
+    public Block getFinally() { ... }
+  }
+\end{lstlisting}
+
+Observe in particular that for list children and optional children there are additional convenience methods: for the former, we can query the number of children in the list, and access a particular one given its position; for the latter, we can determine whether the child is present, and retrieve it directly.
+
+Node types may also have terminal children, as in
+
+\begin{lstlisting}
+  VarAccess : Access ::= <ID:String>;
+\end{lstlisting}
+
+JastAdd creates getter methods for them just like for node children.
+
+A final variety of children are non-terminal attributes, which are not important for the purposes of this introduction.
+
+Just like a Java class, a node type can be declared \code{abstract}, which will make the generated class abstract as well; such a node type cannot be instantiated directly.
+
+\subsection{Attributes}
+Once a node type is declared, we can define attributes on it. This is done in separate files with the extension \file{jrag}. Such files should contain \emph{aspect declarations} as their top-level entities. For example, the file \file{LookupVariables.jrag} from the Java 1.4 compiler frontend defines attribute for handling variable lookup; all these attribute definitions are inside three aspects \code{VariableScope}, \code{VariableScopePropagation}, and \code{Fields}:
+
+\begin{lstlisting}
+aspect VariableScope {
+  ...
+  (attribute definitions)
+  ...
+}
+
+aspect VariableScopePropagation {
+  ...
+  (further definitions)
+  ...
+}
+
+aspect Fields {
+  ...
+  (further definitions)
+  ...
+}
+\end{lstlisting}
+
+\subsubsection{Synthesised Attributes}
+The simplest form of attributes are \emph{synthesised attributes}. They are declared on a node type like this:
+
+\begin{lstlisting}
+  syn boolean Stmt.declaresVariable(String name) = false;
+\end{lstlisting}
+
+This declares a synthesised attribute \code{declaresVariable} on node type \nt{Stmt}, which takes a single parameter \code{name} of type \code{String} and returns \code{boolean}. The declaration also provides a default implementation, which just returns \code{false}.
+
+The above declaration is translated into the following (somewhat simplified) Java method declaration, which is inserted into the definition of class \code{Stmt}:
+
+\begin{lstlisting}
+  public boolean declaresVariable(String name) {
+    return false;
+  }
+\end{lstlisting}
+
+Methods can be overridden on subclasses; likewise, synthesised attributes can be given different definitions on derived node types:
+
+\begin{lstlisting}
+  eq VariableDeclaration.declaresVariable(String name) 
+    = name().equals(name);
+\end{lstlisting}
+
+Besides the equational definition style in this example, synthesised attributes can also be defined using Java method syntax. Indeed, the above definition could be rewritten as
+
+\begin{lstlisting}
+  eq VariableDeclaration.declaresVariable(String name) {
+    return name().equals(name);
+  }
+\end{lstlisting}
+
+Synthesised attributes can be declared \code{lazy}, meaning that their value will be cached and reused on further invocations without being recomputed. Lazy attributes should normally be side-effect free, although this is not enforced by the system.
+
+Synthesised attributes can be declared \code{circular}:
+
+\begin{lstlisting}
+  syn lazy boolean TypeDecl.isCircular() circular [true] = false;
+
+  eq ClassDecl.isCircular() { ... }
+  eq InterfaceDecl.isCircular() { ... }
+\end{lstlisting}
+
+This means that, for every \nt{TypeDecl}, JastAdd performs a fixed point iteration to determine the value of \code{isCircular}, starting at the value \code{true} and iterating until no further value change is observed. The user has to ensure that the definitions given for such attributes are monotonic, and that a fixed point may be reached by iteration.
+
+\subsubsection{Inherited Attributes}
+While the definition of a synthesised attribute only depends on the children of a node (and the values of their attributes), an inherited attribute can make use of additional information about the location of the node with respect to its parent node.
+
+For example, the definition
+
+\begin{lstlisting}
+  eq TypeDecl.getBodyDecl(int i).lookupVariable(String name) {
+    (...)
+  }
+\end{lstlisting}
+
+\noindent defines the attribute \code{lookupVariable} on a \nt{BodyDecl}, but only if it is the child of a \nt{TypeDecl}. Additionally, the body of the declaration knows the index \code{i} at which the body declaration occurs within the type.
+
+Inherited attributes have to be defined for every possible combination of parent and child nodes. If no explicit definition is given, JastAdd provides a default copy rule that recursively evaluates the attribute on the parent node.
+
+To use an inherited attribute on a certain node type, one has to declare it visible:
+
+\begin{lstlisting}
+  inh lazy SimpleSet Block.lookupVariable(String name);
+\end{lstlisting}
+
+This declaration causes a method \code{lookupVariable(String)} to be inserted into the definition of class \code{Block}, that uses the definition rules of the attribute.
+
+Like synthesised attributes, inherited attributes can also be declared \code{lazy} and \code{circular}.
+
+\subsubsection{Collection Attributes}
+While synthesised and inherited attributes are locally defined, collection attributes are global entities whose definition is contributed to by all the nodes in a certain subtree, or even the entire syntax tree.
+
+For example, to collect the names of all the types declared in a Java program one could define the collection attribute
+
+\begin{lstlisting}
+  coll HashSet<String> Program.typeNames()
+    [new HashSet<String>()] with add
+    root Program;
+\end{lstlisting}
+
+This says that the collection attribute \code{typeNames} is declared on the program node, and is of type \code{HashSet<String>}. It is initialised to \code{new HashSet<String>()}, and contributions from individual nodes are added using method \code{add} in type \code{HashSet<String>}. Contributors to the attribute value should be searched for in nodes below \nt{Program}, i.e. in the entire syntax tree.
+
+Every type declaration now should contribute its own name to this global collection:
+
+\begin{lstlisting}
+  TypeDecl contributes name()
+           to Program.typeNames()
+           for getProgram();
+\end{lstlisting}
+
+This says that every type declaration contributes the value of its method \code{name()}\footnote{This can be an arbitrary expression composed of field values and method invocations.} to the \code{typeNames()} attribute of the \nt{Program} node to be found by evaluating \code{getProgram()}.
+
+Contributions may also specify a condition using \code{when ...} to indicate that they only contribute if the condition evaluates to \code{true}.
+
+Note that the contributions may be collected in an arbitrary order.
+
+\end{document}

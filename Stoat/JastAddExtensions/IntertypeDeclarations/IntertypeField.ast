@@ -1,0 +1,5 @@
+// Each IntertypeFieldDeclaration generates a corresponding method in the introduced type
+IntertypeFieldDeclaration : FieldDeclaration ::= TargetType:Access;
+
+IntroducedFieldDeclaration : FieldDeclaration ::= <OriginalName:String>;
+

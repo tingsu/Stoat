@@ -1,0 +1,446 @@
+aspect NullnessAnalysis {	
+	
+	// the set of all locals, i.e., parameters and variable declarations in this body declaration
+	coll BitSet BodyDecl.locals() [empty().mutable()] with add root BodyDecl;
+	ParameterDeclaration contributes this to BodyDecl.locals() 
+		for enclosingBodyDecl();	
+	VariableDeclaration contributes this to BodyDecl.locals() 
+		for enclosingBodyDecl();
+	
+	// broadcast the set of all locals to statements and expressions
+	//inh BitSet Stmt.locals();
+	//inh BitSet Expr.locals();
+	inh BitSet CFGNode.locals();
+	eq BodyDecl.getChild().locals() = locals();
+	eq Program.getChild().locals() = null;
+
+	
+	
+
+	//NULL
+	syn BitSet CFGNode.out_null() circular [locals()];
+	eq Stmt.out_null() = gen_null().union(in_null().compl(kill_null()));
+	eq Expr.out_null() = gen_null().union(in_null().compl(kill_null()));
+			
+	syn BitSet CFGNode.in_null() circular [empty()];
+	eq Stmt.in_null() {
+		/*
+		BitSet set = BitSet.full();
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return empty();
+		while(iter.hasNext())
+			set = set.intersect(((CFGNode)iter.next()).out_null());
+		return set;
+		*/
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return empty();
+		BitSet set = ((CFGNode)iter.next()).out_null();
+		while(iter.hasNext())
+			set = set.intersect(((CFGNode)iter.next()).out_null());
+		return set;
+		
+	/*	//add
+		if(set == BitSet.full())
+			return empty();
+		else
+			return set;*/
+	}	
+	
+	
+	eq Expr.in_null() {
+		/*
+		BitSet set = BitSet.full();
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return empty();
+		while(iter.hasNext())
+			set = set.intersect(((CFGNode)iter.next()).out_null());
+		return set;
+		*/
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return empty();
+		BitSet set = ((CFGNode)iter.next()).out_null();
+		while(iter.hasNext())
+			set = set.intersect(((CFGNode)iter.next()).out_null());
+		return set;
+		
+	/*	//add
+		if(set == BitSet.full())
+			return empty();
+		else
+			return set;*/
+		
+		
+		
+	}
+ 	
+	
+  	syn BitSet CFGNode.gen_null();
+  	eq Expr.gen_null() = empty();
+  	eq Stmt.gen_null() = empty();
+  	
+  	eq VariableDeclaration.gen_null() {
+  		if(getTypeAccess() instanceof PrimitiveTypeAccess || !hasInit())
+  			return empty();
+  		//if(!hasInit()) 
+  		//	return empty().union(this);
+  		
+  		//convert to standard form		
+  		Object init = getInit();
+  		if(init instanceof NullLiteral) //String s = null;
+  			return empty().union(this);
+  	/*	else if(init instanceof CastExpr) 
+  			init = ((CastExpr)init).getExpr();
+  		else if(init instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				init = ((Dot)init).getRight(); 
+  			} while(init instanceof Dot);
+  		}*/
+  		if(init instanceof CastExpr) 
+  			init = ((CastExpr)init).getExpr();
+  		
+  		if(init instanceof VarAccess && in_null().contains(((VarAccess)init).decl()))
+  			return empty().union(this);
+  		else
+  			return empty();
+  	}
+  	
+  	eq AssignExpr.gen_null() {
+  		//convert dest
+  		Object dest = getDest();
+	/*	if(dest instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				dest = ((Dot)dest).getRight();
+  			} while(dest instanceof Dot);
+  		}*/
+		//convert source
+		Object source = getSource();
+		if(source instanceof CastExpr) 
+  			source = ((CastExpr)source).getExpr();
+	/*	if(source instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				source = ((Dot)source).getRight();  
+  			} while(source instanceof Dot);
+  		}
+  		else if(source instanceof CastExpr) 
+  			source = ((CastExpr)source).getExpr();*/
+
+		 		
+  		if(dest instanceof VarAccess &&
+  			(source instanceof NullLiteral || 
+  			 source instanceof VarAccess && 
+  			 	in_null().contains(((VarAccess)source).decl())))			
+  			return empty().union(((VarAccess)dest).decl());
+  		else 
+  			return empty();
+  	}
+  	
+  	 
+  	syn BitSet CFGNode.kill_null();
+  	eq Expr.kill_null() = empty();
+  	eq Stmt.kill_null() = empty();
+  	
+  	eq VariableDeclaration.kill_null() = empty();
+  	/*	{
+  		
+  		//String s; OR int i;
+  		if(!hasInit()) return empty();
+  				
+  		//convert to standard form		
+  		Object init = getInit();
+  		if(init instanceof NullLiteral) //String s = null;
+  			return empty();
+  		else if(init instanceof CastExpr) 
+  			init = ((CastExpr)init).getExpr();
+  		else if(init instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				init = ((Dot)init).getRight(); 
+  			} while(init instanceof Dot);
+  		}
+  		
+  		
+  		
+  		if(!(getTypeAccess() instanceof PrimitiveTypeAccess) && 
+  			hasInit() && !(getInit() instanceof NullLiteral || 
+  				init instanceof VarAccess && in_null().contains(((VarAccess)init).decl())))
+  			return empty().union(this);
+  		else
+  			return empty();
+  			
+  	}*/
+  	
+  	eq AssignExpr.kill_null() {
+  		Object dest = getDest();
+  		if(!(dest instanceof VarAccess))
+  			return empty();
+  		if(gen_null().contains(((VarAccess)dest).decl()))
+  			return empty();
+  		else
+  			return empty().union(((VarAccess)dest).decl());
+  			
+	/*	//convert dest
+  		Object dest = getDest();
+		if(dest instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				dest = ((Dot)dest).getRight();
+  			} while(dest instanceof Dot);
+  		}
+		//convert source
+		Object source = getSource();
+		if(source instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				source = ((Dot)source).getRight();  
+  			} while(source instanceof Dot);
+  		}
+  		else if(source instanceof CastExpr) 
+  			source = ((CastExpr)source).getExpr();
+			
+  		if(dest instanceof VarAccess &&
+  			(!(source instanceof NullLiteral || 
+  			   source instanceof VarAccess &&
+  			   	in_null().contains(((VarAccess)source).decl()))))
+  			return empty().union(((VarAccess)dest).decl());
+  		else
+  			return empty();*/
+  		
+  	}
+  	
+  	
+  	
+  	//NON_NULL
+	syn BitSet CFGNode.out_nonNull() circular [locals()];
+	eq Stmt.out_nonNull() = gen_nonNull().union(in_nonNull().compl(kill_nonNull()));
+	eq Expr.out_nonNull() = gen_nonNull().union(in_nonNull().compl(kill_nonNull()));
+			
+	syn BitSet CFGNode.in_nonNull() circular [empty()];
+	eq Stmt.in_nonNull() {
+
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return empty();
+		BitSet set = ((CFGNode)iter.next()).out_nonNull();
+		while(iter.hasNext())
+			set = set.intersect(((CFGNode)iter.next()).out_nonNull());
+		return set;
+	/*	
+		//add
+		if(set == BitSet.full())
+			return empty();
+		else
+			return set;
+		*/
+		
+		
+	}	
+	
+	
+	eq Expr.in_nonNull() {
+
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return empty();
+		BitSet set = ((CFGNode)iter.next()).out_nonNull();
+		while(iter.hasNext())
+			set = set.intersect(((CFGNode)iter.next()).out_nonNull());
+		return set;
+	/*	
+		//add
+		if(set == BitSet.full())
+			return empty();
+		else
+			return set;*/
+	}
+ 	
+	
+  	syn BitSet CFGNode.gen_nonNull();
+  	eq Expr.gen_nonNull() = empty();
+  	eq Stmt.gen_nonNull() = empty();
+  	
+  	eq VariableDeclaration.gen_nonNull() { 				
+  		if(!hasInit() || (getTypeAccess() instanceof PrimitiveTypeAccess)) 
+  			return empty(); 	
+  		
+  		//convert to standard form		
+  		Object init = getInit();
+  		if(init instanceof NullLiteral)
+  			return empty();
+  	/*	else if(init instanceof CastExpr) 
+  			init = ((CastExpr)init).getExpr();
+  		else if(init instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				init = ((Dot)init).getRight(); 
+  			} while(init instanceof Dot);
+  		}*/
+  		
+  		if(init instanceof CastExpr) 
+  			init = ((CastExpr)init).getExpr(); 		
+  		//
+  		if(init instanceof ClassInstanceExpr || 
+  		   init instanceof ArrayCreationExpr ||
+  		   init instanceof StringLiteral ||
+  		   init instanceof ThisAccess ||
+  		   init instanceof VarAccess && in_nonNull().contains(((VarAccess)init).decl()))
+  			return empty().union(this);
+  		else
+  			return empty(); 			 	
+  	}
+  	
+  	
+  	
+  	eq AssignExpr.gen_nonNull() {
+  		//convert dest
+  		Object dest = getDest();
+	/*	if(dest instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				dest = ((Dot)dest).getRight();
+  			} while(dest instanceof Dot);
+  		}*/
+		//convert source
+		Object source = getSource();
+		if(source instanceof CastExpr) 
+  			source = ((CastExpr)source).getExpr();
+	/*	if(source instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				source = ((Dot)source).getRight();  
+  			} while(source instanceof Dot);
+  		}
+  		else if(source instanceof CastExpr) 
+  			source = ((CastExpr)source).getExpr();*/
+  		
+  		//
+  		if(dest instanceof VarAccess && 
+  			(source instanceof ClassInstanceExpr || 
+  		  	 source instanceof ArrayCreationExpr ||
+  		  	 source instanceof StringLiteral ||
+  		  	 source instanceof ThisAccess ||
+  		  	 source instanceof VarAccess && in_nonNull().contains(((VarAccess)source).decl())))
+  			return empty().union(((VarAccess)dest).decl());
+  		else
+  			return empty();
+  	}
+  	
+  	 
+  	syn BitSet CFGNode.kill_nonNull();
+  	eq Expr.kill_nonNull() = empty();
+  	eq Stmt.kill_nonNull() = empty();
+  	
+  	eq VariableDeclaration.kill_nonNull() = empty();
+  	/*{		
+  		if(getTypeAccess() instanceof PrimitiveTypeAccess || !hasInit()) 		   
+  			return empty().union(this);
+  		
+  		//convert init
+  		Object init = getInit();
+  		if(init instanceof NullLiteral)
+  			return empty().union(this);
+  		else if(init instanceof CastExpr) {
+  			init = ((CastExpr)init).getExpr();
+  			if(!(init instanceof VarAccess)) //String s = (String)foo();
+  				return empty().union(this);
+  		}			
+  		else if(init instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				init = ((Dot)init).getRight(); 
+  			} while(init instanceof Dot);
+  			if(!(init instanceof VarAccess)) //String s = A[1];
+  				return empty().union(this);
+  		}
+  		
+  		if(init instanceof VarAccess && !in_nonNull().contains(((VarAccess)init).decl()))
+  			return empty().union(this);
+  		else
+  			return empty();  		  		
+  	}*/
+  	
+  		
+  	eq AssignExpr.kill_nonNull() {
+  		Object dest = getDest();
+  		if(!(dest instanceof VarAccess))
+  			return empty();
+  		if(gen_nonNull().contains(((VarAccess)dest).decl()))
+  			return empty();
+  		else
+  			return empty().union(((VarAccess)dest).decl());
+  		
+  			
+ 	/*	//convert dest
+  		Object dest = getDest();
+		if(dest instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				dest = ((Dot)dest).getRight(); 
+  			} while(dest instanceof Dot);
+  		}
+		if(!(dest instanceof VarAccess)) //A[1] = s
+  			return empty();
+		
+		//convert source
+		Object source = getSource();
+		if(source instanceof NullLiteral)
+			return empty().union(((VarAccess)dest).decl());
+		else if(source instanceof Dot) {
+  			//this.a or Ref.a, excluding Ref.A[1]
+  			do {
+  				source = ((Dot)source).getRight(); 
+  			} while(source instanceof Dot);
+  			if(!(source instanceof VarAccess)) //s = A[1];
+  				return empty().union(((VarAccess)dest).decl());
+  		}
+  		else if(source instanceof CastExpr) {
+  			source = ((CastExpr)source).getExpr();
+  			if(!(source instanceof VarAccess)) //s = (String)foo();
+  				return empty().union(((VarAccess)dest).decl());
+  		}
+  		
+  		//
+  		if(source instanceof VarAccess && !in_nonNull().contains(((VarAccess)source).decl()))
+  			return empty().union(((VarAccess)dest).decl());
+  		else
+  			return empty();  
+  		*/		
+  	}
+  	
+  
+  	
+	
+  	
+  	// useless comparison
+  	syn boolean EqualityExpr.uselessComparison() {
+  		Object left = getLeftOperand();
+  		Object right = getRightOperand();
+  		
+  		if((left instanceof VarAccess && 
+  			(in_null().contains(((VarAccess)left).decl()) ||
+  		  	 in_nonNull().contains(((VarAccess)left).decl()) 			
+  			) || left instanceof NullLiteral
+  		   ) &&
+  		   (right instanceof VarAccess && 
+  	  		(in_null().contains(((VarAccess)right).decl()) ||
+  	  	  	 in_nonNull().contains(((VarAccess)right).decl()) 			
+  	  	  	) || right instanceof NullLiteral				  
+  		   )
+  		  ) {
+ 			System.err.println(this);
+  			System.err.println("Source_File: "+sourceFile());
+  			System.err.println("Line_Number: "+lineNumber()+"\n");
+  			return true;
+  		}
+  		else
+  			return false;
+  			 			 			
+  	}
+  	
+}

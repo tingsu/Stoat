@@ -1,0 +1,123 @@
+Expr primary_no_new_array :=
+    literal.l                                  {: return l; :}
+  | primitive_type.n dims.d? DOT class_literal.c {: return n.addArrayDims(d).qualifiesAccess(c); :}
+  | name.n dims.d? DOT class_literal.c          {: return n.addArrayDims(d).qualifiesAccess(c); :}
+  | VOID DOT class_literal.c                   {: PrimitiveTypeAccess v = new PrimitiveTypeAccess("void");
+                                                  v.setStart(VOID.getStart());
+                                                  v.setEnd(VOID.getEnd());
+                                                  return v.qualifiesAccess(c); :}
+  | THIS                                       {: return new ThisAccess("this"); :}
+  | name.n DOT THIS                            {: ThisAccess t = new ThisAccess("this");
+                                                  t.setStart(THIS.getStart()); t.setEnd(THIS.getEnd());
+                                                  return n.qualifiesAccess(t); :}
+  | LPAREN expression_nn.e RPAREN                 {: return new ParExpr(e); :}
+  | LPAREN name.n RPAREN                       {: return new ParExpr(n); :}
+  | class_instance_creation_expression.c       {: return c; :}
+  | field_access.f                             {: return f; :}
+  | method_invocation.m                        {: return m; :}
+  | array_access.a                             {: return a; :}
+  ;
+
+
+Expr postfix_expression_nn =
+    primary.p                                  {: return p; :}
+  | postincrement_expression.e                 {: return e; :}
+  | postdecrement_expression.e                 {: return e; :}
+  ;
+Expr unary_expression_nn =
+    preincrement_expression.e                  {: return e; :}
+  | predecrement_expression.e                  {: return e; :}
+  | PLUS unary_expression.e                    {: return new PlusExpr(e); :}
+  | MINUS unary_expression.e                   {: return new MinusExpr(e); :}
+  | unary_expression_not_plus_minus_nn.e          {: return e; :}
+  ;
+Expr unary_expression_not_plus_minus_nn =
+    postfix_expression_nn.e                       {: return e; :}
+  | COMP unary_expression.e                    {: return new BitNotExpr(e); :}
+  | NOT unary_expression.e                     {: return new LogNotExpr(e); :}
+  | cast_expression.e                          {: return e; :}
+  ;
+Expr multiplicative_expression_nn =
+    unary_expression_nn.e                                     {: return e; :}
+  | name.e1 MULT unary_expression.e2  {: return new MulExpr(e1, e2); :}
+  | multiplicative_expression_nn.e1 MULT unary_expression.e2  {: return new MulExpr(e1, e2); :}
+  | name.e1 DIV unary_expression.e2   {: return new DivExpr(e1, e2); :}
+  | multiplicative_expression_nn.e1 DIV unary_expression.e2   {: return new DivExpr(e1, e2); :}
+  | name.e1 MOD unary_expression.e2   {: return new ModExpr(e1, e2); :}
+  | multiplicative_expression_nn.e1 MOD unary_expression.e2   {: return new ModExpr(e1, e2); :}
+  ;
+Expr additive_expression_nn =
+    multiplicative_expression_nn.e                                {: return e; :}
+  | name.e1 PLUS multiplicative_expression.e2   {: return new AddExpr(e1, e2); :}
+  | additive_expression_nn.e1 PLUS multiplicative_expression.e2   {: return new AddExpr(e1, e2); :}
+  | name.e1 MINUS multiplicative_expression.e2  {: return new SubExpr(e1, e2); :}
+  | additive_expression_nn.e1 MINUS multiplicative_expression.e2  {: return new SubExpr(e1, e2); :}
+  ;
+Expr shift_expression_nn =
+    additive_expression_nn.e                               {: return e; :}
+  | name.e1 LSHIFT additive_expression.e2   {: return new LShiftExpr(e1, e2); :}
+  | shift_expression_nn.e1 LSHIFT additive_expression.e2   {: return new LShiftExpr(e1, e2); :}
+  | name.e1 RSHIFT additive_expression.e2   {: return new RShiftExpr(e1, e2); :}
+  | shift_expression_nn.e1 RSHIFT additive_expression.e2   {: return new RShiftExpr(e1, e2); :}
+  | name.e1 URSHIFT additive_expression.e2  {: return new URShiftExpr(e1, e2); :}
+  | shift_expression_nn.e1 URSHIFT additive_expression.e2  {: return new URShiftExpr(e1, e2); :}
+  ;
+Expr relational_expression_nn =
+    shift_expression_nn.e                                  {: return e; :}
+  | name.e1 LT shift_expression.e2     {: return new LTExpr(e1, e2); :}
+  | shift_expression_nn.e1 LT shift_expression.e2     {: return new LTExpr(e1, e2); :}
+  | name.e1 GT shift_expression.e2     {: return new GTExpr(e1, e2); :}
+  | shift_expression_nn.e1 GT shift_expression.e2     {: return new GTExpr(e1, e2); :}
+  | name.e1 LTEQ shift_expression.e2   {: return new LEExpr(e1, e2); :}
+  | relational_expression_nn.e1 LTEQ shift_expression.e2   {: return new LEExpr(e1, e2); :}
+  | name.e1 GTEQ shift_expression.e2   {: return new GEExpr(e1, e2); :}
+  | relational_expression_nn.e1 GTEQ shift_expression.e2   {: return new GEExpr(e1, e2); :}
+  | name.e INSTANCEOF reference_type.t {: return new InstanceOfExpr(e, t); :}
+  | relational_expression_nn.e INSTANCEOF reference_type.t {: return new InstanceOfExpr(e, t); :}
+  ;
+Expr equality_expression_nn =
+    relational_expression_nn.e                               {: return e; :}
+  | name.e1 EQEQ relational_expression.e2  {: return new EQExpr(e1, e2); :}
+  | equality_expression_nn.e1 EQEQ relational_expression.e2  {: return new EQExpr(e1, e2); :}
+  | name.e1 NOTEQ relational_expression.e2 {: return new NEExpr(e1, e2); :}
+  | equality_expression_nn.e1 NOTEQ relational_expression.e2 {: return new NEExpr(e1, e2); :}
+  ;
+Expr and_expression_nn =
+    equality_expression_nn.e                               {: return e; :}
+  | name.e1 AND equality_expression.e2        {: return new AndBitwiseExpr(e1, e2); :}
+  | and_expression_nn.e1 AND equality_expression.e2        {: return new AndBitwiseExpr(e1, e2); :}
+  ;
+Expr exclusive_or_expression_nn =
+    and_expression_nn.e                                    {: return e; :}
+  | name.e1 XOR and_expression.e2    {: return new XorBitwiseExpr(e1, e2); :}
+  | exclusive_or_expression_nn.e1 XOR and_expression.e2    {: return new XorBitwiseExpr(e1, e2); :}
+  ;
+Expr inclusive_or_expression_nn =
+    exclusive_or_expression_nn.e                                {: return e; :}
+  | name.e1 OR exclusive_or_expression.e2 {: return new OrBitwiseExpr(e1, e2); :}
+  | inclusive_or_expression_nn.e1 OR exclusive_or_expression.e2 {: return new OrBitwiseExpr(e1, e2); :}
+  ;
+Expr conditional_and_expression_nn =
+    inclusive_or_expression_nn.e                                       {: return e; :}
+  | name.e1 ANDAND inclusive_or_expression.e2 {: return new AndLogicalExpr(e1, e2); :}
+  | conditional_and_expression_nn.e1 ANDAND inclusive_or_expression.e2 {: return new AndLogicalExpr(e1, e2); :}
+  ;
+Expr conditional_or_expression_nn =
+    conditional_and_expression_nn.e                                    {: return e; :}
+  | name.e1 OROR conditional_and_expression.e2 {: return new OrLogicalExpr(e1, e2); :}
+  | conditional_or_expression_nn.e1 OROR conditional_and_expression.e2 {: return new OrLogicalExpr(e1, e2); :}
+  ;
+Expr conditional_expression_nn =
+    conditional_or_expression_nn.c                                                        {: return c; :}
+  | name.c QUESTION expression.e1 COLON conditional_expression.e2 {: return new ConditionalExpr(c, e1, e2); :}
+  | conditional_or_expression_nn.c QUESTION expression.e1 COLON conditional_expression.e2 {: return new ConditionalExpr(c, e1, e2); :}
+  ;
+Expr assignment_expression_nn =
+    conditional_expression_nn.c {: return c; :}
+  | assignment.a {: return a; :}
+  ;
+
+Expr expression_nn =
+    assignment_expression_nn
+  ;
+

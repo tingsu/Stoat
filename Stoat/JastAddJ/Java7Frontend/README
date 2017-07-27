@@ -1,0 +1,55 @@
+JastAddJ7
+---------
+
+JastAddJ7 is an extension to the JastAddJ Java compiler. More precisely,
+it is an extension to the JastAddJ Java 1.5 extension which implements the
+changes in JSR334 / Project Coin for Java 7.
+
+You need to have all of the JastAddJ source directories in a common root
+in order to be able to compile JastAddJ7. This means that the directories
+
+Java1.4Frontend
+Java1.4Backend
+Java1.5Frontend
+Java1.5Backend
+Java7Frontend
+Java7Backend
+
+all need to be sibling directories. If you are only want to build the
+frontend, it would suffice to have only the fronten directories.
+
+Licenses
+--------
+
+JastAddJ is licenced under the modified BSD license. It is included in the
+licenses directory.
+
+Using the Ant script
+--------------------
+
+Building of JastAddJ7 is handled by Apache Ant. If you have Ant
+installed you can get a list of Ant targets:
+
+$ ant -p
+
+It should tell you something like:
+
+Main targets:
+
+ build   Compile Java7Backend
+ clean   Remove all generated and compiled files
+ jar     Build binary packages
+ source  Build a source distribution
+Default target: build
+
+If you just want to compile the backend, and don't care about packaging
+you can simply run ant in the Java7Backend directory and it will compile
+everything. Note that you must have the rest of the JastAddJ directories
+as sibling directories.
+
+Running Ant on Windows
+----------------------
+
+The build script should work fine on Windows, with the exception of the
+exec task. If this fails it's because Ant is not in your PATH environment
+variable already.

@@ -1,0 +1,224 @@
+aspect ReachingDefinitions {	
+	syn boolean CFGNode.isDef() = false;
+	eq Access.isDef() = isDest();
+	eq MethodAccess.isDef() = true;
+	eq ConstructorAccess.isDef() = true;
+	eq ClassInstanceExpr.isDef() = true;
+	
+	// reaching definitions
+	public SmallSet<CFGNode> Access.reachingDefinitions() {
+		Location l = getLocation();
+		if(!isSource() || l == null)
+			return SmallSet.<CFGNode>empty();
+		// we don't want the node to be its own reaching definition
+		SmallSet<CFGNode> res = SmallSet.<CFGNode>empty();
+		for(CFGNode p : pred())
+			res = res.union(p.reachingDefinitionsFor(l));
+		return res;
+	}
+	
+	public SmallSet<CFGNode> VarAccess.reachingDefinitions() {
+		if(decl().isField()) {
+			FieldDeclaration fd = (FieldDeclaration)decl();
+			if(fd.isConstant() && fd.hasInit())
+				return SmallSet.<CFGNode>singleton(fd);
+		}
+		return super.reachingDefinitions();
+	}
+	
+	// reached uses
+	public SmallSet<Access> Access.reachedUses() {
+		Location l = getLocation();
+		if(!isDest() || l == null)
+			return SmallSet.<Access>empty();
+		// we don't want the node to be its own reached use
+		SmallSet<Access> res = SmallSet.<Access>empty();
+		for(CFGNode p : succ())
+			res = res.union(p.reachedUsesFor(l));
+		return res;
+	}
+	
+	public SmallSet<Access> VarAccess.reachedUses() {
+		if(isDest() && decl().isLocalVariable() && decl().isFinal()) {
+			SmallSet<Access> res = SmallSet.<Access>empty();
+			for(VarAccess u : decl().allUses())
+				if(u.isSource())
+					res = res.union(u);
+			return res;
+		} else {
+			return super.reachedUses();
+		}
+	}
+	
+	syn lazy SmallSet<CFGNode> CFGNode.reachingDefinitionsFor(Location l)
+		circular [SmallSet.<CFGNode>empty()] {
+		SmallSet<CFGNode> res = SmallSet.<CFGNode>empty();
+		if(isReachingDefinitionFor(l)) {
+			res = SmallSet.singleton((CFGNode)this);
+			if(isBlockingDefinitionFor(l))
+				return res;
+		}
+		for(CFGNode p : pred())
+			res = res.union(p.reachingDefinitionsFor(l));
+		return res;
+	}
+	
+	syn lazy SmallSet<Access> CFGNode.reachedUsesFor(Location l) circular [SmallSet.<CFGNode>empty()] {
+		SmallSet<Access> res = SmallSet.<Access>empty();
+		if(isBlockingDefinitionFor(l))
+			return res;
+		for(CFGNode s : succ())
+			res = res.union(s.reachedUsesFor(l));
+		return res;
+	}
+	
+	eq Access.reachedUsesFor(Location l) {
+		SmallSet<Access> res = SmallSet.<Access>empty();
+		if(isReachedUseFor(l))
+			res = SmallSet.singleton((Access)this);
+		if(isBlockingDefinitionFor(l))
+			return res;
+		for(CFGNode s : succ())
+			res = res.union(s.reachedUsesFor(l));
+		return res;		
+	}
+
+	syn boolean Stmt.isReachingDefinitionFor(Location l) = false;
+	syn boolean Stmt.isBlockingDefinitionFor(Location l) = false;
+	syn boolean Stmt.isReachedUseFor(Location l) = false;
+	
+	syn boolean Expr.isReachingDefinitionFor(Location l) = false;
+	syn boolean Expr.isBlockingDefinitionFor(Location l) = false;
+	syn boolean Expr.isReachedUseFor(Location l) = false;
+	
+	syn boolean ParameterDeclaration.isReachingDefinitionFor(Location l) = mayAlias(l);
+	syn boolean ParameterDeclaration.isBlockingDefinitionFor(Location l) = mustAlias(l);
+	syn boolean ParameterDeclaration.isReachedUseFor(Location l) = false;
+
+	eq VariableDeclaration.isReachingDefinitionFor(Location l) = mayAlias(l) && isInitialised();
+	eq VariableDeclaration.isBlockingDefinitionFor(Location l) = mustAlias(l);
+	eq VariableDeclaration.isReachedUseFor(Location l) = false;
+
+	eq Access.isReachingDefinitionFor(Location l) = isDest() && l.mayAlias(getLocation());
+	eq Access.isBlockingDefinitionFor(Location l) = isDest() && l.mustAlias(getLocation());
+	eq Access.isReachedUseFor(Location l) = isSource() && l.mayAlias(getLocation());
+
+	eq MethodAccess.isReachingDefinitionFor(Location l) = l.mayAlias(getLocation());
+	eq MethodAccess.isReachedUseFor(Location l) = l.mayAlias(getLocation());
+	
+	// take care of local variable references from within local/anonymous classes
+	eq EntryStmt.reachingDefinitionsFor(Location l) {
+		SmallSet<CFGNode> res = getParent() instanceof Callable && l.isHeapLocation() ? SmallSet.<CFGNode>singleton(this) : SmallSet.<CFGNode>empty();
+		if(hostType().isLocalClass()) {
+			return res.union(((LocalClassDeclStmt)hostType().getParent()).reachingDefinitionsFor(l));
+		} else if(hostType().isAnonymous()) {
+			return res.union(((ClassInstanceExpr)hostType().getParent().getParent()).reachingDefinitionsFor(l));
+		}
+		//return super.reachingDefinitionsFor(l);
+		for(CFGNode p : pred())
+			res = res.union(p.reachingDefinitionsFor(l));
+		return res;
+	}
+	
+	// add field declaration as reaching definition
+	eq ExitStmt.reachingDefinitionsFor(Location l) {
+		SmallSet<CFGNode> res = SmallSet.<CFGNode>empty();
+		if(getParent() instanceof FieldDeclaration) {
+			FieldDeclaration fd = (FieldDeclaration)getParent();
+			if(fd.isReachingDefinitionFor(l)) {
+				res = SmallSet.singleton((CFGNode)fd);
+				if(fd.isBlockingDefinitionFor(l))
+					return res;
+			}
+		}
+		for(CFGNode p : pred())
+			res = res.union(p.reachingDefinitionsFor(l));
+		return res;
+	}
+	
+	syn boolean FieldDeclaration.isReachingDefinitionFor(Location l) = this == l;
+	syn boolean FieldDeclaration.isBlockingDefinitionFor(Location l) = false;
+	syn boolean FieldDeclaration.isReachedUseFor(Location l) = false;
+	
+	syn boolean VariableDeclaration.isInitialised() = 
+		hasInit() || getParent() instanceof EnhancedForStmt;
+	
+	// r.hasReachingDefinitionBefore(n): is there some reaching definition w for r such that
+	// n is encountered along the path from r back to w?
+	public boolean VarAccess.hasReachingDefinitionBefore(CFGNode n) {
+		Location l = getLocation();
+		if(!isSource() || l == null)
+			return false;
+		// we don't want the node to be its own reaching definition
+		for(CFGNode pred : pred())
+			if(pred.hasReachingDefinitionBefore(l, n))
+				return true;
+		return false;
+	}
+
+	syn boolean CFGNode.hasReachingDefinitionBefore(Location l, CFGNode n) circular [false] {
+		if(this == n)
+			return !reachingDefinitionsFor(l).isEmpty();
+		if(isBlockingDefinitionFor(l))
+			return false;
+		for(CFGNode pred : pred())
+			if(pred.hasReachingDefinitionBefore(l, n))
+				return true;
+		return false;
+	}
+
+	eq EntryStmt.hasReachingDefinitionBefore(Location l, CFGNode n) {
+		if(this == n)
+			return !reachingDefinitionsFor(l).isEmpty();
+		if(isBlockingDefinitionFor(l) || getParent() instanceof Callable && l.isHeapLocation())
+			return false;
+		if(hostType().isLocalClass()) {
+			return ((LocalClassDeclStmt)hostType().getParent()).hasReachingDefinitionBefore(l, n);
+		} else if(hostType().isAnonymous()) {
+			return ((ClassInstanceExpr)hostType().getParent().getParent()).hasReachingDefinitionBefore(l, n);
+		}
+		for(CFGNode pred : pred())
+			if(pred.hasReachingDefinitionBefore(l, n))
+				return true;
+		return false;
+	}
+	
+	// w.hasReachedUseAfter(n): is there some reached use r for w such that
+	// n is encountered along the path from w to r?
+	public boolean VarAccess.hasReachedUseAfter(CFGNode n) {
+		Location l = getLocation();
+		if(!isDest() || l == null)
+			return false;
+		// we don't want the node to be its own reached use
+		for(CFGNode succ : succ())
+			if(succ.hasReachedUseAfter(l, n))
+				return true;
+		return false;
+	}
+
+	syn boolean CFGNode.hasReachedUseAfter(Location l, CFGNode n) circular [false] {
+		if(this == n)
+			return !reachedUsesFor(l).isEmpty();
+		if(isBlockingDefinitionFor(l))
+			return false;
+		for(CFGNode succ : succ())
+			if(succ.hasReachedUseAfter(l, n))
+				return true;
+		return false;
+	}
+
+	// checks if a subtree may reference a variable in any way
+	public boolean ASTNode.mayRef(Variable v) {
+		for(int i=0;i<getNumChild();++i) {
+			ASTNode child = getChild(i);
+			if(child != null && child.mayRef(v))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean VarAccess.mayRef(Variable v) {
+		return decl() == v;
+	}
+	
+}

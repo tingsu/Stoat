@@ -1,0 +1,209 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received
+ * a copy of the modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect PreciseRethrow {
+
+	syn Collection<TypeDecl> Expr.throwTypes() {
+		Collection<TypeDecl> tts = new LinkedList<TypeDecl>();
+		tts.add(type());
+		return tts;
+	}
+	eq VarAccess.throwTypes() = decl().throwTypes();
+	syn lazy Collection<TypeDecl> VariableDeclaration.throwTypes() {
+		Collection<TypeDecl> tts = new LinkedList<TypeDecl>();
+		tts.add(type());
+		return tts;
+	}
+	syn lazy Collection<TypeDecl> FieldDeclaration.throwTypes() {
+		Collection<TypeDecl> tts = new LinkedList<TypeDecl>();
+		tts.add(type());
+		return tts;
+	}
+	syn lazy Collection<TypeDecl> ParameterDeclaration.throwTypes() {
+		if (isCatchParam() && effectivelyFinal()) {
+			// the catch parameter must be final or implicitly
+			// final (multi-catch)
+			return catchClause().caughtExceptions();
+		} else {
+			Collection<TypeDecl> tts = new LinkedList<TypeDecl>();
+			tts.add(type());
+			return tts;
+		}
+	}
+	syn lazy Collection<TypeDecl> CatchParameterDeclaration.throwTypes() =
+		catchClause().caughtExceptions();
+
+	syn boolean ParameterDeclaration.effectivelyFinal() =
+		isFinal() || !inhModifiedInScope(this);
+
+	/**
+ 	 * @return true if the variable var is modified in the local scope
+ 	 */
+	inh boolean ParameterDeclaration.inhModifiedInScope(Variable var);
+	eq ConstructorDecl.getParameter().inhModifiedInScope(Variable var) =
+		getBlock().modifiedInScope(var);
+	eq MethodDecl.getParameter().inhModifiedInScope(Variable var) =
+		getBlock().modifiedInScope(var);
+	eq BasicCatch.getParameter().inhModifiedInScope(Variable var) =
+		getBlock().modifiedInScope(var);
+
+	syn boolean Stmt.modifiedInScope(Variable var);
+	eq VarDeclStmt.modifiedInScope(Variable var) = false;
+	eq VariableDeclaration.modifiedInScope(Variable var) = false;
+	eq EmptyStmt.modifiedInScope(Variable var) = false;
+	eq LabeledStmt.modifiedInScope(Variable var) =
+		getStmt().modifiedInScope(var);
+	eq ExprStmt.modifiedInScope(Variable var) =
+		getExpr().modifiedInScope(var);
+	eq Block.modifiedInScope(Variable var) {
+		for (Stmt stmt : getStmtList())
+			if (stmt.modifiedInScope(var))
+				return true;
+		return false;
+	}
+	eq SwitchStmt.modifiedInScope(Variable var) =
+		getBlock().modifiedInScope(var);
+	eq Case.modifiedInScope(Variable var) = false;
+	eq BreakStmt.modifiedInScope(Variable var) = false;
+	eq ContinueStmt.modifiedInScope(Variable var) = false;
+	eq ReturnStmt.modifiedInScope(Variable var) = false;
+	eq ThrowStmt.modifiedInScope(Variable var) = false;
+	eq IfStmt.modifiedInScope(Variable var) {
+		if (getThen().modifiedInScope(var))
+			return true;
+		return hasElse() && getElse().modifiedInScope(var);
+	}
+	eq WhileStmt.modifiedInScope(Variable var) =
+		getStmt().modifiedInScope(var);
+	eq DoStmt.modifiedInScope(Variable var) =
+		getStmt().modifiedInScope(var);
+	eq ForStmt.modifiedInScope(Variable var) {
+		for (Stmt stmt : getInitStmtList())
+			if (stmt.modifiedInScope(var))
+				return true;
+		for (Stmt stmt : getUpdateStmtList())
+			if (stmt.modifiedInScope(var))
+				return true;
+		return getStmt().modifiedInScope(var);
+	}
+	eq EnhancedForStmt.modifiedInScope(Variable var) =
+		getStmt().modifiedInScope(var);
+	eq SynchronizedStmt.modifiedInScope(Variable var) =
+		getBlock().modifiedInScope(var);
+	eq TryStmt.modifiedInScope(Variable var) {
+		if (getBlock().modifiedInScope(var))
+			return true;
+		for (CatchClause cc : getCatchClauseList())
+			if (cc.modifiedInScope(var))
+				return true;
+		return hasFinally() && getFinally().modifiedInScope(var);
+	}
+	eq AssertStmt.modifiedInScope(Variable var) = false;
+	eq LocalClassDeclStmt.modifiedInScope(Variable var) = false;
+
+	syn boolean CatchClause.modifiedInScope(Variable var) =
+		getBlock().modifiedInScope(var);
+	syn boolean Expr.modifiedInScope(Variable var) = false;
+	eq AssignExpr.modifiedInScope(Variable var) =
+		getDest().isVariable(var);
+
+	syn boolean Expr.isVariable(Variable var) = false;
+	eq VarAccess.isVariable(Variable var) = decl() == var;
+
+	/**
+	 * @return true if this is the parameter declaration of a catch clause
+	 */
+	inh boolean ParameterDeclaration.isCatchParam();
+	eq Program.getChild(int i).isCatchParam() = false;
+	eq ConstructorDecl.getParameter().isCatchParam() = false;
+	eq MethodDecl.getParameter().isCatchParam() = false;
+	eq BasicCatch.getParameter().isCatchParam() = true;
+
+	inh CatchClause ParameterDeclaration.catchClause();
+	inh CatchClause CatchParameterDeclaration.catchClause();
+
+	eq Program.getChild(int i).catchClause() {
+		throw new IllegalStateException("Could not find parent " +
+				"catch clause");
+	}
+	eq CatchClause.getChild(int i).catchClause() = this;
+
+	inh Collection<TypeDecl> CatchClause.caughtExceptions();
+
+	eq TryStmt.getCatchClause(int index).caughtExceptions() {
+		Collection<TypeDecl> excp = new HashSet<TypeDecl>();
+		getBlock().collectExceptions(excp, this);
+		Collection<TypeDecl> caught = new LinkedList<TypeDecl>();
+		Iterator<TypeDecl> iter = excp.iterator();
+		while (iter.hasNext()) {
+			TypeDecl exception = iter.next();
+			// this catch clause handles the exception
+			if (!getCatchClause(index).handles(exception))
+				continue;
+			// no previous catch clause handles the exception
+			boolean already = false;
+			for (int i = 0; i < index; ++i) {
+				if (getCatchClause(i).handles(exception)) {
+					already = true;
+					break;
+				}
+			}
+			if (!already) {
+				caught.add(exception);
+			}
+		}
+		return caught;
+	}
+
+	refine ExceptionHandling
+	public void ThrowStmt.exceptionHandling() {
+		Collection<TypeDecl> exceptionTypes = getExpr().throwTypes();
+		for (TypeDecl exceptionType : exceptionTypes) {
+			if (exceptionType == typeNull())
+				exceptionType = typeNullPointerException();
+			// 8.4.4
+			if (!handlesException(exceptionType))
+				error(""+this+" throws uncaught exception "+
+						exceptionType.fullName());
+		}
+	}
+
+	refine ExceptionHandling
+	protected boolean ThrowStmt.reachedException(TypeDecl catchType) {
+		Collection<TypeDecl> exceptionTypes = getExpr().throwTypes();
+		boolean reached = false;
+		for (TypeDecl exceptionType : exceptionTypes) {
+			if(exceptionType == typeNull())
+				exceptionType = typeNullPointerException();
+			if(catchType.mayCatch(exceptionType)) {
+				reached = true;
+				break;
+			}
+			if (super.reachedException(catchType)) {
+				reached = true;
+				break;
+			}
+		}
+		return reached;
+	}
+
+	inh boolean CatchClause.reportUnreachable();
+	eq CatchClause.getBlock().reportUnreachable() = false;
+
+	void BasicCatch.checkUnreachableStmt() {
+		if (!getBlock().reachable() && reportUnreachable())
+			error("the exception "+getParameter().type().fullName()+
+			" is not thrown in the body of the try statement");
+	}
+
+	void MultiCatch.checkUnreachableStmt() {
+		if (!getBlock().reachable() && reportUnreachable())
+			error("the exception "+getParameter().type().fullName()+
+			" is not thrown in the body of the try statement");
+	}
+}

@@ -1,0 +1,440 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect NameCheck {
+  public void ASTNode.nameCheck() {
+  }
+
+  public TypeDecl ASTNode.extractSingleType(SimpleSet c) {
+    if(c.size() != 1)
+      return null;
+    return (TypeDecl)c.iterator().next();
+  }
+
+  public void SingleTypeImportDecl.nameCheck() {
+    if(!getAccess().type().typeName().equals(typeName()) && !getAccess().type().isUnknown())
+      error("Single-type import " + typeName() + " is not the canonical name of type " + getAccess().type().typeName());
+    else if(allImportedTypes(getAccess().type().name()).size() > 1)
+      error(getAccess().type().name() + " is imported multiple times");
+  }
+  inh SimpleSet SingleTypeImportDecl.allImportedTypes(String name);
+  eq CompilationUnit.getImportDecl().allImportedTypes(String name) =
+    importedTypes(name);
+
+  public void TypeImportOnDemandDecl.nameCheck() {
+    if(getAccess().lastAccess().isTypeAccess() && !getAccess().type().typeName().equals(typeName()))
+      error("On demand type import " + typeName() + ".* is not the canonical name of type " + getAccess().type().typeName());
+  }
+
+  public void CompilationUnit.nameCheck() {
+    for(int i = 0; i < getNumImportDecl(); i++) {
+      ImportDecl decl = getImportDecl(i);
+      if(decl instanceof SingleTypeImportDecl) {
+        TypeDecl importedType = decl.getAccess().type();
+        Iterator iter = localLookupType(importedType.name()).iterator();
+        while (iter.hasNext()) {
+          TypeDecl local = (TypeDecl) iter.next();
+          if (local != importedType)
+            error("imported type " + decl + " is conflicting with visible type");
+        }
+      }
+    }
+  }
+
+  public void PackageAccess.nameCheck() {
+    if(!hasPackage(packageName())) {
+      error(packageName() + " not found");
+    }
+  }
+
+  public void AmbiguousAccess.nameCheck() {
+    error("ambiguous name " + name());
+  }
+  
+  public void PackageOrTypeAccess.nameCheck() {
+    error("packageortype name " + name());
+  }
+
+  
+  syn boolean MethodAccess.validArgs() {
+    for(int i = 0; i < getNumArg(); i++)
+      if(getArg(i).type().isUnknown())
+        return false;
+    return true;
+  }
+
+
+  public void ConstructorDecl.nameCheck() {
+    super.nameCheck();
+    // 8.8
+    if(!hostType().name().equals(name()))
+      error("constructor " + name() +" does not have the same name as the simple name of the host class " + hostType().name());
+    
+    // 8.8.2
+    if(hostType().lookupConstructor(this) != this)
+      error("constructor with signature " + signature() + " is multiply declared in type " + hostType().typeName());
+
+    if(circularThisInvocation(this))
+      error("The constructor " + signature() + " may not directly or indirectly invoke itself");
+  }
+
+  // 8.8.5
+  syn lazy boolean ConstructorDecl.circularThisInvocation(ConstructorDecl decl) circular [true] {
+    if(hasConstructorInvocation()) {
+      Expr e = ((ExprStmt)getConstructorInvocation()).getExpr();
+      if(e instanceof ConstructorAccess) {
+        ConstructorDecl constructorDecl = ((ConstructorAccess)e).decl();
+        if(constructorDecl == decl)
+          return true;
+        return constructorDecl.circularThisInvocation(decl);
+      }
+    }
+    return false;
+  }
+
+  public void MethodDecl.nameCheck() {
+    // 8.4
+    // 8.4.2
+    if(!hostType().methodsSignature(signature()).contains(this))
+      error("method with signature " + signature() + " is multiply declared in type " + hostType().typeName());
+    // 8.4.3.4
+    if(isNative() && hasBlock())
+      error("native methods must have an empty semicolon body");
+    // 8.4.5
+    if(isAbstract() && hasBlock())
+      error("abstract methods must have an empty semicolon body");
+    // 8.4.5
+    if(!hasBlock() && !(isNative() || isAbstract()))
+      error("only abstract and native methods may have an empty semicolon body");
+  }
+
+  public void ConstructorAccess.nameCheck() {
+    super.nameCheck();
+    if(decls().isEmpty())
+      error("no constructor named " + this);
+    if(decls().size() > 1 && validArgs()) {
+      error("several most specific constructors for " + this);
+      for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
+        error("         " + ((ConstructorDecl)iter.next()).signature());
+      }
+    }
+  }
+
+  syn boolean ConstructorAccess.validArgs() {
+    for(int i = 0; i < getNumArg(); i++)
+      if(getArg(i).type().isUnknown())
+        return false;
+    return true;
+  }
+  syn boolean ClassInstanceExpr.validArgs() {
+    for(int i = 0; i < getNumArg(); i++)
+      if(getArg(i).type().isUnknown())
+        return false;
+    return true;
+  }
+
+  public void ClassInstanceExpr.nameCheck() {
+    super.nameCheck();
+    if(decls().isEmpty())
+      error("can not instantiate " + type().typeName() + " no matching constructor found in " + type().typeName());
+    else if(decls().size() > 1 && validArgs()) {
+      error("several most specific constructors found");
+      for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
+        error("         " + ((ConstructorDecl)iter.next()).signature());
+      }
+    }
+  }
+    
+  
+  public void ArrayTypeAccess.nameCheck() {
+    if(decl().elementType().isUnknown())
+      error("no type named " + decl().elementType().typeName());
+  }
+  
+  public void TypeAccess.nameCheck() {
+    if(isQualified() && !qualifier().isTypeAccess() && !qualifier().isPackageAccess())
+      error("can not access the type named " + decl().typeName() + " in this context");
+    if(decls().isEmpty())
+      error("no visible type named " + typeName());
+    if(decls().size() > 1) {
+      StringBuffer s = new StringBuffer();
+      s.append("several types named " + name() + ":");
+      for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
+        TypeDecl t = (TypeDecl)iter.next();
+        s.append(" " + t.typeName());
+      }
+      error(s.toString());
+    }
+  }
+
+
+  public void ClassAccess.nameCheck() {
+    if(isQualified() && !qualifier().isTypeAccess())
+      error("class literal may only contain type names");
+  }
+
+  public void VarAccess.nameCheck() {
+    if(decls().isEmpty() && (!isQualified() || !qualifier().type().isUnknown() || qualifier().isPackageAccess()))
+      error("no field named " + name() + " is accessible");
+    if(decls().size() > 1) {
+      StringBuffer s = new StringBuffer();
+      s.append("several fields named " + name());
+      for(Iterator iter = decls().iterator(); iter.hasNext(); ) {
+        Variable v = (Variable)iter.next();
+        s.append("\n    " + v.type().typeName() + "." + v.name() + " declared in " + v.hostType().typeName());
+      }
+      error(s.toString());
+    }
+      
+    // 8.8.5.1
+    if(inExplicitConstructorInvocation() && !isQualified() && decl().isInstanceVariable() && hostType() == decl().hostType())
+      error("instance variable " + name() + " may not be accessed in an explicit constructor invocation");
+
+    Variable v = decl();
+    if(!v.isFinal() && !v.isClassVariable() && !v.isInstanceVariable() && v.hostType() != hostType())
+      error("A parameter/variable used but not declared in an inner class must be declared final");
+
+    // 8.3.2.3
+    if((decl().isInstanceVariable() || decl().isClassVariable()) && !isQualified()) {
+      if(hostType() != null && !hostType().declaredBeforeUse(decl(), this)) {
+        if(inSameInitializer() && !simpleAssignment() && inDeclaringClass()) {
+          BodyDecl b = closestBodyDecl(hostType());
+          error("variable " + decl().name() + " is used in " + b + " before it is declared");
+        }
+      }
+    }
+
+  }
+
+  // find the bodydecl declared in t in which this construct is nested
+  public BodyDecl VarAccess.closestBodyDecl(TypeDecl t) {
+    ASTNode node = this;
+    while(!(node.getParent().getParent() instanceof Program) && node.getParent().getParent() != t) {
+      node = node.getParent();
+    }
+    if(node instanceof BodyDecl)
+      return (BodyDecl)node;
+    return null;
+  }
+
+  syn boolean VarAccess.inSameInitializer() {
+    BodyDecl b = closestBodyDecl(decl().hostType());
+    if(b == null) return false;
+    if(b instanceof FieldDeclaration && ((FieldDeclaration)b).isStatic() == decl().isStatic())
+      return true;
+    if(b instanceof InstanceInitializer && !decl().isStatic())
+      return true;
+    if(b instanceof StaticInitializer && decl().isStatic())
+      return true;
+    return false;
+  }
+
+  syn boolean VarAccess.simpleAssignment() = isDest() && getParent() instanceof AssignSimpleExpr;
+
+  syn boolean VarAccess.inDeclaringClass() = hostType() == decl().hostType();
+
+  inh boolean TypeDecl.hasPackage(String packageName);
+  inh boolean PackageAccess.hasPackage(String packageName);
+
+  inh ASTNode TypeDecl.enclosingBlock();
+  eq MethodDecl.getBlock().enclosingBlock() = this;
+  eq ConstructorDecl.getBlock().enclosingBlock() = this;
+  eq InstanceInitializer.getBlock().enclosingBlock() = this;
+  eq Program.getChild().enclosingBlock() = null;
+
+  public void TypeDecl.nameCheck() {
+    if(isTopLevelType() && lookupType(packageName(), name()) != this)
+      error("duplicate type " + name() + " in package " + packageName());
+  
+    if(!isTopLevelType() && !isAnonymous() && !isLocalClass() && extractSingleType(enclosingType().memberTypes(name())) != this)
+      error("duplicate member type " + name() + " in type " + enclosingType().typeName());
+
+    // 14.3
+    if(isLocalClass()) {
+      TypeDecl typeDecl = extractSingleType(lookupType(name()));
+      if(typeDecl != null && typeDecl != this && typeDecl.isLocalClass() && enclosingBlock() == typeDecl.enclosingBlock())
+        error("local class named " + name() + " may not be redeclared as a local class in the same block");
+    }
+
+    if(!packageName().equals("") && hasPackage(fullName()))
+      error("type name conflicts with a package using the same name: " + name());
+    
+    // 8.1 & 9.1
+    if(hasEnclosingTypeDecl(name())) {
+      error("type may not have the same simple name as an enclosing type declaration");
+    }
+  }
+
+  syn boolean TypeDecl.hasEnclosingTypeDecl(String name) {
+    TypeDecl enclosingType = enclosingType();
+    if(enclosingType != null) {
+      return enclosingType.name().equals(name) || enclosingType.hasEnclosingTypeDecl(name);
+    }
+    return false;
+  }
+
+  public void FieldDeclaration.nameCheck() {
+    super.nameCheck();
+    // 8.3
+    for(Iterator iter = hostType().memberFields(name()).iterator(); iter.hasNext(); ) {
+      Variable v = (Variable)iter.next();
+      if(v != this && v.hostType() == hostType())
+        error("field named " + name() + " is multiply declared in type " + hostType().typeName());
+    }
+
+  }
+
+  inh VariableScope ParameterDeclaration.outerScope();
+  inh VariableScope VariableDeclaration.outerScope();
+  eq BasicCatch.getParameter().outerScope() = this;
+  eq Block.getStmt().outerScope() = this;
+  eq TypeDecl.getBodyDecl().outerScope() = this;
+  eq ForStmt.getInitStmt().outerScope() = this;
+  eq ForStmt.getStmt().outerScope() = this;
+  eq Program.getChild().outerScope() {
+    throw new UnsupportedOperationException("outerScope() not defined");
+  }
+
+  public void VariableDeclaration.nameCheck() {
+    SimpleSet decls = outerScope().lookupVariable(name());
+    for(Iterator iter = decls.iterator(); iter.hasNext(); ) {
+      Variable var = (Variable)iter.next();
+      if(var instanceof VariableDeclaration) {
+        VariableDeclaration decl = (VariableDeclaration)var;
+        if(decl != this && decl.enclosingBodyDecl() == enclosingBodyDecl())
+          error("duplicate declaration of local variable " + name() + " in enclosing scope");
+      }
+      // 8.4.1
+      else if(var instanceof ParameterDeclaration) {
+        ParameterDeclaration decl = (ParameterDeclaration)var;
+        if(decl.enclosingBodyDecl() == enclosingBodyDecl())
+          error("duplicate declaration of local variable and parameter " + name());
+      }
+    }
+    if(getParent().getParent() instanceof Block) {
+      Block block = (Block)getParent().getParent();
+      for(int i = 0; i < block.getNumStmt(); i++) {
+        if(block.getStmt(i) instanceof Variable) {
+          Variable v = (Variable)block.getStmt(i);
+          if(v.name().equals(name()) && v != this) {
+            error("duplicate declaration of local variable " + name());
+          }
+        }
+      }
+    }
+  }
+  
+  public void ParameterDeclaration.nameCheck() {
+    SimpleSet decls = outerScope().lookupVariable(name());
+    for(Iterator iter = decls.iterator(); iter.hasNext(); ) {
+      Variable var = (Variable)iter.next();
+      if(var instanceof VariableDeclaration) {
+        VariableDeclaration decl = (VariableDeclaration)var;
+        if(decl.enclosingBodyDecl() == enclosingBodyDecl())
+          error("duplicate declaration of local variable " + name());
+      }
+      else if(var instanceof ParameterDeclaration) {
+        ParameterDeclaration decl = (ParameterDeclaration)var;
+        if(decl.enclosingBodyDecl() == enclosingBodyDecl())
+          error("duplicate declaration of local variable " + name());
+      }
+    }
+
+    // 8.4.1  
+    if(!lookupVariable(name()).contains(this)) {
+      error("duplicate declaration of parameter " + name());
+    }
+  }
+  inh BodyDecl ParameterDeclaration.enclosingBodyDecl();
+  
+  public void LabeledStmt.nameCheck() {
+    LabeledStmt stmt = lookupLabel(getLabel());
+    if(stmt != null) {
+      if(stmt.enclosingBodyDecl() == enclosingBodyDecl()) {
+        error("Labels can not shadow labels in the same member");
+      }
+    }
+  }
+  
+  inh boolean BreakStmt.insideLoop();
+  inh boolean ContinueStmt.insideLoop();
+
+  eq Program.getChild().insideLoop() = false;
+  eq TypeDecl.getBodyDecl(int i).insideLoop() = false;
+  eq ForStmt.getStmt().insideLoop() = true;
+  eq WhileStmt.getStmt().insideLoop() = true;
+  eq DoStmt.getStmt().insideLoop() = true;
+  
+  inh boolean BreakStmt.insideSwitch();
+  eq Program.getChild().insideSwitch() = false;
+  eq TypeDecl.getBodyDecl(int i).insideSwitch() = false;
+  eq SwitchStmt.getBlock().insideSwitch() = true;
+
+  public void BreakStmt.nameCheck() {
+    if(!hasLabel() && !insideLoop() && !insideSwitch())
+      error("break outside switch or loop");
+    else if(hasLabel()) {
+      LabeledStmt label = lookupLabel(getLabel());
+      if(label == null)
+        error("labeled break must have visible matching label");
+    }
+  }
+  
+  public void ContinueStmt.nameCheck() {
+    if(!insideLoop())
+      error("continue outside loop");
+    else if(hasLabel()) {
+      LabeledStmt label = lookupLabel(getLabel());
+      if(label == null)
+        error("labeled continue must have visible matching label");
+      else if(!label.getStmt().continueLabel())
+        error(getLabel() + " is not a loop label");
+    }
+  }
+
+  syn boolean Stmt.continueLabel() = false;
+  eq ForStmt.continueLabel() = true;
+  eq WhileStmt.continueLabel() = true;
+  eq DoStmt.continueLabel() = true;
+  
+  public void ConstCase.nameCheck() {
+    if(getValue().isConstant() && bind(this) != this) {
+      error("constant expression " + getValue() + " is multiply declared in two case statements");
+    }
+  }
+  public void DefaultCase.nameCheck() {
+    if(bind(this) != this) {
+      error("only one default case statement allowed");
+    }
+  }
+
+  inh lazy Case Case.bind(Case c);
+  eq SwitchStmt.getBlock().bind(Case c) {
+    Block b = getBlock();
+    for(int i = 0; i < b.getNumStmt(); i++)
+      if(b.getStmt(i) instanceof Case && ((Case)b.getStmt(i)).constValue(c))
+        return (Case)b.getStmt(i);
+    return null;
+  }
+  eq Program.getChild().bind(Case c) = null;
+
+  syn boolean TypeDecl.assignableToInt() = false;
+  eq IntegralType.assignableToInt() = true;
+  eq LongType.assignableToInt() = false;
+
+  syn boolean Case.constValue(Case c);
+  eq ConstCase.constValue(Case c) {
+    if(!(c instanceof ConstCase) || !getValue().isConstant())
+      return false;
+    if(!getValue().type().assignableToInt() || !((ConstCase)c).getValue().type().assignableToInt())
+      return false;
+    return getValue().constant().intValue() == ((ConstCase)c).getValue().constant().intValue();
+  }
+  eq DefaultCase.constValue(Case c) = c instanceof DefaultCase;
+}

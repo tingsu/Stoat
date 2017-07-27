@@ -1,0 +1,49 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect AspectErrorCheck
+{
+  public void AspectDecl.checkModifiers() {
+    if(isNestedType() && !isStatic())
+      error("inner aspects must be static");
+    else
+      super.checkModifiers();
+  }
+  
+  syn boolean TypeDecl.isAspectDecl() = false;
+  eq AspectDecl.isAspectDecl() = true;
+
+  public void AspectDecl.typeCheck() {
+    if(hasSuperclass() && superclass().isAspectDecl() && !superclass().isAbstract())
+      error("aspects may only extend abstract aspects");
+    else if(!hasSuperclass() || !superclass().isUnknown()) {
+      if(instanceOf(lookupType("java.lang", "Cloneable")))
+        error("aspect may not implement Cloneable");
+      if(instanceOf(lookupType("java.io", "Serializable")))
+        error("aspect may not implement Serializable");
+      super.typeCheck();
+    }
+  }
+
+  public void ClassDecl.typeCheck() {
+    if(!isAspectDecl() && hasSuperclass() && superclass().isAspectDecl())
+      error("classes may not extend aspects");
+    else
+      super.typeCheck();
+  }
+
+  // aspect constructors must take no arguments
+  refine TypeCheck public void ConstructorDecl.typeCheck()
+  {
+    if (hostType().isAspectDecl() && getNumParameter() > 0)
+      error(hostType().typeName() + " is an aspect, so its " +
+            "constructor must have no parameters.");
+    refined();
+  }
+}

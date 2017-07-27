@@ -1,0 +1,231 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import java.util.*;
+
+aspect AccessTypes {
+  syn boolean Expr.isTypeAccess() = false;
+  eq TypeAccess.isTypeAccess() = true;
+  eq AbstractDot.isTypeAccess() = getRight().isTypeAccess();
+
+  syn boolean Expr.isMethodAccess() = false;
+  eq AbstractDot.isMethodAccess() = getRight().isMethodAccess();
+  eq MethodAccess.isMethodAccess() = true;
+
+  syn boolean Expr.isFieldAccess() = false;
+  eq AbstractDot.isFieldAccess() = getRight().isFieldAccess();
+  syn lazy boolean VarAccess.isFieldAccess() = decl().isClassVariable() || decl().isInstanceVariable();
+
+  syn boolean Expr.isSuperAccess() = false;
+  eq AbstractDot.isSuperAccess() = getRight().isSuperAccess();
+  eq SuperAccess.isSuperAccess() = true;
+  eq ParExpr.isSuperAccess() = getExpr().isSuperAccess();
+  eq CastExpr.isSuperAccess() = getExpr().isSuperAccess();
+
+  syn boolean Expr.isThisAccess() = false;
+  eq AbstractDot.isThisAccess() = getRight().isThisAccess();
+  eq ThisAccess.isThisAccess() = true;
+  eq ParExpr.isThisAccess() = getExpr().isThisAccess();
+  eq CastExpr.isThisAccess() = getExpr().isThisAccess();
+
+  syn boolean Expr.isPackageAccess() = false;
+  eq AbstractDot.isPackageAccess() = getRight().isPackageAccess();
+  eq PackageAccess.isPackageAccess() = true;
+
+  syn boolean Expr.isArrayAccess() = false;
+  eq AbstractDot.isArrayAccess() = getRight().isArrayAccess();
+  eq ArrayAccess.isArrayAccess() = true;
+  
+  syn boolean Expr.isClassAccess() = false;
+  eq AbstractDot.isClassAccess() = getRight().isClassAccess();
+  eq ClassAccess.isClassAccess() = true;
+ 
+  syn boolean Expr.isSuperConstructorAccess() = false;
+  eq AbstractDot.isSuperConstructorAccess() = getRight().isSuperConstructorAccess();
+  eq SuperConstructorAccess.isSuperConstructorAccess() = true;
+}
+
+aspect QualifiedNames {
+  syn boolean Expr.isLeftChildOfDot() = hasParentDot() && parentDot().getLeft() == this;
+  syn boolean Expr.isRightChildOfDot() = hasParentDot() && parentDot().getRight() == this;
+  
+  syn boolean Access.isQualified() = hasPrevExpr();
+  eq AbstractDot.isQualified() = hasParentDot();
+
+  syn Expr Access.qualifier() = prevExpr();
+  
+  syn Expr AbstractDot.leftSide() = getLeft();
+  syn Access AbstractDot.rightSide() = getRight/*NoTransform*/() instanceof AbstractDot ? (Access)((AbstractDot)getRight/*NoTransform*/()).getLeft() : (Access)getRight();
+
+  syn Access Access.lastAccess() = this;
+  eq AbstractDot.lastAccess() = getRight().lastAccess();
+
+  syn AbstractDot Expr.parentDot() = getParent() instanceof AbstractDot ? (AbstractDot)getParent() : null;
+  syn boolean Expr.hasParentDot() = parentDot() != null;
+
+  syn Access Expr.nextAccess() = parentDot().nextAccess();
+  syn boolean Expr.hasNextAccess() = isLeftChildOfDot();
+  
+  syn Access AbstractDot.nextAccess() = rightSide();
+  
+  syn Expr AbstractDot.prevExpr() = leftSide();
+  syn lazy Expr Access.prevExpr() {
+    if(isLeftChildOfDot()) {
+      if(parentDot().isRightChildOfDot())
+        return parentDot().parentDot().leftSide();
+    }
+    else if(isRightChildOfDot())
+      return parentDot().leftSide();
+    throw new Error(this + " does not have a previous expression");
+  }
+
+  syn boolean AbstractDot.hasPrevExpr() = true;
+  syn lazy boolean Access.hasPrevExpr() {
+    if(isLeftChildOfDot()) {
+      if(parentDot().isRightChildOfDot())
+        return true;
+    }
+    else if(isRightChildOfDot())
+      return true;
+    return false;
+  }
+
+  public Dot Dot.lastDot() {
+    Dot node = this;
+    while(node.getRightNoTransform() instanceof Dot)
+      node = (Dot)node.getRightNoTransform();
+    return node;
+  }
+
+  public Dot Expr.qualifiesAccess(Access access) {
+    Dot dot = new Dot(this, access);
+    dot.setStart(this.getStart());
+    dot.setEnd(access.getEnd());
+    return dot;
+  }
+  
+  public Dot Dot.qualifiesAccess(Access access) {
+	  Dot lastDot = lastDot();
+	  Expr l = lastDot.getRightNoTransform();
+	  Dot dot = new Dot(lastDot.getRightNoTransform(), access);
+	  dot.setStart(l.getStart());
+	  dot.setEnd(access.getEnd());
+	  lastDot.setRight(dot);
+	  return this;
+  }
+  
+  // Used when replacing pairs from a list to concatenate the result to the tail of the current location.
+  private Access Dot.qualifyTailWith(Access expr) {
+    if(getRight/*NoTransform*/() instanceof AbstractDot) {
+      AbstractDot dot = (AbstractDot)getRight/*NoTransform*/();
+      return expr.qualifiesAccess(dot.getRight/*NoTransform*/());
+    }
+    return expr;
+  }
+
+
+  // These are used by the parser to extract the last name which
+  // will be replaced by a method name
+  public Access AbstractDot.extractLast() {
+    return getRightNoTransform();
+ }
+  public void AbstractDot.replaceLast(Access access) {
+    setRight(access);
+  }
+  public Access Dot.extractLast() {
+    return lastDot().getRightNoTransform();
+  }
+  public void Dot.replaceLast(Access access) {
+    lastDot().setRight(access);
+  }
+
+  public Access Access.addArrayDims(List list) {
+    Access a = this;
+    for(int i = 0; i < list.getNumChildNoTransform(); i++) {
+      Dims dims = (Dims)list.getChildNoTransform(i);
+      Opt opt = dims.getExprOpt();
+      if(opt.getNumChildNoTransform() == 1)
+        a = new ArrayTypeWithSizeAccess(a, (Expr)opt.getChildNoTransform(0));
+      else
+        a = new ArrayTypeAccess(a);
+      a.setStart(dims.start());
+      a.setEnd(dims.end());
+    }
+    return a;
+  }
+
+}
+
+aspect NameResolution {
+ 
+  // Resolve Package or Type name
+  rewrite PackageOrTypeAccess {
+    /*
+    when(!lookupType(name()).isEmpty())
+    to Access new TypeAccess(name());
+    when(hasPackage(name()))
+    to Access new PackageAccess(name());
+    */
+    when(!duringSyntacticClassification())
+    to Access{
+      if(!lookupType(name()).isEmpty())
+        return new TypeAccess(name(), start(), end());
+      else
+        return new PackageAccess(name(), start(), end());
+    }
+  }
+
+  // Resolve Ambiguous name
+  rewrite AmbiguousAccess {
+    /*
+    when(!lookupVariable(name()).isEmpty())
+    to Access new VarAccess(name());
+    when(!lookupType(name()).isEmpty())
+    to Access new TypeAccess(name());
+    when(hasPackage(name()))
+    to Access new PackageAccess(name());
+    */
+    when(!duringSyntacticClassification())
+    to Access {
+      if(!lookupVariable(name()).isEmpty()) {
+        return new VarAccess(name(), start(), end());
+      }
+      else if(!lookupType(name()).isEmpty()) {
+        return new TypeAccess(name(), start(), end());
+      }
+      else {
+        return new PackageAccess(name(), start(), end());
+      }
+    }
+  }
+
+  // combine two package access into one node
+  rewrite Dot {
+    when(!duringSyntacticClassification() && leftSide().isPackageAccess() && rightSide().isPackageAccess())
+    to Access {
+      PackageAccess left = (PackageAccess)leftSide();
+      PackageAccess right = (PackageAccess)rightSide();
+      left.setPackage(left.getPackage() + "." + right.getPackage());
+      left.setEnd(right.end());
+      return qualifyTailWith(left);
+    }
+  }
+        
+  // combine PackageAccess + TypeAccess into one qualified TypeAccess
+  rewrite Dot {
+    when(!duringSyntacticClassification() && leftSide().isPackageAccess() && !((Access)leftSide()).hasPrevExpr() && rightSide() instanceof TypeAccess)
+    to Access {
+      PackageAccess left = (PackageAccess)leftSide();
+      TypeAccess right = (TypeAccess)rightSide();
+      right.setPackage(left.getPackage());
+      right.setStart(left.start());
+      return qualifyTailWith(right);
+    }
+  }
+}

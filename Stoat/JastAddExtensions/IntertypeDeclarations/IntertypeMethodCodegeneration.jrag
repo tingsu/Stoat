@@ -1,0 +1,617 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect IntertypeMethodCodegeneration {
+  
+  // generate code for each inter-type method that is visible in this type
+  public void InterfaceDecl.generateIntertypeDecls() {
+    super.generateIntertypeDecls();
+    for(Iterator iter = localMethodsIterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(m instanceof IntertypeMethodDecl) {
+        IntertypeMethodDecl methodDecl = (IntertypeMethodDecl)m;
+        // do not generate code in the declaring aspect
+        // TODO: should maybe not be included in localMethodsIterator()
+        if(methodDecl.hostAspect() != this)
+          methodDecl.createIntertypeMethod(this);
+      }
+    }
+  }
+
+  public void ClassDecl.generateIntertypeDecls() {
+    super.generateIntertypeDecls();
+    for(Iterator iter = methodsIterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(m instanceof IntertypeMethodDecl && (!hasSuperclass() || !superclass().methodsSignature(m.signature()).contains(m))) {
+        IntertypeMethodDecl methodDecl = (IntertypeMethodDecl)m;
+        if(methodDecl.hostAspect() != this) {
+          methodDecl.createIntertypeMethod(this);
+        }
+      }
+    }
+  }
+
+  // for each class decl that has a memberMethod with an implementation that is also an intertype method decl
+  //   if that method is not a member method of the superclass then generate code for that method
+
+  // Each IntertypeMethodDecl generates two methods
+  //   IntroducedMethodDecl m1 in the aspect, holding the method body
+  //   MethodDecl m2 in the introduced type, that delegates the call to m1 
+  // the delegation methods are needed to give the desired semantics for instance methods
+  // the IntroducedMethodDecl node type is used to specialize name analysis
+  public void IntertypeMethodDecl.createIntertypeMethod(TypeDecl introducedType) {
+    generateIntertypeDecls();
+    if(introducedType.isInterfaceDecl() || isAbstract()) {
+      boolean found = false;
+      for(int i = 0; !found && i < introducedType.getNumBodyDecl(); i++) {
+        if(introducedType.getBodyDecl(i) instanceof MethodDecl) {
+          MethodDecl m = (MethodDecl)introducedType.getBodyDecl(i);
+          if(m.signature().equals(signature()) && m.name().equals(delegateName()))
+            found = true;
+        }
+      }
+      // create abstract signature
+      if(!found)
+        introducedType.addMemberMethod(createAbstractMethod());
+    }
+    else {
+      MethodDecl aspectMethod = createAspectMethod();
+      MethodDecl delegateMethod = createDelegateMethod(aspectMethod);
+      introducedType.addMemberMethod(delegateMethod);
+      if(hostType() != introducedType) {
+        aspectMethod.generateSuperDispatchDelegate(introducedType);
+      }
+    }
+  }
+
+  public MethodDecl IntertypeMethodDecl.createAbstractMethod() {
+    return new MethodDecl(
+      getModifiers().makePublicAbstractSynthetic(),
+      type().createQualifiedAccess(),
+      delegateName(),
+      copyParameterList(getParameterList()),
+      copyTypeList(getExceptionList()),
+      new Opt()
+    );
+  }
+
+  syn lazy MethodDecl IntertypeMethodDecl.createAspectMethod() {
+    if(!is$Final) throw new Error("IntertypeMethodDecl must be final when aspectMethod is created");
+    // make aspect method static
+    Modifiers modifiers = getModifiers().makePublic();
+    if(!isStatic())
+      modifiers.addModifier(new Modifier("static"));
+    
+    // add that for instance methods
+    List parameterList = new List();
+    if(!isStatic())
+    	parameterList.add(new ParameterDeclaration(introducedType().createQualifiedAccess(), "this"));
+    for(int i = 0; i < getNumParameter(); i++)
+      parameterList.add(getParameter(i).qualifiedCopy());
+      
+    MethodDecl aspectMethod = new IntroducedMethodDecl(
+      modifiers,
+      type().createQualifiedAccess(),
+      implBodyName(),
+      parameterList,
+      copyTypeList(getExceptionList()),
+      (Opt)getBlockOpt().boundCopy(),
+      introducedType(),
+      this
+    );
+    aspectMethod = hostAspect().addMemberMethod(aspectMethod);
+    return aspectMethod;
+  }
+
+  public ASTNode ASTNode.boundCopy() {
+    ASTNode res = (ASTNode)copy();
+    for(int i = 0; i < getNumChildNoTransform(); i++) {
+      ASTNode node = getChildNoTransform(i);
+      if(node != null) node = node.boundCopy();
+        res.setChild(node, i);
+    }
+    return res;
+  }
+  public ASTNode MethodAccess.boundCopy() {
+    List args = new List();
+    for(int i = 0; i < getNumArg(); i++)
+      args.add(getArg(i).boundCopy());
+    return new BoundMethodAccess(name(), args, decl());
+  }
+
+  public ASTNode VarAccess.boundCopy() {
+    Variable v = decl();
+    if(v instanceof FieldDeclaration && !v.type().isUnknown())
+      return new BoundFieldAccess((FieldDeclaration)v);
+    else
+      return super.boundCopy();
+  }
+  public ASTNode ConstructorAccess.boundCopy() {
+    List args = new List();
+    for(int i = 0; i < getNumArg(); i++)
+      args.add(getArg(i).boundCopy());
+    final ConstructorDecl decl = decl();
+    return new ConstructorAccess(name(), args) {
+      public ConstructorDecl decl() { return decl; }
+    };
+  }
+  public ASTNode SuperConstructorAccess.boundCopy() {
+    List args = new List();
+    for(int i = 0; i < getNumArg(); i++)
+      args.add(getArg(i).boundCopy());
+    final ConstructorDecl decl = decl();
+    return new SuperConstructorAccess(name(), args) {
+      public ConstructorDecl decl() { return decl; }
+    };
+  }
+  public ASTNode ClassInstanceExpr.boundCopy() {
+    List args = new List();
+    for(int i = 0; i < getNumArg(); i++)
+      args.add(getArg(i).boundCopy());
+    final ConstructorDecl decl = decl();
+    final TypeDecl type = type();
+    return new ClassInstanceExpr(
+      type.createBoundAccess(),
+      args,
+      new Opt()
+    ) {
+      public ConstructorDecl decl() { return decl; } 
+      public TypeDecl type() { return type; } 
+    };
+
+/*
+    if(hasTypeDecl())
+      return new ClassInstanceExpr(
+        (Access)getAccess().boundCopy(),
+        args,
+        (Opt)getTypeDeclOpt().boundCopy()
+      );
+    else
+    return new ClassInstanceExpr(
+      (Access)getAccess().boundCopy(),
+      args,
+      (Opt)getTypeDeclOpt().boundCopy()
+    ) { 
+      public ConstructorDecl decl() { return decl; } 
+    };
+*/
+  }
+  public ASTNode TypeAccess.boundCopy() {
+    // we do not bind anonymous classes since they should
+    // be rebound in their new context
+    if(!decl().isAnonymous())
+      return decl().createBoundAccess();
+    else
+      return super.boundCopy();
+  }
+  public ASTNode ArrayTypeAccess.boundCopy() {
+    return new ArrayTypeAccess((Access)getAccess().boundCopy());
+  }
+  public ASTNode ArrayTypeWithSizeAccess.boundCopy() {
+    return new ArrayTypeWithSizeAccess((Access)getAccess().boundCopy(), (Expr)getExpr().boundCopy());
+  }
+
+  public ParameterDeclaration ParameterDeclaration.qualifiedCopy() {
+    return new ParameterDeclaration(type().createQualifiedAccess(), name());
+  }
+
+
+  syn boolean MethodAccess.needsSuperDispatchDelegate() {
+    if(!hasPrevExpr() || !prevExpr().isSuperAccess())
+      return false;
+    BodyDecl bodyDecl = enclosingBodyDecl();
+    if(bodyDecl instanceof IntroducedMethodDecl) {
+      IntroducedMethodDecl m = (IntroducedMethodDecl)bodyDecl;
+      return m.introducedType() != bodyDecl.hostType();
+    }
+    else if(bodyDecl instanceof IntertypeMethodDecl) {
+      return true;
+      /*
+      IntertypeMethodDecl m = (IntertypeMethodDecl)bodyDecl;
+      return m.introducedType() != bodyDecl.hostType();
+      */
+    }
+    return false;
+  }
+
+  public void ASTNode.generateSuperDispatchDelegate(TypeDecl typeDecl) {
+    for(int i = 0; i < getNumChild(); i++)
+      getChild(i).generateSuperDispatchDelegate(typeDecl);
+  }
+
+  public void MethodAccess.generateSuperDispatchDelegate(TypeDecl typeDecl) {
+    super.generateSuperDispatchDelegate(typeDecl);
+    if(decl().name().startsWith("superDispatch$")) {
+      typeDecl.addMemberMethod((MethodDecl)decl().boundCopy());
+    }
+    else if(needsSuperDispatchDelegate()) {
+      typeDecl.addMemberMethod((MethodDecl)superDispatchDelegate().boundCopy());
+    }
+  }
+
+  public void MethodAccess.generateIntertypeDecls() {
+    if(needsSuperDispatchDelegate()) {
+      if(options().verbose())
+        System.out.println("May need super dispatch delegate for " + this);
+      MethodDecl m = superDispatchDelegate();
+      List args = (List)getArgList().boundCopy();
+      Access a = superDispatchQualifier().createBoundAccess().qualifiesAccess(new ThisAccess()).qualifiesAccess(m.createBoundAccess(args));
+      replace(unqualifiedScope()).with(hasNextAccess() ? a.qualifiesAccess(nextAccess()) : a);
+      //replace(getParent()).with(a);
+      a.generateIntertypeDecls();
+    }
+    else
+      super.generateIntertypeDecls();
+  }
+
+  syn TypeDecl MethodAccess.superDispatchQualifier() {
+    if(!needsSuperDispatchDelegate())
+      throw new Error("superDispatchQualifier may only be called on method calls that need delegate");
+    SuperAccess access = (SuperAccess)qualifier();
+    return access.isQualified() ? access.qualifier().type() : thisType();
+  }
+
+
+  public MethodDecl MethodAccess.superDispatchDelegate() {
+    if(!needsSuperDispatchDelegate())
+      throw new Error("superDispatchDelegate may only be called on method calls that need delegate");
+    SimpleSet maxSpecific = SimpleSet.emptySet;
+    for(Iterator iter = superDispatchQualifier().memberMethods(name()).iterator(); iter.hasNext(); ) {
+      MethodDecl decl = (MethodDecl)iter.next();
+      if(applicable(decl) && accessible(decl)) {
+        if(maxSpecific.isEmpty())
+          maxSpecific = maxSpecific.add(decl);
+        else {
+          if(decl.moreSpecificThan((MethodDecl)maxSpecific.iterator().next()))
+            maxSpecific = SimpleSet.emptySet.add(decl);
+          else if(!((MethodDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
+            maxSpecific = maxSpecific.add(decl);
+        }
+      }
+    }
+    if(maxSpecific.size() == 1) {
+      MethodDecl m = (MethodDecl)maxSpecific.iterator().next();
+      return m.createSuperDispatchDelegate(superDispatchQualifier());
+    }
+    throw new Error("Could not find most specific method");
+  }
+
+/*
+  refine CreateBCode public void MethodAccess.createBCode(CodeGeneration gen) {
+    if(needsSuperDispatchDelegate()) {
+      MethodDecl m = superDispatchDelegate();
+      TypeDecl thisType = hostType();
+      .createBCode(gen);
+      for (int i = 0; i < getNumArg(); ++i) {
+        getArg(i).createBCode(gen);
+        getArg(i).type().emitCastTo(gen, m.getParameter(i).type()); // MethodInvocationConversion
+      }
+      m.emitInvokeMethod(gen, methodQualifierType());
+    }
+    else
+      CreateBCode.MethodAccess.createBCode(gen);
+  }*/
+
+  /*
+  TODO: fixme
+  refine CreateBCode public void MethodAccess.createBCode(CodeGeneration gen) {
+    if(needsSuperDispatchDelegate()) {
+      SimpleSet maxSpecific = SimpleSet.emptySet;
+      for(Iterator iter = hostType().memberMethods(name()).iterator(); iter.hasNext(); ) {
+        MethodDecl decl = (MethodDecl)iter.next();
+        if(applicable(decl) && accessible(decl)) {
+          if(maxSpecific.isEmpty())
+            maxSpecific = maxSpecific.add(decl);
+          else {
+            if(decl.moreSpecificThan((MethodDecl)maxSpecific.iterator().next()))
+              maxSpecific = SimpleSet.emptySet.add(decl);
+            else if(!((MethodDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
+              maxSpecific = maxSpecific.add(decl);
+          }
+        }
+      }
+      if(maxSpecific.size() == 1) {
+        MethodDecl m = (MethodDecl)maxSpecific.iterator().next();
+        m = m.createSuperDispatchDelegate(hostType());
+        // invoke m virtually
+        gen.emitLoadReference(0);
+        for (int i = 0; i < getNumArg(); ++i) {
+          getArg(i).createBCode(gen);
+          getArg(i).type().emitCastTo(gen, m.getParameter(i).type()); // MethodInvocationConversion
+        }
+        m.emitInvokeMethod(gen, m.hostType());
+      }
+      else
+        throw new Error("Used super." + name() + " in introduced method, hostType:" + hostType().typeName() + ", decl().hostType: " + decl().hostType().typeName());
+    }
+    else
+      CreateBCode.MethodAccess.createBCode(gen);
+  }*/
+
+  protected static List ASTNode.copyParameterList(List l) {
+    List list = new List();
+    for(int i = 0; i < l.getNumChild(); i++) {
+      ParameterDeclaration p = (ParameterDeclaration)l.getChild(i);
+      list.add(new ParameterDeclaration(p.type().createQualifiedAccess(), p.name()));
+    }
+    return list;
+  }
+  protected static List ASTNode.copyTypeList(List l) {
+    List list = new List();
+    for(int i = 0; i < l.getNumChild(); i++) {
+      Access a = (Access)l.getChild(i);
+      list.add(a.type().createBoundAccess());
+    }
+    return list;
+  }
+    
+  syn lazy MethodDecl MethodDecl.createSuperDispatchDelegate(TypeDecl qualifierType) {
+    String name = "superDispatch$" + qualifierType.fullName().replace('.', '$').replace('@', '_') + "$" + name();
+    List statements = new List();
+    Expr e = null;
+    if(qualifierType.isInterfaceDecl()) {
+      for(Iterator iter = ((InterfaceDecl)qualifierType).ancestorMethods(signature()).iterator(); iter.hasNext(); ) {
+        MethodDecl m = (MethodDecl)iter.next();
+        if(m instanceof IntertypeMethodDecl && !m.isAbstract()) {
+          IntertypeMethodDecl imd = (IntertypeMethodDecl)m;
+          List args = new List();
+          args.add(new ThisAccess());
+          for(int i = 0; i < getNumParameter(); i++)
+            args.add(getParameter(i).createAccess());
+          e = imd.createAspectMethod().createBoundAccess(args);
+        }
+      }
+    }
+    if(e == null && qualifierType instanceof ClassDecl) {
+      TypeDecl superType = ((ClassDecl)qualifierType).superclass();
+      MethodDecl superMethod = (MethodDecl)superType.methodsSignature(signature()).iterator().next();
+      List args = new List();
+      for(int i = 0; i < getNumParameter(); i++)
+        args.add(getParameter(i).createAccess());
+      e = new SuperAccess("super").qualifiesAccess(superMethod.createBoundAccess(args));
+    }
+    if(e == null) {
+      List args = new List();
+      for(int i = 0; i < getNumParameter(); i++)
+        args.add(getParameter(i).createAccess());
+      e = new SuperAccess("super").qualifiesAccess(this.createBoundAccess(args));
+    }
+    if(type().isVoid())
+      statements.add(new ExprStmt(e));
+    else
+      statements.add(new ReturnStmt(e));
+    MethodDecl m = new MethodDecl(
+      new Modifiers(new List().add(new Modifier("public")).add(new Modifier("synthetic"))),
+      type().createQualifiedAccess(),
+      name,
+      copyParameterList(getParameterList()),
+      copyTypeList(getExceptionList()),
+      new Opt(new Block(statements))
+    );
+    return qualifierType.addMemberMethod(m);
+  }
+
+  public Access ParameterDeclaration.createAccess() {
+    return new VarAccess(name());
+  }
+
+  // decl().signature() -> method to call using invoke super
+  // hostType() -> type to hold the new method
+  // a new method called dispatchSuper$signature
+  
+  public MethodDecl IntertypeMethodDecl.createDelegateMethod(MethodDecl aspectMethod) {
+    // make arguments from this and method parameters
+    List args = new List();
+    if(!isStatic())
+      args.add(new ThisAccess("this"));
+    for(int i = 0; i < getNumParameter(); i++) {
+      args.add(getParameter(i).createAccess());
+    }
+    
+    // delegate by calling the aspect method
+    List statements = new List();
+    if(type().isVoid())
+    	statements.add(new ExprStmt(aspectMethod.createBoundAccess(args)));
+    else
+    	statements.add(new ReturnStmt(aspectMethod.createBoundAccess(args)));
+      
+    return new MethodDecl(
+      getModifiers().makePublicSynthetic(),
+      type().createQualifiedAccess(),
+      delegateName(),
+      copyParameterList(getParameterList()),
+      copyTypeList(getExceptionList()),
+      new Opt(new Block(statements))
+    );
+  }
+
+  public Modifiers Modifiers.makePublic() {
+    List list = new List();
+    for(int i = 0; i < getNumModifier(); i++) {
+      String s = getModifier(i).getID();
+      if(!s.equals("public") && !s.equals("protected") && !s.equals("private"))
+        list.add((Modifier)getModifier(i).fullCopy());
+    }
+    list.add(new Modifier("public"));
+    return new Modifiers(list);
+  }
+  public Modifiers Modifiers.makePublicSynthetic() {
+    Modifiers m = makePublic();
+    for(int i = 0; i < m.getNumModifier(); i++)
+      if(m.getModifier(i).getID().equals("synthetic"))
+        return m;
+    m.addModifier(new Modifier("synthetic"));
+    return m;
+  }
+  public Modifiers Modifiers.makePublicAbstract() {
+    Modifiers m = makePublic();
+    for(int i = 0; i < m.getNumModifier(); i++)
+      if(m.getModifier(i).getID().equals("abstract"))
+        return m;
+    m.addModifier(new Modifier("abstract"));
+    return m;
+  }
+  public Modifiers Modifiers.makePublicAbstractSynthetic() {
+    Modifiers m = makePublicAbstract();
+    for(int i = 0; i < m.getNumModifier(); i++)
+      if(m.getModifier(i).getID().equals("synthetic"))
+        return m;
+    m.addModifier(new Modifier("synthetic"));
+    return m;
+  }
+
+  
+  // Do not generate bytecode for this node type even though it is a subtype of MethodDecl
+  // the IntertypeMethodDecl is a placeholder used during error checking, but code
+  // need only be emitted for the two generated methods
+  eq IntertypeMethodDecl.generate() = false; 
+  
+  // change name binding to search for methods in introducedType in IntroducedMethodDecl body
+  syn TypeDecl IntroducedMethodDecl.introducedType() = getIntroducedType();
+  eq IntroducedMethodDecl.getBlock().lookupMethod(String name) {
+    Collection c = introducedType().memberMethods(name);
+    if(!c.isEmpty())
+      return c;
+    return getITDBodyDecl().lookupMethod(name);
+  }
+  
+  eq IntroducedMethodDecl.getBlock().lookupVariable(String name) {
+    SimpleSet set = parameterDeclaration(name);
+    if(!set.isEmpty()) return set;
+    set = introducedType().memberFields(name);
+    if(!set.isEmpty()) return set;
+    return getITDBodyDecl().lookupVariable(name);
+  }
+
+  eq IntroducedMethodDecl.getTypeAccess().lookupType(String name) {
+    SimpleSet set = introducedType().memberTypes(name);
+    if(!set.isEmpty())
+      return set;
+    return getITDBodyDecl().lookupType(name);
+  }
+  eq IntroducedMethodDecl.getBlock().lookupType(String name) {
+    SimpleSet set = introducedType().memberTypes(name);
+    if(!set.isEmpty())
+      return set;
+    return getITDBodyDecl().lookupType(name);
+  }
+
+  eq IntroducedMethodDecl.getBlock().hostType() = introducedType();
+  eq IntroducedMethodDecl.getParameter(int index).hostType() = introducedType();
+
+  // TODO: make this use the modifier prior to transformation instead of hardcoded false
+  eq IntroducedMethodDecl.getBlock().inStaticContext() = false;
+
+  eq IntroducedMethodDecl.getBlock().enclosingType() = introducedType();
+  eq IntroducedMethodDecl.getBlock().enclosingInstance() = introducedType();
+
+  eq IntroducedMethodDecl.getChild().thisType() = introducedType();
+
+  refine Transformations public void MethodAccess.transformation() {
+    if(needsSuperDispatchDelegate()) {
+      if(options().verbose())
+        System.out.println("May need super dispatch delegate for " + this);
+      SimpleSet maxSpecific = SimpleSet.emptySet;
+      for(Iterator iter = thisType().memberMethods(name()).iterator(); iter.hasNext(); ) {
+        MethodDecl decl = (MethodDecl)iter.next();
+        if(applicable(decl) && accessible(decl)) {
+          if(maxSpecific.isEmpty())
+            maxSpecific = maxSpecific.add(decl);
+          else {
+            if(decl.moreSpecificThan((MethodDecl)maxSpecific.iterator().next()))
+              maxSpecific = SimpleSet.emptySet.add(decl);
+            else if(!((MethodDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
+              maxSpecific = maxSpecific.add(decl);
+          }
+        }
+      }
+      if(maxSpecific.size() == 1) {
+        MethodDecl m = (MethodDecl)maxSpecific.iterator().next();
+        m.createSuperDispatchDelegate(thisType());
+      }
+    }
+    MethodDecl m = decl();
+    //if(!(m instanceof IntertypeMethodDecl) && m.isPrivate() && !thisType().hasMethod(name())) {
+    if(!(m instanceof IntertypeMethodDecl) && requiresAccessor()) {
+      /* Access to private methods in enclosing types:
+      The original MethodAccess is replaced with an access to an accessor method
+      built by createAccessor(). This method is built lazily and differs from
+      normal MethodDeclarations in the following ways:
+      1) The method in the class file should always be static and the signature
+         is thus changed to include a possible this reference as the first argument. 
+      2) The method is always invoked using INVOKESTATIC
+      3) The flags must indicate that the method is static and package private
+      */
+      replace(this).with(decl().createAccessor(methodQualifierType()).createBoundAccess(getArgList()));
+      return;
+    }
+    else if(!m.isStatic() && isQualified() && prevExpr().isSuperAccess() && !thisType().instanceOf(prevExpr().type())) {
+      decl().createSuperAccessor(superAccessorTarget());
+    }
+    super.transformation();
+  }
+
+  refine InnerClasses eq MethodAccess.requiresAccessor() {
+    if(enclosingBodyDecl() instanceof IntroducedMethodDecl) {
+      MethodDecl m = decl();
+      TypeDecl hostType = enclosingBodyDecl().hostType();
+      if(m.isPrivate() && m.hostType() != hostType)
+        return true;
+      if(m.isProtected() && !m.hostPackage().equals(hostPackage()))
+        return true;
+      return false;
+    }
+    return refined();
+  }
+  
+  syn String IntertypeMethodDecl.implBodyName() = "impl$body$" + name();
+  syn String IntertypeMethodDecl.delegateName() {
+    if(isPrivate())
+      return "abc$interMethod$" + hostAspect().topLevelType().abcMangledName() + "$" + name();
+    else if(isPublic())
+      return name();
+    else
+      return "abc$interMethod$" + hostAspect().packageName().replace('.', '_') + "$" + name();
+  }
+
+  public void IntroducedMethodDecl.toString(StringBuffer s) {
+    s.append(indent());
+    s.append("/*@IntroducedType(" + getIntroducedType().typeName() + ")*/ ");
+    //s.append("@ITDBodyDecl(" + getITDBodyDecl().typeName() + ") ");
+
+    getModifiers().toString(s);
+    getTypeAccess().toString(s);
+    s.append(" " + name() + "(");
+    if(getNumParameter() > 0) {
+      getParameter(0).toString(s);
+      for(int i = 1; i < getNumParameter(); i++) {
+        s.append(", ");
+        getParameter(i).toString(s);
+      }
+    }
+    s.append(")");
+    if(getNumException() > 0) {
+      s.append(" throws ");
+      getException(0).toString(s);
+      for(int i = 1; i < getNumException(); i++) {
+        s.append(", ");
+        getException(i).toString(s);
+      }
+    }
+    if(hasBlock()) {
+      s.append(" ");
+      getBlock().toString(s);
+    }
+    else {
+      s.append(";\n");
+    }
+  }
+
+
+}

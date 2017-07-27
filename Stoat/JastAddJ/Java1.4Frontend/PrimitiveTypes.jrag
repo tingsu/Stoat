@@ -1,0 +1,226 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect PrimitiveTypes {
+  protected static final String ASTNode.PRIMITIVE_PACKAGE_NAME = "@primitive";
+
+/* ES: Replacing this with a create method used in type lookup the first time a primitive type is requested
+  private boolean Program.initPrimTypes = false;
+  public void Program.addPrimitiveTypes() {
+    if(!initPrimTypes) {
+      initPrimTypes = true;
+    
+    CompilationUnit u = new CompilationUnit();
+    u.setPackageDecl(PRIMITIVE_PACKAGE_NAME);
+    addCompilationUnit(u);
+
+    TypeDecl classDecl = generateUnknownType();
+    u.addTypeDecl(classDecl);
+    TypeDecl unknown = classDecl;
+
+    classDecl = generatePrimitiveType(new BooleanType(), "boolean", unknown);
+    u.addTypeDecl(classDecl);
+    
+    classDecl = generatePrimitiveType(new DoubleType(), "double", unknown);
+    u.addTypeDecl(classDecl);
+    
+    classDecl = generatePrimitiveType(new FloatType(), "float", classDecl);
+    u.addTypeDecl(classDecl);
+    
+    classDecl = generatePrimitiveType(new LongType(), "long", classDecl);
+    u.addTypeDecl(classDecl);
+    
+    classDecl = generatePrimitiveType(new IntType(), "int", classDecl);
+    u.addTypeDecl(classDecl);
+    TypeDecl intDecl = classDecl;
+    
+    classDecl = generatePrimitiveType(new ShortType(), "short", classDecl);
+    u.addTypeDecl(classDecl);
+    
+    classDecl = generatePrimitiveType(new ByteType(), "byte", classDecl);
+    u.addTypeDecl(classDecl);
+    
+    classDecl = generatePrimitiveType(new CharType(), "char", intDecl);
+    u.addTypeDecl(classDecl);
+    
+    classDecl = new NullType();
+    classDecl.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    classDecl.setID("null");
+    u.addTypeDecl(classDecl);
+
+    classDecl = new VoidType();
+    classDecl.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    classDecl.setID("void");
+    u.addTypeDecl(classDecl);
+
+    }
+  }
+
+
+  public TypeDecl Program.generatePrimitiveType(PrimitiveType type, String name, TypeDecl superType) {
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID(name);
+    if(superType != null)
+      type.setSuperClassAccess(superType.createQualifiedAccess());
+    return type;
+  }
+
+  private TypeDecl Program.generateUnknownType() {
+    ClassDecl classDecl = new UnknownType();
+    classDecl.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    classDecl.setID("Unknown");
+    MethodDecl methodDecl = new MethodDecl(
+        new Modifiers(new List().add(
+          new Modifier("public")
+        )),
+        new PrimitiveTypeAccess("Unknown"),
+        "unknown",
+        new List(),
+        new List(),
+        new Opt()
+    );
+    classDecl.addBodyDecl(methodDecl);
+    FieldDeclaration fieldDecl = new FieldDeclaration(
+        new Modifiers(new List().add(
+          new Modifier("public")
+        )),
+        new PrimitiveTypeAccess("Unknown"),
+        "unknown",
+        new Opt()
+    );
+    classDecl.addBodyDecl(fieldDecl);   
+    ConstructorDecl constrDecl = new ConstructorDecl(
+      new Modifiers(new List().add(new Modifier("public"))),
+      "Unknown",
+      new List(),
+      new List(),
+      new Opt(),
+      new Block()
+    );
+    classDecl.addBodyDecl(constrDecl);
+      
+    return classDecl;
+  }
+
+*/
+
+  syn nta TypeDecl PrimitiveCompilationUnit.typeBoolean() {
+    BooleanType type = new BooleanType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("boolean");
+    type.setSuperClassAccess(unknownType().createQualifiedAccess());
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeByte() {
+    ByteType type = new ByteType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("byte");
+    type.setSuperClassAccess(typeShort().createQualifiedAccess());
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeShort() {
+    ShortType type = new ShortType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("short");
+    type.setSuperClassAccess(typeInt().createQualifiedAccess());
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeChar() {
+    CharType type = new CharType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("char");
+    type.setSuperClassAccess(typeInt().createQualifiedAccess());
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeInt() {
+    IntType type = new IntType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("int");
+    type.setSuperClassAccess(typeLong().createQualifiedAccess());
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeLong() {
+    LongType type = new LongType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("long");
+    // Float doesn't seem right here, keeping it because the old code does this
+    type.setSuperClassAccess(typeFloat().createQualifiedAccess()); 
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeFloat() {
+    FloatType type = new FloatType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("float");
+    type.setSuperClassAccess(typeDouble().createQualifiedAccess());
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeDouble() {
+    DoubleType type = new DoubleType();
+    type.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    type.setID("double");
+    type.setSuperClassAccess(unknownType().createQualifiedAccess());
+    return type;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeVoid() {
+    VoidType classDecl = new VoidType();
+    classDecl.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    classDecl.setID("void");
+    return classDecl;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.typeNull() {
+    NullType classDecl = new NullType();
+    classDecl.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    classDecl.setID("null");
+    return classDecl;
+  }
+  syn nta TypeDecl PrimitiveCompilationUnit.unknownType() {
+    ClassDecl classDecl = new UnknownType();
+    classDecl.setModifiers(new Modifiers(new List().add(new Modifier("public"))));
+    classDecl.setID("Unknown");
+    MethodDecl methodDecl = new MethodDecl(
+        new Modifiers(new List().add(
+          new Modifier("public")
+        )),
+        new PrimitiveTypeAccess("Unknown"),
+        "unknown",
+        new List(),
+        new List(),
+        new Opt()
+    );
+    classDecl.addBodyDecl(methodDecl);
+    FieldDeclaration fieldDecl = new FieldDeclaration(
+        new Modifiers(new List().add(
+          new Modifier("public")
+        )),
+        new PrimitiveTypeAccess("Unknown"),
+        "unknown",
+        new Opt()
+    );
+    classDecl.addBodyDecl(fieldDecl);   
+    ConstructorDecl constrDecl = new ConstructorDecl(
+      new Modifiers(new List().add(new Modifier("public"))),
+      "Unknown",
+      new List(),
+      new List(),
+      new Opt(),
+      new Block()
+    );
+    classDecl.addBodyDecl(constrDecl);      
+    return classDecl;
+  }
+
+  // Creates a compilation unit with primitive types
+  syn nta PrimitiveCompilationUnit Program.getPrimitiveCompilationUnit() {    
+    PrimitiveCompilationUnit u = new PrimitiveCompilationUnit();
+    u.setPackageDecl(PRIMITIVE_PACKAGE_NAME);
+    return u;
+  }
+  
+}
+

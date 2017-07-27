@@ -1,0 +1,54 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect DeclarePrecedenceNameAnalysis {
+
+  syn lazy boolean TypeDecl.precedes(TypeDecl typeDecl) {
+    for(Iterator iter = declarePrecedence().iterator(); iter.hasNext(); ) {
+      DeclarePrecedence p = (DeclarePrecedence)iter.next();
+      boolean foundThis = false;
+      for(int i = 0; i < p.getNumPattern(); i++ ) {
+        if(!foundThis && p.matchPattern(i, this))
+          foundThis = true;
+        else if(foundThis && p.matchPattern(i, typeDecl))
+          return true;
+      }
+    }
+    return false;
+  }
+
+  syn boolean DeclarePrecedence.matchPattern(int i, TypeDecl typeDecl) =
+    getPattern(i).type() == typeDecl;
+
+  inh Collection TypeDecl.declarePrecedence();
+  eq Program.getChild().declarePrecedence() {
+    String key = "declare_precedence";
+    if(intertypeDecls().containsKey(key))
+      return (Collection)intertypeDecls().get(key);
+    return Collections.EMPTY_LIST;
+  }
+
+  // add declare precedences to generic inter-type collection phase
+  void DeclarePrecedence.collectIntertypeDecls(HashMap map) {
+    super.collectIntertypeDecls(map);
+    String key = "declare_precedence";
+    if(!map.containsKey(key))
+      map.put(key, new ArrayList());
+    Collection c = (Collection)map.get(key);
+    c.add(this);
+  }
+
+  public void DeclarePrecedence.typeCheck() {
+    super.typeCheck();
+    for(int i = 0; i < getNumPattern(); i++)
+      if(getPattern(i).isTypeAccess() && !getPattern(i).type().isAspectDecl())
+        error("non aspect type " + getPattern(i).type().typeName() + " can not be used in a declare precendence statement");
+  }
+
+}

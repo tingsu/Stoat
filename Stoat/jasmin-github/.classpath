@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="scm/autogen/|scm/autogen/" kind="src" path="lib/jas/src"/>
+	<classpathentry kind="src" path="lib/jas/src/scm/autogen"/>
+	<classpathentry kind="src" path="generated"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/java_cup.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

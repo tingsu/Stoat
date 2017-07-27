@@ -1,0 +1,209 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ *                    2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect Variables {
+  VariableDeclaration implements Variable;
+  syn boolean VariableDeclaration.isParameter() = false;
+  // 4.5.3
+  syn boolean VariableDeclaration.isClassVariable() = false;
+  syn boolean VariableDeclaration.isInstanceVariable() = false;
+  syn boolean VariableDeclaration.isMethodParameter() = false;
+  syn boolean VariableDeclaration.isConstructorParameter() = false;
+  syn boolean VariableDeclaration.isExceptionHandlerParameter() = false;
+  syn boolean VariableDeclaration.isLocalVariable() = true;
+  // 4.5.4
+  syn boolean VariableDeclaration.isFinal() = getModifiers().isFinal();
+  syn boolean VariableDeclaration.isVolatile() = getModifiers().isVolatile();
+  syn boolean VariableDeclaration.isBlank() = !hasInit();
+  syn boolean VariableDeclaration.isStatic() = false;
+  
+  syn String VariableDeclaration.name() = getID();
+
+  syn lazy Constant VariableDeclaration.constant() = type().cast(getInit().constant());
+
+  FieldDeclaration implements Variable;
+  syn boolean FieldDeclaration.isParameter() = false;
+  // 4.5.3
+  syn boolean FieldDeclaration.isClassVariable() = isStatic() || hostType().isInterfaceDecl();
+  syn boolean FieldDeclaration.isInstanceVariable() = (hostType().isClassDecl() || hostType().isAnonymous() )&& !isStatic();
+  syn boolean FieldDeclaration.isMethodParameter() = false;
+  syn boolean FieldDeclaration.isConstructorParameter() = false;
+  syn boolean FieldDeclaration.isExceptionHandlerParameter() = false;
+  syn boolean FieldDeclaration.isLocalVariable() = false;
+
+  syn boolean FieldDeclaration.isBlank() = !hasInit();
+  
+  syn String FieldDeclaration.name() = getID();
+  syn lazy Constant FieldDeclaration.constant() = type().cast(getInit().constant());
+
+  ParameterDeclaration implements Variable;
+  syn boolean ParameterDeclaration.isParameter() = true;
+
+  // 4.5.3
+  syn boolean ParameterDeclaration.isClassVariable() = false;
+  syn boolean ParameterDeclaration.isInstanceVariable() = false;
+  inh boolean ParameterDeclaration.isMethodParameter();
+  inh boolean ParameterDeclaration.isConstructorParameter();
+  inh boolean ParameterDeclaration.isExceptionHandlerParameter();
+  syn boolean ParameterDeclaration.isLocalVariable() = false;
+  
+  // 4.5.3
+  eq ConstructorDecl.getParameter().isMethodParameter() = false;
+  eq ConstructorDecl.getParameter().isConstructorParameter() = true;
+  eq ConstructorDecl.getParameter().isExceptionHandlerParameter() = false;
+  eq MethodDecl.getParameter().isMethodParameter() = true;
+  eq MethodDecl.getParameter().isConstructorParameter() = false;
+  eq MethodDecl.getParameter().isExceptionHandlerParameter() = false;
+  eq BasicCatch.getParameter().isMethodParameter() = false;
+  eq BasicCatch.getParameter().isConstructorParameter() = false;
+  eq BasicCatch.getParameter().isExceptionHandlerParameter() = true;
+
+  eq Program.getChild().isMethodParameter() = false;
+  eq Program.getChild().isConstructorParameter() = false;
+  eq Program.getChild().isExceptionHandlerParameter() = false;
+  
+  // 4.5.4
+  syn boolean ParameterDeclaration.isFinal() = getModifiers().isFinal();
+  syn boolean ParameterDeclaration.isVolatile() = getModifiers().isVolatile();
+  syn boolean ParameterDeclaration.isBlank() = true;
+  syn boolean ParameterDeclaration.isStatic() = false;
+  
+  syn String ParameterDeclaration.name() = getID();
+
+  syn boolean ParameterDeclaration.hasInit() = false;
+  syn Expr ParameterDeclaration.getInit() { throw new UnsupportedOperationException(); }
+  syn Constant ParameterDeclaration.constant() { throw new UnsupportedOperationException(); }
+
+  syn String VariableDecl.name() = getID();
+
+}
+
+aspect VariableDeclarationTransformation {
+  // when splitting a FieldDecl into multiple FieldDeclarations, provide every FieldDeclaration with a reference
+  // to the original FieldDecl; if only a single FieldDeclaration results, no reference is stored
+  private FieldDecl FieldDeclaration.fieldDecl = null;
+  public FieldDecl FieldDeclaration.getFieldDecl() {
+	  return fieldDecl;
+  }
+  public void FieldDeclaration.setFieldDecl(FieldDecl fieldDecl) {
+	  this.fieldDecl = fieldDecl;
+  }
+	
+  // FieldDecl with single VariableDecl -> FieldDeclaration
+  rewrite FieldDecl {
+    when(getNumVariableDecl() == 1)
+    to FieldDeclaration {
+      FieldDeclaration decl = getVariableDecl(0).createFieldDeclarationFrom(getModifiers(), getTypeAccess());
+      decl.setStart(start); // copy location information
+      decl.setEnd(end); // copy location information
+      return decl;
+    }
+  }
+
+  // FieldDecl with multiple VariableDecl -> FieldDeclaration+
+  rewrite FieldDecl in TypeDecl.getBodyDecl() {
+    when(getNumVariableDecl() > 1)
+    to List {
+      List varList = new List();
+      for(int j = 0; j < getNumVariableDecl(); j++) {
+        FieldDeclaration f = 
+          getVariableDecl(j).createFieldDeclarationFrom(
+            (Modifiers)getModifiers().fullCopy(),
+            (Access)getTypeAccess().fullCopy()
+          );
+        if(j == 0)
+          f.setStart(start);
+        else {
+          f.getModifiersNoTransform().clearLocations();
+          f.getTypeAccessNoTransform().clearLocations();
+        }
+        f.setFieldDecl(this);
+        varList.add(f);
+      }
+      return varList;
+    }
+  }
+
+  public void ASTNode.clearLocations() {
+    setStart(0);
+    setEnd(0);
+    for(int i = 0; i < getNumChildNoTransform(); i++)
+      getChildNoTransform(i).clearLocations();
+  }
+     
+
+  // VarDeclStmt with single VariableDecl -> VariableDeclaration
+  rewrite VarDeclStmt {
+    when(getNumVariableDecl() == 1)
+    to VariableDeclaration {
+      VariableDeclaration decl = getVariableDecl(0).createVariableDeclarationFrom(getModifiers(), getTypeAccess());
+      decl.setStart(start); // copy location information
+      decl.setEnd(end); // copy location information
+      return decl;
+    }
+  }
+
+  // VarDeclStmt with multiple VariableDecl -> VariableDeclaration+
+  rewrite VarDeclStmt in Block.getStmt() {
+    when(getNumVariableDecl() > 1)
+    to List createVariableDeclarationList();
+  }
+  rewrite VarDeclStmt in ForStmt.getInitStmt() {
+    when(getNumVariableDecl() > 1)
+    to List createVariableDeclarationList();
+  }
+
+  private List VarDeclStmt.createVariableDeclarationList() {
+    List varList = new List();
+    for(int j = 0; j < getNumVariableDecl(); j++) {
+      VariableDeclaration v =
+        getVariableDecl(j).createVariableDeclarationFrom(
+          (Modifiers)getModifiers().fullCopy(),
+          (Access)getTypeAccess().fullCopy()
+        );
+      if(j == 0)
+        v.setStart(start);
+      else {
+        v.getModifiersNoTransform().clearLocations();
+        v.getTypeAccessNoTransform().clearLocations();
+      }
+      varList.add(v);
+    }
+    return varList;
+  }
+
+  public VariableDeclaration VariableDecl.createVariableDeclarationFrom(Modifiers modifiers, Access type) {
+    VariableDeclaration decl = new VariableDeclaration(
+      modifiers,
+      type.addArrayDims(getDimsList()),
+      getID(),
+      getInitOpt()
+    );
+    decl.setStart(start); // copy location information
+    decl.setEnd(end); // copy location information
+    decl.IDstart = IDstart;
+    decl.IDend = IDend;
+    return decl;
+  }
+
+  public FieldDeclaration VariableDecl.createFieldDeclarationFrom(Modifiers modifiers, Access type) {
+    FieldDeclaration decl = new FieldDeclaration(
+      modifiers,
+      type.addArrayDims(getDimsList()),
+      getID(),
+      getInitOpt()
+    );
+    decl.setStart(start); // copy location information
+    decl.setEnd(end); // copy location information
+    decl.IDstart = IDstart;
+    decl.IDend = IDend;
+    return decl;
+  }
+}

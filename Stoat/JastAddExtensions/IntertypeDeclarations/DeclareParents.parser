@@ -1,0 +1,7 @@
+BodyDecl aspect_body_declaration =
+    DECLARE PARENTS COLON interface_type.a EXTENDS interface_type_list.b SEMICOLON
+    {: return new DeclareParentsExtends(a,b); :}
+  | DECLARE PARENTS COLON interface_type.a IMPLEMENTS interface_type_list.b SEMICOLON
+    {: return new DeclareParentsImplements(a,b); :}
+  ;
+

@@ -1,0 +1,964 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect Expressions {
+  public soot.Value Expr.eval(Body b) {
+    throw new Error("Operation eval not supported for " + getClass().getName());
+  }
+
+  public soot.Value ParExpr.eval(Body b) { return getExpr().eval(b); }
+
+  public soot.Value IntegerLiteral.eval(Body b) {
+    return IntType.emitConstant(constant().intValue());
+  }
+  public soot.Value CharacterLiteral.eval(Body b) {
+    return IntType.emitConstant(constant().intValue());
+  }
+  public soot.Value LongLiteral.eval(Body b) {
+    return soot.jimple.LongConstant.v(constant().longValue());
+  }
+  public soot.Value FloatingPointLiteral.eval(Body b) {
+    return soot.jimple.FloatConstant.v(constant().floatValue());
+  }
+  public soot.Value DoubleLiteral.eval(Body b) {
+    return soot.jimple.DoubleConstant.v(constant().doubleValue());
+  }
+  public soot.Value StringLiteral.eval(Body b) {
+    return soot.jimple.StringConstant.v(getLITERAL());
+  }
+  public soot.Value NullLiteral.eval(Body b) {
+    return soot.jimple.NullConstant.v();
+  }
+  public soot.Value BooleanLiteral.eval(Body b) {
+    return BooleanType.emitConstant(constant().booleanValue());
+  }
+
+  public static soot.Value IntType.emitConstant(int i) {
+    return IntConstant.v(i);
+  }
+  public static soot.Value BooleanType.emitConstant(boolean b) {
+    return soot.jimple.IntConstant.v(b ? 1 : 0);
+  }
+
+  // simple assign expression
+  public soot.Value AssignSimpleExpr.eval(Body b) {
+    Value lvalue = getDest().eval(b);
+    Value rvalue = asRValue(b,
+      getSource().type().emitCastTo(b, // Assign conversion
+        getSource(),
+        getDest().type()
+      )
+    );
+    return getDest().emitStore(b, lvalue, asImmediate(b, rvalue), this);
+  }
+
+  // compound assign expression
+  public soot.Value AssignExpr.eval(Body b) {
+    TypeDecl dest = getDest().type();
+    TypeDecl source = getSource().type();
+    TypeDecl type;
+    if(dest.isNumericType() && source.isNumericType())
+      type = dest.binaryNumericPromotion(source);
+    else 
+      type = dest;
+    Value lvalue = getDest().eval(b);
+    Value v = lvalue instanceof Local ? lvalue : (Value)lvalue.clone();
+    Value value = b.newTemp(dest.emitCastTo(b, v, type, this));
+    Value rvalue = source.emitCastTo(b, getSource(), type);
+    Value result = asImmediate(b, type.emitCastTo(b,
+      createAssignOp(b, value, rvalue),
+      dest,
+      getDest()
+    ));
+    getDest().emitStore(b, lvalue, result, this);
+    return result;
+  }
+
+  // string addition assign expression
+  public soot.Value AssignPlusExpr.eval(Body b) {
+    TypeDecl dest = getDest().type();
+    TypeDecl source = getSource().type();
+    if(dest.isString()) {
+      
+      Value lvalue = getDest().eval(b);
+
+      Value v = asImmediate(b, lvalue);
+
+      // new StringBuffer(left)
+      Local local = b.newTemp(b.newNewExpr(
+        lookupType("java.lang", "StringBuffer").sootRef(), this));
+      b.setLine(this);
+      b.add(b.newInvokeStmt(
+        b.newSpecialInvokeExpr(local, 
+          Scene.v().getMethod("<java.lang.StringBuffer: void <init>(java.lang.String)>").makeRef(),
+          v,
+          this
+        ), this));
+
+      // append right
+      Local rightResult = b.newTemp(
+        b.newVirtualInvokeExpr(local,
+          lookupType("java.lang", "StringBuffer").methodWithArgs("append", new TypeDecl[] { source.stringPromotion() }).sootRef(),
+          asImmediate(b, getSource().eval(b)),
+          this
+        ));
+
+      // toString
+      Local result = b.newTemp(
+        b.newVirtualInvokeExpr(rightResult,
+          Scene.v().getMethod("<java.lang.StringBuffer: java.lang.String toString()>").makeRef(),
+          this
+        ));
+  
+      Value v2 = lvalue instanceof Local ? lvalue : (Value)lvalue.clone();
+      getDest().emitStore(b, v2, result, this);
+      return result;
+    }
+    else {
+      return super.eval(b);
+    }
+  }
+
+  // shift assign expression
+  public soot.Value AssignExpr.emitShiftExpr(Body b) {
+    TypeDecl dest = getDest().type();
+    TypeDecl source = getSource().type();
+    TypeDecl type = dest.unaryNumericPromotion();
+
+    Value lvalue = getDest().eval(b);
+    Value v = lvalue instanceof Local ? lvalue : (Value)lvalue.clone();
+    Value value = b.newTemp(dest.emitCastTo(b, v, type, getDest()));
+    Value rvalue = source.emitCastTo(b, getSource(), typeInt());
+    Value result = asImmediate(b, type.emitCastTo(b,
+      createAssignOp(b, value, rvalue),
+      dest,
+      getDest()
+    ));
+    getDest().emitStore(b, lvalue, result, this);
+    return result;
+  }
+
+  public soot.Value AssignLShiftExpr.eval(Body b) { return emitShiftExpr(b); }
+  public soot.Value AssignRShiftExpr.eval(Body b) { return emitShiftExpr(b); }
+  public soot.Value AssignURShiftExpr.eval(Body b) { return emitShiftExpr(b); }
+
+
+  // create the operation for a compound assign expression
+  public soot.Value AssignExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    throw new Error("Operation createAssignOp is not implemented for " + getClass().getName());
+  }
+  public soot.Value AssignMulExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return asImmediate(b, b.newMulExpr(asImmediate(b, fst), asImmediate(b, snd), this));
+  }
+  public soot.Value AssignDivExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newDivExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignModExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newRemExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignPlusExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newAddExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignMinusExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newSubExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignLShiftExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newShlExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignRShiftExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newShrExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignURShiftExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newUshrExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignAndExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newAndExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignXorExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newXorExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+  public soot.Value AssignOrExpr.createAssignOp(Body b, soot.Value fst, soot.Value snd) {
+    return b.newOrExpr(asImmediate(b, fst), asImmediate(b, snd), this);
+  }
+
+  public soot.Value AbstractDot.eval(Body b) {
+    return lastAccess().eval(b);
+  }
+
+  public soot.Value VarAccess.eval(Body b) {
+    Variable v = decl();
+    if(v instanceof VariableDeclaration) {
+      VariableDeclaration decl = (VariableDeclaration)v;
+      if(decl.hostType() == hostType())
+        return decl.local;
+      else
+        return emitLoadLocalInNestedClass(b, decl);
+    }
+    else if(v instanceof ParameterDeclaration) {
+      ParameterDeclaration decl = (ParameterDeclaration)v;
+      if(decl.hostType() == hostType())
+        return decl.local;
+      else
+        return emitLoadLocalInNestedClass(b, decl);
+    }
+    else if(v instanceof FieldDeclaration) {
+      FieldDeclaration f = (FieldDeclaration)v;
+      if(f.hostType().isArrayDecl() && f.name().equals("length")) {
+        return b.newLengthExpr(asImmediate(b, createLoadQualifier(b)), this);
+      }
+      if(f.isStatic()) {
+        if(isQualified() && !qualifier().isTypeAccess())
+          b.newTemp(qualifier().eval(b));
+        if(requiresAccessor()) {
+          ArrayList list = new ArrayList();
+          return b.newStaticInvokeExpr(f.createAccessor(fieldQualifierType()).sootRef(), list, this);
+        }
+        else
+          return b.newStaticFieldRef(sootRef(), this);
+      }
+      else {
+        if(requiresAccessor()) {
+          soot.Local base = base(b);
+          ArrayList list = new ArrayList();
+          list.add(base);
+          return b.newStaticInvokeExpr(f.createAccessor(fieldQualifierType()).sootRef(), list, this);
+        }
+        else {
+          soot.Local base = createLoadQualifier(b);
+          return b.newInstanceFieldRef(base, sootRef(), this);
+        }
+      }
+    }
+    else
+      return super.eval(b);
+  }
+  private SootFieldRef VarAccess.sootRef() {
+    FieldDeclaration decl = (FieldDeclaration)decl();
+    SootFieldRef ref = Scene.v().makeFieldRef(
+      fieldQualifierType().getSootClassDecl(),
+      decl.name(),
+      decl.type().getSootType(),
+      decl.isStatic()
+    );
+    return ref;
+  }
+
+
+
+  syn lazy soot.Local VarAccess.base(Body b) = asLocal(b, createLoadQualifier(b));
+
+  public soot.Value AbstractDot.emitStore(Body b, soot.Value lvalue, soot.Value rvalue, ASTNode location) {
+    return lastAccess().emitStore(b, lvalue, rvalue, location);
+  }
+  public soot.Value Expr.emitStore(Body b, soot.Value lvalue, soot.Value rvalue, ASTNode location) {
+    b.setLine(this);
+    b.add(
+      b.newAssignStmt(
+        lvalue,
+        asLocal(b, rvalue, lvalue.getType()),
+        location
+      )
+    );
+    return rvalue;
+  }
+  public soot.Value VarAccess.emitStore(Body b, soot.Value lvalue, soot.Value rvalue, ASTNode location) {
+    Variable v = decl();
+    if(v instanceof FieldDeclaration) {
+      FieldDeclaration f = (FieldDeclaration)v;
+      if(requiresAccessor()) {
+        if(f.isStatic()) {
+          ArrayList list = new ArrayList();
+          list.add(rvalue);
+          return asLocal(b, b.newStaticInvokeExpr(f.createAccessorWrite(fieldQualifierType()).sootRef(), list, location));
+        }
+        else {
+          soot.Local base = base(b);
+          ArrayList list = new ArrayList();
+          list.add(base);
+          list.add(asLocal(b, rvalue, lvalue.getType()));
+          return asLocal(b, b.newStaticInvokeExpr(f.createAccessorWrite(fieldQualifierType()).sootRef(), list, location));
+        }
+      }
+    }
+    return super.emitStore(b, lvalue, rvalue, location);
+  }
+
+  inh boolean Access.inExplicitConstructorInvocation();
+  public soot.Value Access.emitLoadLocalInNestedClass(Body b, Variable v) {
+    if(inExplicitConstructorInvocation() && enclosingBodyDecl() instanceof ConstructorDecl) {
+      ConstructorDecl c = (ConstructorDecl)enclosingBodyDecl();
+      return ((ParameterDeclaration)c.parameterDeclaration(v.name()).iterator().next()).local;
+    }
+    else {
+      return b.newInstanceFieldRef(
+        b.emitThis(hostType()),
+        Scene.v().makeFieldRef(hostType().getSootClassDecl(), "val$" + v.name(), v.type().getSootType(), false),
+        this
+        //hostType().getSootClassDecl().getField("val$" + v.name(), v.type().getSootType()).makeRef()
+      );
+    }
+  }
+  public soot.Local VarAccess.createLoadQualifier(Body b) {
+    Variable v = decl();
+    if(v instanceof FieldDeclaration) {
+      FieldDeclaration f = (FieldDeclaration)v;
+      if(hasPrevExpr()) {
+        // load explicit qualifier
+        Local qualifier = asLocal(b, prevExpr().eval(b));
+        // pop qualifier stack element for class variables
+        // this qualifier must be computed to ensure side effects
+        return qualifier;
+      }
+      else if(f.isInstanceVariable()) {
+        return emitThis(b, fieldQualifierType());
+      }
+    }
+    throw new Error("createLoadQualifier not supported for " + v.getClass().getName());
+  }
+
+
+  private ArrayList MethodAccess.buildArgList(Body b) {
+    ArrayList list = new ArrayList();
+    for(int i = 0; i < getNumArg(); i++)
+      list.add(
+        asImmediate(b,
+          getArg(i).type().emitCastTo(b, // MethodInvocationConversion
+            getArg(i),
+            decl().getParameter(i).type()
+          )
+        )
+      );
+    return list;
+  }
+
+  public soot.Value MethodAccess.eval(Body b) {
+    if(!decl().isStatic() && isQualified() && prevExpr().isSuperAccess()) {
+      Local left = asLocal(b, createLoadQualifier(b));
+      ArrayList list = buildArgList(b);
+      soot.Value result;
+      if(!hostType().instanceOf(prevExpr().type())) {
+        MethodDecl m = decl().createSuperAccessor(superAccessorTarget());
+        if(methodQualifierType().isInterfaceDecl())
+          result = b.newInterfaceInvokeExpr(left, m.sootRef(), list, this);
+        else
+          result = b.newVirtualInvokeExpr(left, m.sootRef(), list, this);
+      }
+      else
+        result = b.newSpecialInvokeExpr(left, sootRef(), list, this);
+      return type().isVoid() ? result : asLocal(b, result);
+    }
+    else {
+      soot.Value result;
+      if(!decl().isStatic()) {
+        Local left = asLocal(b, createLoadQualifier(b));
+        ArrayList list = buildArgList(b);
+        if(methodQualifierType().isInterfaceDecl())
+          result = b.newInterfaceInvokeExpr(left, sootRef(), list, this);
+        else
+          result = b.newVirtualInvokeExpr(left, sootRef(), list, this);
+      }
+      else {
+        if(isQualified() && !qualifier().isTypeAccess())
+          b.newTemp(qualifier().eval(b));
+        ArrayList list = buildArgList(b);
+        result = b.newStaticInvokeExpr(sootRef(), list, this);
+      }
+      return type().isVoid() ? result : asLocal(b, result);
+    }
+  }
+
+  private SootMethodRef MethodAccess.sootRef() {
+    MethodDecl decl = decl();
+    ArrayList parameters = new ArrayList();
+    for(int i = 0; i < decl.getNumParameter(); i++)
+      parameters.add(decl.getParameter(i).type().getSootType());
+    SootMethodRef ref = Scene.v().makeMethodRef(
+      methodQualifierType().getSootClassDecl(),
+      decl.name(),
+      parameters,
+      decl.type().getSootType(),
+      decl.isStatic()
+    );
+    return ref;
+  }
+
+  private soot.Value MethodAccess.createLoadQualifier(Body b) {
+    MethodDecl m = decl();
+    if(hasPrevExpr()) {
+      // load explicit qualifier
+      soot.Value v = prevExpr().eval(b);
+      if(v ==  null)
+        throw new Error("Problems evaluating " + prevExpr().getClass().getName());
+      Local qualifier = asLocal(b, v /*prevExpr().eval(b)*/);
+      // pop qualifier stack element for class variables
+      // this qualifier must be computed to ensure side effects
+      return qualifier;
+    }
+    else if(!m.isStatic()) {
+      // load implicit this qualifier
+      return emitThis(b, methodQualifierType());
+    }
+    throw new Error("createLoadQualifier not supported for " + m.getClass().getName());
+  }
+
+  public soot.Value ArrayAccess.eval(Body b) {
+    soot.Value arrayRef = b.newTemp(prevExpr().eval(b));
+    soot.Value arrayIndex = b.newTemp(getExpr().eval(b));
+    return b.newArrayRef(
+      asLocal(b, arrayRef),
+      asImmediate(b, arrayIndex),
+      this
+    );
+  }
+
+  public soot.Value ThisAccess.eval(Body b) {
+    return emitThis(b, decl());
+  }
+  
+  public soot.Value SuperAccess.eval(Body b) {
+    return emitThis(b, decl());
+  }
+
+  // load this where hostType is the target this instance 
+  // supporting inner classes and in explicit contructor invocations
+  public soot.Local Access.emitThis(Body b, TypeDecl targetDecl) {
+    b.setLine(this);
+    if(targetDecl == hostType())
+      return b.emitThis(hostType());
+    else {
+      TypeDecl enclosing = hostType();
+      Local base;
+      if(inExplicitConstructorInvocation()) {
+        base = asLocal(b,
+          b.newParameterRef(enclosing.enclosingType().getSootType(), 0, this)
+        );
+        enclosing = enclosing.enclosing();
+      }
+      else {
+        base = b.emitThis(hostType());
+      }
+      while(enclosing != targetDecl) {
+        Local next = b.newTemp(enclosing.enclosingType().getSootType());
+        b.add(
+          b.newAssignStmt(
+            next,
+            b.newInstanceFieldRef(
+              base,
+              enclosing.getSootField("this$0", enclosing.enclosingType()).makeRef(),
+              this
+            ),
+            this
+          )
+        );
+        base = next;
+        enclosing = enclosing.enclosingType();
+      }
+      return base;
+    }
+  }
+
+  public soot.Value ConstructorAccess.eval(Body b) {
+    b.setLine(this);
+    ConstructorDecl c = decl();
+    // this
+    Local base = b.emitThis(hostType());
+  
+    int index = 0;
+    ArrayList list = new ArrayList();
+    // this$0
+    if(c.needsEnclosing())
+      list.add(asImmediate(b,
+        b.newParameterRef(hostType().enclosingType().getSootType(), index++, this)
+      ));
+    if(c.needsSuperEnclosing()) {
+      TypeDecl superClass = ((ClassDecl)hostType()).superclass();
+      list.add(asImmediate(b,
+        b.newParameterRef(superClass.enclosingType().getSootType(), index++, this)
+      ));
+    }
+    // args
+    for(int i = 0; i < getNumArg(); i++)
+      list.add(asImmediate(b, 
+         getArg(i).type().emitCastTo(b, getArg(i), c.getParameter(i).type()))); // MethodInvocationConversion
+
+    if(decl().isPrivate() && decl().hostType() != hostType()) {
+      list.add(asImmediate(b, soot.jimple.NullConstant.v()));
+      b.add(
+        b.newInvokeStmt(
+          b.newSpecialInvokeExpr(base, decl().createAccessor().sootRef(), list, this),
+          this
+        )
+      );
+      return base;
+    }
+    else {
+      return b.newSpecialInvokeExpr(base, c.sootRef(), list, this);
+    }
+  }
+
+  public soot.Value SuperConstructorAccess.eval(Body b) {
+    ConstructorDecl c = decl();
+    // this
+    Local base = b.emitThis(hostType());
+
+    int index = 0;
+    ArrayList list = new ArrayList();
+    if(c.needsEnclosing()) {
+      if(hasPrevExpr() && !prevExpr().isTypeAccess()) {
+        list.add(asImmediate(b, prevExpr().eval(b)));
+      }
+      else {
+        if(hostType().needsSuperEnclosing()) {
+          soot.Type type = ((ClassDecl)hostType()).superclass().enclosingType().getSootType();
+          if(hostType().needsEnclosing())
+            list.add(asImmediate(b, b.newParameterRef(type, 1, this)));
+          else
+            list.add(asImmediate(b, b.newParameterRef(type, 0, this)));
+        }
+        else {
+          list.add(emitThis(b, superConstructorQualifier(c.hostType().enclosingType())));
+        }
+      }
+    }
+
+    // args
+    for(int i = 0; i < getNumArg(); i++)
+      list.add(asImmediate(b, 
+         getArg(i).type().emitCastTo(b, getArg(i), c.getParameter(i).type()))); // MethodInvocationConversion
+ 
+    if(decl().isPrivate() && decl().hostType() != hostType()) {
+      list.add(asImmediate(b, soot.jimple.NullConstant.v()));
+      b.add(
+        b.newInvokeStmt(
+          b.newSpecialInvokeExpr(base, decl().createAccessor().sootRef(), list, this),
+          this
+        )
+      );
+      return base;
+    }
+    else {
+      return b.newSpecialInvokeExpr(base, c.sootRef(), list, this);
+    }
+  }
+
+  private soot.Value ClassInstanceExpr.emitLocalEnclosing(Body b, TypeDecl localClass) {
+    if(!localClass.inStaticContext()) {
+      return emitThis(b, localClass.enclosingType());
+    }
+    throw new Error("Not implemented");
+  }
+
+  private soot.Value ClassInstanceExpr.emitInnerMemberEnclosing(Body b, TypeDecl innerClass) {
+    if(hasPrevExpr()) {
+      Local base = asLocal(b, prevExpr().eval(b));
+      b.setLine(this);
+      b.add(b.newInvokeStmt(
+        b.newVirtualInvokeExpr(
+          base, 
+          Scene.v().getMethod("<java.lang.Object: java.lang.Class getClass()>").makeRef(),
+          this
+        ),
+        this
+      ));
+      return base;
+    }
+    else {
+      TypeDecl enclosing = hostType();
+      while(!enclosing.hasType(innerClass.name()))
+        enclosing = enclosing.enclosingType();
+      return emitThis(b, enclosing);
+    }
+  }
+
+  public soot.Value ClassInstanceExpr.eval(Body b) {
+    Local local = asLocal(b, b.newNewExpr(type().sootRef(), this));
+    ArrayList list = new ArrayList();
+
+     // 15.9.2 first part
+    if(type().isAnonymous()) {
+      if(type().isAnonymousInNonStaticContext()) {
+        list.add(asImmediate(b, b.emitThis(hostType())));
+      }
+      // 15.9.2 second part
+      ClassDecl C = (ClassDecl)type();
+      TypeDecl S = C.superclass();
+      if(S.isLocalClass()) {
+        if(!type().inStaticContext())
+          list.add(asImmediate(b, emitLocalEnclosing(b, S)));
+      }
+      else if(S.isInnerType()) {
+        list.add(asImmediate(b, emitInnerMemberEnclosing(b, S)));
+      }
+    }
+    else if(type().isLocalClass()) {
+      if(!type().inStaticContext())
+        list.add(asImmediate(b, emitLocalEnclosing(b, type())));
+    }
+    else if(type().isInnerType()) {
+      list.add(asImmediate(b, emitInnerMemberEnclosing(b, type())));
+    }
+
+    for(int i = 0; i < getNumArg(); i++)
+      list.add(asImmediate(b, getArg(i).type().emitCastTo(b, getArg(i), decl().getParameter(i).type()))); // MethodInvocationConversion
+  
+    if(decl().isPrivate() && type() != hostType()) {
+      list.add(asImmediate(b, soot.jimple.NullConstant.v()));
+      b.setLine(this);
+      b.add(
+        b.newInvokeStmt(
+          b.newSpecialInvokeExpr(local, decl().createAccessor().sootRef(), list, this),
+          this
+        )
+      );
+      return local;
+    }
+    else {
+      b.setLine(this);
+      b.add(
+        b.newInvokeStmt(
+          b.newSpecialInvokeExpr(local, decl().sootRef(), list, this),
+          this
+        )
+      );
+      return local;
+    }
+  }
+
+  public soot.Value ArrayCreationExpr.eval(Body b) {
+    if(hasArrayInit()) {
+      return getArrayInit().eval(b);
+    }
+    else {
+      ArrayList list = new ArrayList();
+      getTypeAccess().addArraySize(b, list);
+      if(numArrays() == 1) {
+        soot.Value size = (soot.Value)list.get(0);
+        return b.newNewArrayExpr(
+          type().componentType().getSootType(),
+          asImmediate(b, size),
+          this
+        );
+      }
+      else {
+        return b.newNewMultiArrayExpr(
+          (soot.ArrayType)type().getSootType(),
+          list,
+          this
+        );
+      }
+    }
+  }
+
+  public void Access.addArraySize(Body b, ArrayList list) {
+  }
+  public void ArrayTypeAccess.addArraySize(Body b, ArrayList list) {
+    getAccess().addArraySize(b, list);
+  }
+  public void ArrayTypeWithSizeAccess.addArraySize(Body b, ArrayList list) {
+    getAccess().addArraySize(b, list);
+    list.add(asImmediate(b, getExpr().eval(b)));
+  }
+
+  public soot.Value ArrayInit.eval(Body b) {
+    soot.Value size = IntType.emitConstant(getNumInit());
+    Local array = asLocal(b, b.newNewArrayExpr(
+      type().componentType().getSootType(),
+      asImmediate(b, size),
+      this
+    ));
+    for(int i = 0; i < getNumInit(); i++) {
+      Value rvalue = 
+        getInit(i).type().emitCastTo(b, // Assign conversion
+          getInit(i),
+          expectedType()
+        );
+      Value index = IntType.emitConstant(i);
+      Value lvalue = b.newArrayRef(array, index, getInit(i));
+      b.setLine(this);
+      b.add(b.newAssignStmt(lvalue, asImmediate(b, rvalue), getInit(i)));
+    }
+    return array;
+  }
+
+  public soot.Value Unary.eval(Body b) {
+    return super.eval(b);
+  }
+  public soot.Value MinusExpr.eval(Body b) { 
+    return b.newNegExpr(asImmediate(b, getOperand().eval(b)), this);
+  }
+  public soot.Value PlusExpr.eval(Body b) { return getOperand().eval(b); }
+  public soot.Value BitNotExpr.eval(Body b) {
+    soot.Value v = IntType.emitConstant(-1);
+    soot.Local result = asLocal(b,
+      b.newXorExpr(
+        asImmediate(b, typeInt().emitCastTo(b, v, type(), this)),
+        asImmediate(b, getOperand().eval(b)),
+        this
+      )
+    );
+    return result;
+  }
+  // See BooleanExpressions.jrag for LogNotExpr
+
+  public soot.Value CastExpr.eval(Body b) {
+    if(isConstant())
+      return emitConstant(constant());
+    soot.Value operand = getExpr().eval(b);
+    if (operand == NullConstant.v())
+        return getExpr().type().emitCastTo(b, operand, type(), this);
+    return getExpr().type().emitCastTo(b, asLocal(b, operand), type(), this);
+  }
+
+  public static soot.Value ASTNode.emitConstant(Constant constant) {
+    if(constant instanceof Constant.ConstantInt)
+      return IntType.emitConstant(constant.intValue());
+    else if(constant instanceof Constant.ConstantLong)
+      return soot.jimple.LongConstant.v(constant.longValue());
+    else if(constant instanceof Constant.ConstantFloat)
+      return soot.jimple.FloatConstant.v(constant.floatValue());
+    else if(constant instanceof Constant.ConstantDouble)
+      return soot.jimple.DoubleConstant.v(constant.doubleValue());
+    else if(constant instanceof Constant.ConstantChar)
+      return IntType.emitConstant(constant.intValue());
+    else if(constant instanceof Constant.ConstantBoolean)
+      return BooleanType.emitConstant(constant.booleanValue());
+    else if(constant instanceof Constant.ConstantString)
+      return soot.jimple.StringConstant.v(constant.stringValue());
+    throw new Error("Unexpected constant");
+  }
+
+  public soot.Value Unary.emitPostfix(Body b, int constant) {
+    soot.Value lvalue = getOperand().eval(b);
+    Value v = lvalue instanceof Local ? lvalue : (Value)lvalue.clone();
+    TypeDecl type = getOperand().type().binaryNumericPromotion(typeInt());
+    Value value = b.newTemp(getOperand().type().emitCastTo(b, v, type, getOperand()));
+    Value rvalue = typeInt().emitCastTo(b, IntType.emitConstant(constant), type, this);
+    Value sum = asRValue(b, type.emitCastTo(b,
+      b.newAddExpr(asImmediate(b, value), asImmediate(b, rvalue), this),
+      getOperand().type(),
+      this
+    ));
+    getOperand().emitStore(b, lvalue, sum, this);
+    return value;
+  }
+
+  public soot.Value PostIncExpr.eval(Body b) { return emitPostfix(b, 1); }
+  public soot.Value PostDecExpr.eval(Body b) { return emitPostfix(b, -1); }
+
+  public soot.Value Unary.emitPrefix(Body b, int constant) {
+    soot.Value lvalue = getOperand().eval(b);
+    Value v = lvalue instanceof Local ? lvalue : (Value)lvalue.clone();
+    TypeDecl type = getOperand().type().binaryNumericPromotion(typeInt());
+    Value value = getOperand().type().emitCastTo(b, v, type, getOperand());
+    Value rvalue = typeInt().emitCastTo(b, IntType.emitConstant(constant), type, this);
+    Value result = asLocal(b, type.emitCastTo(b,
+      b.newAddExpr(asImmediate(b, value), asImmediate(b, rvalue), this),
+      getOperand().type(),
+      this
+    ));
+    getOperand().emitStore(b, lvalue, result, this);
+    return result;
+  }
+
+  public soot.Value PreIncExpr.eval(Body b) { return emitPrefix(b, 1); }
+  public soot.Value PreDecExpr.eval(Body b) { return emitPrefix(b, -1); }
+
+  public soot.Value Binary.eval(Body b) {
+    return asLocal(b, emitOperation(b, 
+      getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
+        getLeftOperand(),
+        type()
+      ),
+      getRightOperand().type().emitCastTo(b, // Binary numeric promotion
+        getRightOperand(),
+        type()
+      )
+    ));
+  }
+
+  public soot.Value Binary.emitShiftExpr(Body b) {
+    return asLocal(b, emitOperation(b, 
+      getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
+        getLeftOperand(),
+        type()
+      ),
+      getRightOperand().type().emitCastTo(b,
+        getRightOperand(),
+        typeInt()
+      )
+    ));
+  }
+
+  public soot.Value LShiftExpr.eval(Body b) { return emitShiftExpr(b); }
+  public soot.Value RShiftExpr.eval(Body b) { return emitShiftExpr(b); }
+  public soot.Value URShiftExpr.eval(Body b) { return emitShiftExpr(b); }
+
+  public soot.Value Binary.emitOperation(Body b, soot.Value left, soot.Value right) {
+    throw new Error("emitOperation not implemented in " + getClass().getName());
+  }
+  public soot.Value AddExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newAddExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value SubExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newSubExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value MulExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newMulExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value DivExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newDivExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value ModExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newRemExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value LShiftExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newShlExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value RShiftExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newShrExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value URShiftExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newUshrExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value OrBitwiseExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newOrExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value AndBitwiseExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newAndExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+  public soot.Value XorBitwiseExpr.emitOperation(Body b, soot.Value left, soot.Value right) {
+    return asLocal(b, b.newXorExpr(asImmediate(b, left), asImmediate(b, right), this));
+  }
+
+  public soot.Value AddExpr.eval(Body b) {
+    if(type().isString() && isConstant())
+      return soot.jimple.StringConstant.v(constant().stringValue());
+    if(isStringAdd()) {
+      Local v;
+      if(firstStringAddPart()) {
+        // new StringBuffer
+        v = b.newTemp(b.newNewExpr(
+          lookupType("java.lang", "StringBuffer").sootRef(), this));
+        b.setLine(this);
+        b.add(b.newInvokeStmt(
+          b.newSpecialInvokeExpr(v, 
+          Scene.v().getMethod("<java.lang.StringBuffer: void <init>()>").makeRef(),
+          this
+        ), this));
+        b.setLine(this);
+        b.add(b.newInvokeStmt(
+          b.newVirtualInvokeExpr(v,
+            lookupType("java.lang", "StringBuffer").methodWithArgs("append", new TypeDecl[] { getLeftOperand().type().stringPromotion() }).sootRef(),
+            asImmediate(b, getLeftOperand().eval(b)),
+            this
+          ), this));
+      }
+      else
+        v = (Local)getLeftOperand().eval(b);
+      // append
+      b.setLine(this);
+      b.add(b.newInvokeStmt(
+        b.newVirtualInvokeExpr(v,
+          lookupType("java.lang", "StringBuffer").methodWithArgs("append", new TypeDecl[] { getRightOperand().type().stringPromotion() }).sootRef(),
+          asImmediate(b, getRightOperand().eval(b)),
+          this
+        ), this));
+      if(lastStringAddPart()) {
+        return b.newTemp(
+          b.newVirtualInvokeExpr(v,
+            Scene.v().getMethod("<java.lang.StringBuffer: java.lang.String toString()>").makeRef(),
+            this
+        ));
+      }
+      else
+        return v;
+    }
+    else 
+    return b.newAddExpr(
+      b.newTemp(
+        getLeftOperand().type().emitCastTo(b,  // Binary numeric promotion
+          getLeftOperand(),
+          type()
+        )
+      ),
+      asImmediate(b,
+        getRightOperand().type().emitCastTo(b, // Binary numeric promotion
+          getRightOperand(),
+          type()
+        )
+      ),
+      this
+    );
+  }
+
+  // See BooleanExpressions.jrag for the evaluation of conditionals
+
+  public soot.Value InstanceOfExpr.eval(Body b) {
+    return b.newInstanceOfExpr(
+      asImmediate(b, getExpr().eval(b)),
+      getTypeAccess().type().getSootType(),
+      this
+    );
+  }
+
+
+  public soot.Value ClassAccess.eval(Body b) {
+    if(prevExpr().type().isPrimitiveType() || prevExpr().type().isVoid()) {
+      TypeDecl typeDecl = lookupType("java.lang", prevExpr().type().primitiveClassName());
+      SimpleSet c = typeDecl.memberFields("TYPE");
+      FieldDeclaration f = (FieldDeclaration)c.iterator().next();
+      return b.newStaticFieldRef(f.sootRef(), this);
+    }
+    else {
+      FieldDeclaration f = hostType().topLevelType().createStaticClassField(prevExpr().type().referenceClassFieldName());
+      // add method to perform lookup as a side-effect
+      MethodDecl m = hostType().topLevelType().createStaticClassMethod();
+
+      soot.jimple.Stmt next_label = b.newLabel();
+      soot.jimple.Stmt end_label = b.newLabel();
+      Local result = b.newTemp(type().getSootType());
+      Local ref = asLocal(b, b.newStaticFieldRef(f.sootRef(), this));
+      b.setLine(this);
+      b.add(
+        b.newIfStmt(
+          b.newNeExpr(ref, soot.jimple.NullConstant.v(), this),
+          next_label,
+          this
+        )
+      );
+      // emit string literal
+        
+      ArrayList list = new ArrayList();
+      list.add(new StringLiteral(prevExpr().type().jvmName()).eval(b));
+      Local l = asLocal(b, b.newStaticInvokeExpr(m.sootRef(), list, this));
+      b.setLine(this);
+      b.add(b.newAssignStmt(
+        b.newStaticFieldRef(f.sootRef(), this),
+        l,
+        this
+      ));
+      b.setLine(this);
+      b.add(b.newAssignStmt(result, l, this));
+      b.add(b.newGotoStmt(end_label, this));
+      b.addLabel(next_label);
+      b.add(b.newAssignStmt(
+        result,
+        b.newStaticFieldRef(f.sootRef(), this),
+        this
+      ));
+      b.addLabel(end_label);
+      return result;
+    }
+  }
+
+
+
+
+
+}

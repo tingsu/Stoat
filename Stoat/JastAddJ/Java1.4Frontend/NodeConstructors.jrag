@@ -1,0 +1,97 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect NodeConstructors {
+  public ParameterDeclaration.ParameterDeclaration(Access type, String name) {
+    this(new Modifiers(new List()), type, name);
+  }
+  public ParameterDeclaration.ParameterDeclaration(TypeDecl type, String name) {
+    this(new Modifiers(new List()), type.createQualifiedAccess(), name);
+  }
+
+  public PackageAccess.PackageAccess(String name, int start, int end) {
+    this(name);
+    this.start = this.Packagestart = start;
+    this.end = this.Packageend = end;
+  }
+  public TypeAccess.TypeAccess(String name, int start, int end) {
+    this(name);
+    this.start = this.IDstart = start;
+    this.end = this.IDend = end;
+  }
+  public PackageOrTypeAccess.PackageOrTypeAccess(String name, int start, int end) {
+    this(name);
+    this.start = this.IDstart = start;
+    this.end = this.IDend = end;
+  }
+  public AmbiguousAccess.AmbiguousAccess(String name, int start, int end) {
+    this(name);
+    this.start = this.IDstart = start;
+    this.end = this.IDend = end;
+  }
+  public VarAccess.VarAccess(String name, int start, int end) {
+    this(name);
+    this.start = this.IDstart = start;
+    this.end = this.IDend = end;
+  }
+
+  public TypeAccess.TypeAccess(String typeName) {
+    this("", typeName);
+  }
+
+  public IntegerLiteral.IntegerLiteral(int i) {
+    this(Integer.toString(i));
+  }
+
+  public BooleanLiteral.BooleanLiteral(boolean b) {
+    this(b ? "true" : "false");
+  }
+
+  public MethodAccess.MethodAccess(String name, List args, int start, int end) {
+    this(name, args);
+    setStart(start);
+    setEnd(end);
+  }
+
+  public ReturnStmt.ReturnStmt(Expr expr) {
+    this(new Opt(expr));
+  }
+
+  public IfStmt.IfStmt(Expr cond, Stmt thenBranch) {
+    this(cond, thenBranch, new Opt());
+  }
+
+  public IfStmt.IfStmt(Expr cond, Stmt thenBranch, Stmt elseBranch) {
+    this(cond, thenBranch, new Opt(elseBranch));
+  }
+
+  public VariableDeclaration.VariableDeclaration(Access type, String name, Expr init) {
+    this(new Modifiers(new List()), type, name, new Opt(init));
+  }
+
+  public VariableDeclaration.VariableDeclaration(Access type, String name) {
+    this(new Modifiers(new List()), type, name, new Opt());
+  }
+
+  public ClassInstanceExpr.ClassInstanceExpr(Access type, List args) {
+    this(type, args, new Opt());
+  }
+
+  public FieldDeclaration.FieldDeclaration(Modifiers m, Access type, String name) {
+    this(m, type, name, new Opt());
+  }
+  
+  public FieldDeclaration.FieldDeclaration(Modifiers m, Access type, String name, Expr init) {
+    this(m, type, name, new Opt(init));
+  }
+
+  public static Stmt AssignExpr.asStmt(Expr left, Expr right) {
+    return new ExprStmt(new AssignSimpleExpr(left, right));
+  }
+}

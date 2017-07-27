@@ -1,0 +1,713 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+
+aspect Sets {
+
+// class BitSet and class SmallSet from TOBBE
+
+class BitSet {
+    protected HashMap elementMap;
+    protected ArrayList elementList;
+    public BitSet() {
+      this(new HashMap(), new ArrayList(), new int[1]);
+    }
+    protected BitSet(HashMap elementMap, ArrayList elementList, int[] bits) {
+      this.elementMap = elementMap;
+      this.elementList = elementList;
+      this.bits = bits;
+    }
+    protected BitSet(BitSet set) {
+      this(set, set.bits.length);
+    }
+    protected BitSet(BitSet set, int size) {
+      this(set.elementMap, set.elementList, new int[size]);
+      for(int i = 0; i < set.bits.length; i++)
+        bits[i] = set.bits[i];
+    }
+    protected int index(Object element) {
+      if(!elementMap.containsKey(element)) {
+        elementMap.put(element, new Integer(elementList.size()));
+        elementList.add(element);
+      }
+      return ((Integer)elementMap.get(element)).intValue();
+    }
+
+    protected Object element(int index) {
+      return elementList.get(index);
+    }
+
+    // represent set using a bit field
+    int[] bits;
+
+    // iterate over the set by searching the bit field linearly for one bits
+    // use the array to perform the reverse lookup
+    public Iterator iterator() {
+      return new Iterator() {
+        private int nextElement;
+        {
+          // make nextElement refer to the first element
+          nextElement = 0;
+          hasNext();
+        }
+        public boolean hasNext() {
+          while((nextElement >> 5) < bits.length) {   // while (nextElement / 32 < bits.length)
+            int offset = nextElement >> 5;            //   nextElement / 32
+            int bit = 1 << (nextElement & 0x1f);      //   nextElement % 32
+            if((bits[offset] & bit) == bit)           
+              return true;
+            nextElement++;
+          }
+          return false;
+        }
+        public Object next() {
+          return element(nextElement++);
+        }
+        public void remove() {
+          throw new Error("remove not supported for " + BitSet.this.getClass().getName());
+        }
+      };
+    }
+
+    public static BitSet full() { return fullSet; }
+    // override set operations when operating on the full set 
+    private static BitSet fullSet = new BitSet(null, null, null) {
+      public BitSet union(BitSet set) { return this; }
+      public BitSet union(Object element) { return this; }
+      public BitSet compl(BitSet set) { throw new Error("compl not supported for the full set"); }
+      public BitSet compl(Object element) { throw new Error("compl not supported for the full set"); }
+      public BitSet intersect(BitSet set) { return set; }
+      public boolean isEmpty() { return false; }
+    };
+
+    private BitSet convert(BitSet set) {
+      if(set.elementMap == elementMap) return set;
+      System.err.println("Warning: need to convert set");
+      BitSet newSet = new BitSet(elementMap, elementList, new int[bits.length + 1]);
+      for(Iterator iter = set.iterator(); iter.hasNext(); )
+        newSet.add(iter.next());
+      return newSet;
+    }
+
+    public BitSet union(BitSet set) {
+      set = convert(set);
+      if(set.isEmpty() || this.equals(set)) return this;
+        
+      BitSet min, max;
+      if(bits.length >= set.bits.length) {
+        max = this;
+        min = set;
+      }
+      else {
+        max = set;
+        min = this;
+      }
+      int length = min.bits.length;
+      int i = 0;
+      // search for elements in the smaller set that are missing in the larger set
+      while(i < length && (max.bits[i] & min.bits[i]) == min.bits[i])
+        i++;
+      if(i != length) {
+        // copy the larger set and store missing elements from smaller set
+        max = new BitSet(max);
+        for(; i < length; i++)
+          max.bits[i] |= min.bits[i];
+      }
+      return max;
+    }
+    
+    public BitSet union(Object element) {
+      int index = index(element);
+      int offset = index >> 5;
+      int bit = 1 << (index & 0x1f);
+      if(bits.length > offset && (bits[offset] & bit) == bit)
+        return this;
+      // copy the set and store the missing element
+      BitSet set = new BitSet(this, Math.max(offset + 1, bits.length));
+      set.bits[offset] |= bit;
+      return set;
+    }
+    
+    public BitSet compl(BitSet set) {
+      set = convert(set);
+      if(set.isEmpty()) return this;
+      // copy this
+      BitSet res = new BitSet(this);
+      int i = 0;
+      int length = Math.min(bits.length, set.bits.length);
+      // find first hit
+      while (i < length && (bits[i] & set.bits[i]) == 0) 
+        i++;
+      if (i != length) {
+        // remove 
+        for (; i < length; i++) {
+          res.bits[i] &= ~set.bits[i];
+        }	 
+      }
+      return res;
+    }
+    
+    public BitSet compl(Object element) {
+      int index = index(element);
+      int offset = index >> 5;
+      int bit = 1 << (index & 0x1f);
+      if(bits.length > offset && (bits[offset] & bit) == 0)
+        return this;
+      // copy the set and remove element
+      BitSet set = new BitSet(this, Math.max(offset + 1, bits.length));
+      set.bits[offset] &= ~bit;
+      return set;
+    }
+    
+    public BitSet intersect(BitSet set) {
+      set = convert(set);
+      if(this.equals(set) || set == fullSet)
+        return this;
+      int length = Math.min(this.bits.length, set.bits.length);
+      BitSet newSet = new BitSet(elementMap, elementList, new int[length]);
+      for(int i = 0; i < length; i++)
+        newSet.bits[i] = this.bits[i] & set.bits[i];
+      return newSet;
+    }
+
+    public boolean contains(Object o) {
+      int index = index(o);
+      int offset = index >> 5;
+      int bit = 1 << (index & 0x1f);
+      return offset < bits.length && (bits[offset] & bit) != 0;
+    }
+
+    public boolean equals(Object o) {
+      if (o == null) return false;
+      if(this == o) return true;
+      if(o instanceof BitSet) {
+        BitSet set = (BitSet)o;
+        if(elementMap != set.elementMap)
+          return false;
+        int length = set.bits.length > bits.length ? bits.length : set.bits.length;
+        int i = 0;
+        for(; i < length; i++)
+          if(bits[i] != set.bits[i])
+            return false;
+        for(; i < bits.length; i++)
+          if(bits[i] != 0)
+            return false;
+        for(; i < set.bits.length; i++)
+          if(set.bits[i] != 0)
+            return false;
+        return true;
+      }
+      return super.equals(o);
+    }
+
+    public boolean isEmpty() {
+      for(int i = 0; i < bits.length; i++)
+        if(bits[i] != 0)
+          return false;
+      return true;
+    }
+    public void add(BitSet set) {
+      set = convert(set);
+      if(set.bits.length > bits.length) {
+        int[] newBits = new int[set.bits.length];
+        for(int i = 0; i < bits.length; i++)
+          newBits[i] = bits[i] | set.bits[i];
+        for(int i = bits.length; i < set.bits.length; i++)
+          newBits[i] = set.bits[i];
+        bits = newBits;
+      }
+      else {
+        for(int i = 0; i < set.bits.length; i++)
+          bits[i] |= set.bits[i];
+      }
+    }
+    public void add(Object o) {
+      int index = index(o);
+      int offset = index >> 5;
+      int bit = 1 << (index & 0x1f);
+      if(offset >= bits.length) {
+        int[] newBits = new int[offset+1];
+        for(int i = 0; i < bits.length; i++)
+          newBits[i] = bits[i];
+        bits = newBits;
+      }
+      bits[offset] |= bit;
+    }
+    public BitSet mutable() {
+      return new BitSet(this);
+    }
+  }
+
+  class SmallSet<T> implements Iterable<T> {
+    HashSet<T> set = new HashSet<T>();
+    public String toString() { return set.toString(); }
+    public Iterator<T> iterator() { return set.iterator(); }
+    public int size() { return set.size(); }
+    public boolean subsetOf(SmallSet<? extends T> that) {
+        for(T x : set)
+            if(!that.contains(x))
+                return false;
+        return true;
+    }
+    @SuppressWarnings("unchecked")
+    public static <T> SmallSet<T> empty() {
+      return new SmallSet<T>() {
+        public boolean equals(Object o) { return o instanceof SmallSet && ((SmallSet)o).isEmpty(); }
+        public SmallSet union(SmallSet set) { return set; }
+        public SmallSet union(Object element) { return new SmallSet().union(element); }
+        public SmallSet compl(SmallSet set) { return this; }
+        public SmallSet compl(Object element) { return this; }
+        public SmallSet intersect(SmallSet set) { return this; }
+        public boolean isEmpty() { return true; }
+        public boolean isSingleton() { return false; }
+        public void add(T t) { throw new UnsupportedOperationException("emptySet.add(T)"); }
+        public void add(SmallSet<T> x) { throw new UnsupportedOperationException("emptySet.add(SmallSet<T>)"); }
+        public int size() { return 0; }
+        public boolean subsetOf(SmallSet<? extends T> that) { return true; }
+      };
+    }
+    @SuppressWarnings("unchecked")
+    public static <T> SmallSet<T> full() { return fullSet; }
+    @SuppressWarnings("unchecked")
+    private static SmallSet fullSet = new SmallSet() {
+      public String toString() { return "full set"; }
+      public SmallSet union(SmallSet set) { return this; }
+      public SmallSet union(Object element) { return this; }
+      public SmallSet compl(SmallSet set) {
+    	  throw new Error("compl not supported for the full set");
+      }
+      public SmallSet compl(Object element) {
+        throw new Error("compl not supported for the full set");
+      }
+      public SmallSet intersect(SmallSet set) { return set; }
+      public boolean isEmpty() { return false; }
+      public boolean isSingleton() { return false; }
+      public int size() { throw new UnsupportedOperationException("fullSet.size()"); }
+      public boolean subsetOf(SmallSet that) { throw new UnsupportedOperationException("fullSet.subsetOf"); }
+    };
+
+    protected SmallSet() {
+    }
+    public SmallSet<T> union(SmallSet<T> set) {
+      if(set.isEmpty() || this.equals(set))
+        return this;
+      SmallSet<T> newSet = new SmallSet<T>();
+      newSet.set.addAll(this.set);
+      newSet.set.addAll(set.set);
+      return newSet;
+    }
+    
+    public SmallSet<T> union(T element) {
+      if(contains(element))
+        return this;
+      SmallSet<T> newSet = new SmallSet<T>();
+      newSet.set.addAll(this.set);
+      newSet.set.add(element);
+      return newSet;
+    }
+    
+    public SmallSet<T> compl(SmallSet<T> set) {
+      if(set.isEmpty())
+        return this;
+      SmallSet<T> newSet = new SmallSet<T>();
+      newSet.set.addAll(this.set);
+      newSet.set.removeAll(set.set);
+      return newSet;
+    }
+    
+    public SmallSet<T> compl(Object element) {
+      if(!set.contains(element))
+        return this;
+      SmallSet<T> newSet = new SmallSet<T>();
+      newSet.set.addAll(this.set);
+      newSet.set.remove(element);
+      return newSet;
+    }
+
+    public SmallSet<T> intersect(SmallSet<T> set) {
+      if(this.equals(set) || set == fullSet)
+        return this;
+      SmallSet<T> newSet = new SmallSet<T>();
+      newSet.set.addAll(this.set);
+      newSet.set.retainAll(set.set);
+      return newSet;
+    }
+
+    public boolean contains(Object o) {
+      return set.contains(o);
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean equals(Object o) {
+      if (o == null) return false;
+      if(this == o) return true;
+      if(o instanceof SmallSet) {
+        SmallSet<T> set = (SmallSet)o;
+        return this.set.equals(set.set);
+      }
+      return super.equals(o);
+    }
+
+    public boolean isEmpty() {
+      return set.isEmpty();
+    }
+    public boolean isSingleton() {
+      return set.size() == 1;
+    }
+    public void add(SmallSet<T> set) {
+      this.set.addAll(set.set);
+    }
+    public void add(T o) {
+      this.set.add(o);
+    }
+    public static <T> SmallSet<T> mutable() {
+      return new SmallSet<T>();
+    }
+    public static <T> SmallSet<T> singleton(T elt) {
+      SmallSet<T> res = new SmallSet<T>();
+      res.add(elt);
+      return res;
+    }
+  }
+
+
+
+// class Set from Old impl EMMA/TOBBE
+
+class Set {
+    // map each element to an integer
+    // perform lookup using a map and reverse lookup using an array
+	
+    protected static HashMap elementMap = new HashMap();
+    protected static ArrayList elementList = new ArrayList();
+    
+    protected static int index(Object element) {
+      if(!elementMap.containsKey(element)) {
+        elementMap.put(element, new Integer(elementList.size()));
+        elementList.add(element);
+      }
+      return ((Integer)elementMap.get(element)).intValue();
+    }
+    
+    protected static Object element(int index) {
+      return elementList.get(index);
+    }
+
+    // represent set using a bit field
+    int[] bits;
+
+    // iterate over the set by searching the bit field linearly for one bits
+    // use the array to perform the reverse lookup
+    public Iterator iterator() {
+      return new Iterator() {
+        private int nextElement;
+        {
+          // make nextElement refer to the first element
+          nextElement = 0;
+          hasNext();
+        }
+        public boolean hasNext() {
+          while((nextElement >> 5) < bits.length) {   // while (nextElement / 32 < bits.length)
+            int offset = nextElement >> 5;            //   nextElement / 32
+            int bit = 1 << (nextElement & 0x1f);      //   nextElement % 32
+            if((bits[offset] & bit) == bit)           
+              return true;
+            nextElement++;
+          }
+          return false;
+        }
+        public Object next() {
+          return element(nextElement++);
+        }
+        public void remove() {
+          throw new Error("remove not supported for " + Set.this.getClass().getName());
+        }
+      };
+    }
+
+ 	// Measurements
+
+	private static int nbrOfCreatedSets = 0;
+	public static int getNbrOfCreatedSets() { return nbrOfCreatedSets; }
+
+	private static int nbrOfUnion = 0;
+	public static int getNbrOfUnion() { return nbrOfUnion; }
+
+    private static int nbrOfCompl = 0;
+	public static int getNbrOfCompl() { return nbrOfCompl; }
+
+
+    // the empty set
+    public static Set empty() {
+      return emptySet;
+    }
+    // override set operations when operating on the empty set 
+    private static Set emptySet = new Set(0) {
+      public Set union(Set set) {
+		  nbrOfUnion++;
+
+        return set;
+      }
+      public Set union(Object element) {
+		  nbrOfUnion++;
+
+        int index = index(element);
+        int offset = index >>> 5;           // index / 32
+        int bit = 1 << (index & 0x1f);     // index % 32
+        Set set = new Set(offset + 1);
+        set.bits[offset] = bit;
+        return set;
+      }
+      public Set compl(Set set) {
+	
+		nbrOfCompl++;
+
+        return this;
+      }
+      public Set compl(Object element) {
+
+		nbrOfCompl++;
+
+        return this;
+      }
+      public Set intersect(Set set) {
+        return this;
+      }
+      public boolean isEmpty() {
+        return true;
+      }
+    };
+    
+    // the full set
+    public static Set full() {
+      return fullSet;
+    }
+    // override set operations when operating on the full set 
+    private static Set fullSet = new Set(0) {
+      public Set union(Set set) {
+
+		nbrOfUnion++;
+
+        return this;
+      }
+      public Set union(Object element) {
+
+     	nbrOfUnion++;
+
+        return this;
+      }
+      public Set compl(Set set) {
+    	  throw new Error("compl not supported for the full set");
+       }
+      public Set compl(Object element) {
+        throw new Error("compl not supported for the full set");
+      }
+      public Set intersect(Set set) {
+        return set;
+      }
+      public boolean isEmpty() {
+        return false;
+      }
+    };
+
+    // create a new set containing at most size * 32 elements
+    protected Set(int size) {
+		nbrOfCreatedSets++;
+      bits = new int[size];
+    }
+    // create a new set containing at most size * 32 elements and copy elements from set
+    protected Set(Set set, int size) {
+      this(size);
+      for(int i = 0; i < set.bits.length; i++)
+        bits[i] = set.bits[i];
+    }
+    // create a copy of set
+    protected Set(Set set) {
+      this(set, set.bits.length);
+    }
+
+    public Set union(Set set) {
+
+      nbrOfUnion++;
+
+      Set min, max;
+      if(bits.length >= set.bits.length) {
+        max = this;
+        min = set;
+      }
+      else {
+        max = set;
+        min = this;
+      }
+      int length = min.bits.length;
+      int i = 0;
+      // search for elements in the smaller set that are missing in the larger set
+      while(i < length && (max.bits[i] & min.bits[i]) == min.bits[i])
+        i++;
+      if(i != length) {
+        // copy the larger set and store missing elements from smaller set
+        max = new Set(max);
+        for(; i < length; i++)
+          max.bits[i] |= min.bits[i];
+      }
+      return max;
+    }
+    
+    public Set union(Object element) {
+
+ 		nbrOfUnion++;
+
+      int index = index(element);
+      int offset = index >> 5;
+      int bit = 1 << (index & 0x1f);
+      if(bits.length > offset && (bits[offset] & bit) == bit)
+        return this;
+      // copy the set and store the missing element
+      Set set = new Set(this, Math.max(offset + 1, bits.length));
+      set.bits[offset] |= bit;
+      return set;
+    }
+    
+    public Set compl(Set set) {
+
+      nbrOfCompl++;
+
+	  // copy this
+	  Set res = new Set(this);
+	  int i = 0;
+	  int length = Math.min(bits.length, set.bits.length);
+	  // find first hit
+	  while (i < length && (bits[i] & set.bits[i]) == 0) 
+		  i++;
+	  if (i != length) {
+		 // remove 
+		 for (; i < length; i++) {
+			res.bits[i] &= ~set.bits[i];
+		 }	 
+	  }
+	  return res;
+    }
+    
+    public Set compl(Object element) {
+
+		nbrOfCompl++;
+
+      int index = index(element);
+      int offset = index >> 5;
+      int bit = 1 << (index & 0x1f);
+      if(bits.length > offset && (bits[offset] & bit) == 0)
+        return this;
+      // copy the set and remove element
+      Set set = new Set(this, Math.max(offset + 1, bits.length));
+      set.bits[offset] &= ~bit;
+      return set;
+    }
+    
+    public Set intersect(Set set) {
+      if(this.equals(set))
+        return this;
+      if(set == fullSet) return this;
+      int length = Math.max(this.bits.length, set.bits.length);
+      Set newSet = new Set(length);
+      for(int i = 0; i < length; i++)
+        newSet.bits[i] = this.bits[i] & set.bits[i];
+      return newSet;
+    }
+
+    public boolean contains(Object o) {
+      int index = index(o);
+      int offset = index >> 5;
+      int bit = 1 << (index & 0x1f);
+      return offset < bits.length && (bits[offset] & bit) != 0;
+    }
+
+    public boolean equals(Object o) {
+      if (o == null) return false;
+      if(this == o) return true;
+      if(o instanceof Set) {
+        Set set = (Set)o;
+        int length = set.bits.length > bits.length ? bits.length : set.bits.length;
+        int i = 0;
+        for(; i < length; i++)
+          if(bits[i] != set.bits[i])
+            return false;
+        for(; i < bits.length; i++)
+          if(bits[i] != 0)
+            return false;
+        for(; i < set.bits.length; i++)
+          if(set.bits[i] != 0)
+            return false;
+        return true;
+      }
+      return super.equals(o);
+    }
+
+    public boolean isEmpty() {
+      for(int i = 0; i < bits.length; i++)
+        if(bits[i] != 0)
+          return false;
+      return true;
+    }
+  }
+
+ class MutableSet extends Set {
+
+    private static int nbrOfCreatedSets = 0;
+	public static int getNbrOfCreatedSets() { return nbrOfCreatedSets; }
+
+	private static int nbrOfAdd = 0;
+	public static int getNbrOfAdd() { return nbrOfAdd; }
+
+	protected MutableSet(int size) {
+		super(size);
+		nbrOfCreatedSets++;
+	}
+
+	public void add(Object element) {
+
+		nbrOfAdd++;
+
+		int index = index(element);
+		int offset = index >> 5;
+		int bit = 1 << (index & 0x1f);
+		if (bits.length > offset && (bits[offset] & bit) == bit) {
+			return;
+		}
+		// Copy if needed
+		if (offset >= bits.length) {
+			int[] newBits = new int[offset + 1];
+			for (int i = 0; i < bits.length; i++) {
+				newBits[i] = bits[i];
+			}
+			bits = newBits;
+		}
+		bits[offset] |= bit;
+	}
+
+	public void add(Set set) {
+
+		nbrOfAdd++;
+
+		if (set.bits.length > bits.length) {
+			int[] newBits = new int[set.bits.length];
+			for(int i = 0; i < bits.length; i++) {
+				newBits[i] = bits[i];
+ 			}
+			bits = newBits;         
+		}
+		int i = 0;
+		while (i < set.bits.length && (bits[i] & set.bits[i]) == set.bits[i]) { 
+			i++;
+		}
+		if (i != bits.length) {
+			for(; i < set.bits.length; i++)
+				bits[i] |= set.bits[i];			
+		}
+	}
+	
+    public static MutableSet empty() {
+      return new MutableSet(0);
+    }
+  }
+}

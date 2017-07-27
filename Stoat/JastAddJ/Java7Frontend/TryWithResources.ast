@@ -1,0 +1,16 @@
+/**
+ * The JSR 334 try with resources statement.
+ */
+TryWithResources : TryStmt ::= Resource:ResourceDeclaration* Block CatchClause* [Finally:Block];
+
+/**
+ * A resource declaration in a try with resources statement.
+ */
+ResourceDeclaration : VariableDeclaration;
+
+/**
+ * Subclass of Modifiers for resource declarations.
+ * This subclass is added as a convenient method of making resource
+ * declarations implicitly final.
+ */
+ResourceModifiers : Modifiers;

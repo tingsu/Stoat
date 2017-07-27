@@ -1,0 +1,168 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect DataStructures {
+  // A persistent Set
+  interface SimpleSet {
+    int size();
+    boolean isEmpty();
+    SimpleSet add(Object o);
+    Iterator iterator();
+    boolean contains(Object o);
+    boolean isSingleton();
+    boolean isSingleton(Object o);
+    SimpleSet emptySet = new SimpleSet() {
+      public int size() { return 0; }
+      public boolean isEmpty() { return true; }
+      public SimpleSet add(Object o) {
+        if(o instanceof SimpleSet)
+          return (SimpleSet)o;
+        return new SimpleSetImpl().add(o);
+      }
+      public boolean contains(Object o) { return false; }
+      public Iterator iterator() { return Collections.EMPTY_LIST.iterator(); }
+      public boolean isSingleton() { return false; }
+      public boolean isSingleton(Object o) { return false; }
+    };
+    SimpleSet fullSet = new SimpleSet() {
+      public int size() { throw new Error("Operation size not supported on the full set"); }
+      public boolean isEmpty() { return false; }
+      public SimpleSet add(Object o) { return this; }
+      public boolean contains(Object o) { return true; }
+      public Iterator iterator() { throw new Error("Operation iterator not support on the full set"); }
+      public boolean isSingleton() { return false; }
+      public boolean isSingleton(Object o) { return false; }
+    };
+    class SimpleSetImpl implements SimpleSet {
+      private HashSet internalSet;
+      public SimpleSetImpl() {
+        internalSet = new HashSet(4);
+      }
+      public SimpleSetImpl(java.util.Collection c) {
+        internalSet = new HashSet(c.size());
+	internalSet.addAll(c);
+      }
+      private SimpleSetImpl(SimpleSetImpl set) {
+        this.internalSet = new HashSet(set.internalSet);
+      }
+      public int size() {
+        return internalSet.size();
+      }
+      public boolean isEmpty() {
+        return internalSet.isEmpty();
+      }
+      public SimpleSet add(Object o) {
+        if(internalSet.contains(o)) return this;
+        SimpleSetImpl set = new SimpleSetImpl(this);
+        set.internalSet.add(o);
+        return set;
+      }
+      public Iterator iterator() {
+        return internalSet.iterator();
+      }
+      public boolean contains(Object o) {
+        return internalSet.contains(o);
+      }
+      public boolean isSingleton() { return internalSet.size() == 1; }
+      public boolean isSingleton(Object o) { return isSingleton() && contains(o); }
+    }
+  }
+
+  // FieldDeclaration is a SimpleSet
+  FieldDeclaration implements SimpleSet;
+  syn int FieldDeclaration.size() = 1;
+  syn boolean FieldDeclaration.isEmpty() = false;
+  public SimpleSet FieldDeclaration.add(Object o) {
+    return new SimpleSetImpl().add(this).add(o);
+  }
+  syn boolean FieldDeclaration.contains(Object o) = this == o;
+  public boolean FieldDeclaration.isSingleton() { return true; }
+  public boolean FieldDeclaration.isSingleton(Object o) { return contains(o); }
+  
+  FieldDeclaration implements Iterator;
+  private FieldDeclaration FieldDeclaration.iterElem;
+  public Iterator FieldDeclaration.iterator() { iterElem = this; return this; }
+  public boolean FieldDeclaration.hasNext() { return iterElem != null; }
+  public Object FieldDeclaration.next() { Object o = iterElem; iterElem = null; return o; }
+  public void FieldDeclaration.remove() { throw new UnsupportedOperationException(); }
+
+  // VariableDeclaration is a SimpleSet
+  VariableDeclaration implements SimpleSet;
+  syn int VariableDeclaration.size() = 1;
+  syn boolean VariableDeclaration.isEmpty() = false;
+  public SimpleSet VariableDeclaration.add(Object o) {
+    return new SimpleSetImpl().add(this).add(o);
+  }
+  syn boolean VariableDeclaration.contains(Object o) = this == o;
+  public boolean VariableDeclaration.isSingleton() { return true; }
+  public boolean VariableDeclaration.isSingleton(Object o) { return contains(o); }
+  
+  VariableDeclaration implements Iterator;
+  private VariableDeclaration VariableDeclaration.iterElem;
+  public Iterator VariableDeclaration.iterator() { iterElem = this; return this; }
+  public boolean VariableDeclaration.hasNext() { return iterElem != null; }
+  public Object VariableDeclaration.next() { Object o = iterElem; iterElem = null; return o; }
+  public void VariableDeclaration.remove() { throw new UnsupportedOperationException(); }
+  
+  // ParameterDeclaration is a SimpleSet
+  ParameterDeclaration implements SimpleSet;
+  syn int ParameterDeclaration.size() = 1;
+  syn boolean ParameterDeclaration.isEmpty() = false;
+  public SimpleSet ParameterDeclaration.add(Object o) {
+    return new SimpleSetImpl().add(this).add(o);
+  }
+  syn boolean ParameterDeclaration.contains(Object o) = this == o;
+  public boolean ParameterDeclaration.isSingleton() { return true; }
+  public boolean ParameterDeclaration.isSingleton(Object o) { return contains(o); }
+  
+  ParameterDeclaration implements Iterator;
+  private ParameterDeclaration ParameterDeclaration.iterElem;
+  public Iterator ParameterDeclaration.iterator() { iterElem = this; return this; }
+  public boolean ParameterDeclaration.hasNext() { return iterElem != null; }
+  public Object ParameterDeclaration.next() { Object o = iterElem; iterElem = null; return o; }
+  public void ParameterDeclaration.remove() { throw new UnsupportedOperationException(); }
+
+
+  // TypeDecl is a SimpleSet
+  TypeDecl implements SimpleSet;
+  syn int TypeDecl.size() = 1;
+  syn boolean TypeDecl.isEmpty() = false;
+  public SimpleSet TypeDecl.add(Object o) {
+    return new SimpleSetImpl().add(this).add(o);
+  }
+  syn boolean TypeDecl.contains(Object o) = this == o;
+  public boolean TypeDecl.isSingleton() { return true; }
+  public boolean TypeDecl.isSingleton(Object o) { return contains(o); }
+
+  TypeDecl implements Iterator;
+  private TypeDecl TypeDecl.iterElem;
+  public Iterator TypeDecl.iterator() { iterElem = this; return this; }
+  public boolean TypeDecl.hasNext() { return iterElem != null; }
+  public Object TypeDecl.next() { Object o = iterElem; iterElem = null; return o; }
+  public void TypeDecl.remove() { throw new UnsupportedOperationException(); }
+  
+  // MethodDecl is a SimpleSet
+  MethodDecl implements SimpleSet;
+  syn int MethodDecl.size() = 1;
+  syn boolean MethodDecl.isEmpty() = false;
+  public SimpleSet MethodDecl.add(Object o) {
+    return new SimpleSetImpl().add(this).add(o);
+  }
+  syn boolean MethodDecl.contains(Object o) = this == o;
+  public boolean MethodDecl.isSingleton() { return true; }
+  public boolean MethodDecl.isSingleton(Object o) { return contains(o); }
+
+  MethodDecl implements Iterator;
+  private MethodDecl MethodDecl.iterElem;
+  public Iterator MethodDecl.iterator() { iterElem = this; return this; }
+  public boolean MethodDecl.hasNext() { return iterElem != null; }
+  public Object MethodDecl.next() { Object o = iterElem; iterElem = null; return o; }
+  public void MethodDecl.remove() { throw new UnsupportedOperationException(); }
+
+}

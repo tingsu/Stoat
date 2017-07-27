@@ -1,0 +1,594 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+
+aspect TypeCheck {
+  public void ASTNode.typeCheck() {
+  }
+  
+  syn boolean Expr.isVariable() = false;
+  eq AbstractDot.isVariable() = lastAccess().isVariable();
+  eq VarAccess.isVariable() = true;
+  eq ArrayAccess.isVariable() = true;
+  eq ParExpr.isVariable() = getExpr().isVariable();
+ 
+  // 5.2
+  public void VariableDeclaration.typeCheck() {
+    if(hasInit()) {
+      TypeDecl source = getInit().type();
+      TypeDecl dest = type();
+      if(!source.assignConversionTo(dest, getInit()))
+        error("can not assign variable " + name() + " of type " + dest.typeName() +
+              " a value of type " + source.typeName());
+    }
+  }
+
+  // 5.2
+  public void FieldDeclaration.typeCheck() {
+    if(hasInit()) {
+      TypeDecl source = getInit().type();
+      TypeDecl dest = type();
+      if(!source.assignConversionTo(dest, getInit()))
+        error("can not assign field " + name() + " of type " + dest.typeName() +
+              " a value of type " + source.typeName());
+    }
+  }
+
+  // 5.2 Assignment Conversion
+  public void AssignSimpleExpr.typeCheck() {
+    if(!getDest().isVariable())
+      error("left hand side is not a variable");
+    else if(!sourceType().assignConversionTo(getDest().type(), getSource()) && !sourceType().isUnknown())
+      error("can not assign " + getDest() + " of type " + getDest().type().typeName() +
+            " a value of type " + sourceType().typeName());
+  }
+  
+  public void AssignExpr.typeCheck() {
+    if(!getDest().isVariable())
+      error("left hand side is not a variable");
+    else {
+      TypeDecl source = sourceType();
+      TypeDecl dest = getDest().type();
+      if(getSource().type().isPrimitive() && getDest().type().isPrimitive())
+        return;
+      error("can not assign " + getDest() + " of type " + getDest().type().typeName() +
+            " a value of type " + sourceType().typeName());
+    }
+  }
+
+  public void AssignMultiplicativeExpr.typeCheck() {
+    if(sourceType().isBoolean() || getDest().type().isBoolean())
+      error("Multiplicative operators do not operate on boolean types");
+    super.typeCheck();
+  }
+  
+  public void AssignPlusExpr.typeCheck() {
+    if(!getDest().isVariable())
+      error("left hand side is not a variable");
+    else if(getSource().type().isUnknown() || getDest().type().isUnknown())
+      return;
+    else if(getDest().type().isString() && !(getSource().type().isVoid()))
+      return;
+    else if(getSource().type().isBoolean() || getDest().type().isBoolean())
+      error("Operator + does not operate on boolean types");
+    else if(getSource().type().isPrimitive() && getDest().type().isPrimitive())
+      return;
+    else
+      error("can not assign " + getDest() + " of type " + getDest().type().typeName() +
+            " a value of type " + sourceType().typeName());
+  }
+  public void AssignMinusExpr.typeCheck() {
+    if(sourceType().isBoolean() || getDest().type().isBoolean())
+      error("Operator - does not operate on boolean types");
+    super.typeCheck();
+  }
+  
+  public void AssignShiftExpr.typeCheck() {
+    if(!sourceType().isIntegralType() || !getDest().type().isIntegralType())
+      error("Shift operators only operate on integral types");
+    super.typeCheck();
+  }
+  
+  public void AssignBitwiseExpr.typeCheck() {
+    TypeDecl source = sourceType();
+    TypeDecl dest = getDest().type();
+    if(source.isIntegralType() && dest.isIntegralType())
+      super.typeCheck();
+    else if(source.isBoolean() && dest.isBoolean())
+      super.typeCheck();
+    else
+      error("Operator only operates on integral and boolean types");
+  }
+
+  syn TypeDecl AssignExpr.sourceType() = getSource().type().isPrimitive() ? getSource().type() : unknownType();
+  
+  eq AssignPlusExpr.sourceType() {
+    TypeDecl left = getDest().type();
+    TypeDecl right = getSource().type();
+    if(!left.isString() && !right.isString())
+      return super.sourceType();
+    if(left.isVoid() || right.isVoid())
+      return unknownType();
+    return left.isString() ? left : right;
+  }
+  
+  syn TypeDecl AssignSimpleExpr.sourceType() = getSource().type();
+
+  // 5.3 Method Invocation Conversion
+  public void MethodAccess.typeCheck() {
+    for(int i = 0; i < decl().getNumParameter(); i++) {
+      TypeDecl exprType = getArg(i).type();
+      TypeDecl parmType = decl().getParameter(i).type();
+      if(!exprType.methodInvocationConversionTo(parmType) && !exprType.isUnknown() && !parmType.isUnknown()) {
+        error("The type " + exprType.typeName() + " of expr " +
+            getArg(i) + " is not compatible with the method parameter " +
+            decl().getParameter(i));
+      }
+    }
+  }
+          
+  // 15.13
+  public void ArrayAccess.typeCheck() {
+    if(isQualified() && !qualifier().type().isArrayDecl() && !qualifier().type().isUnknown())
+      error("the type " + qualifier().type().name() + " of the indexed element is not an array");
+    if(!getExpr().type().unaryNumericPromotion().isInt() || !getExpr().type().isIntegralType())
+      error("array index must be int after unary numeric promotion which " + getExpr().type().typeName() + " is not");
+  }
+
+  public void ArrayInit.typeCheck() {
+    TypeDecl initializerType = declType().componentType();
+    if(initializerType.isUnknown())
+      error("the dimension of the initializer is larger than the expected dimension");
+    for(int i = 0; i < getNumInit(); i++) {
+      Expr e = getInit(i);
+      if(!e.type().assignConversionTo(initializerType, e))
+        error("the type " + e.type().name() + " of the initializer is not compatible with " + initializerType.name()); 
+    }
+  }
+
+  // 15.17
+  public void MultiplicativeExpr.typeCheck() {
+    if(!getLeftOperand().type().isNumericType())
+      error(getLeftOperand().type().typeName() + " is not numeric");
+    if(!getRightOperand().type().isNumericType())
+      error(getRightOperand().type().typeName() + " is not numeric");
+  }
+
+  // 15.18
+  public void AdditiveExpr.typeCheck() {
+    if(!getLeftOperand().type().isNumericType())
+      error(getLeftOperand().type().typeName() + " is not numeric");
+    if(!getRightOperand().type().isNumericType())
+      error(getRightOperand().type().typeName() + " is not numeric");
+  }
+  
+  // 15.18
+  public void AddExpr.typeCheck() {
+    TypeDecl left = getLeftOperand().type();
+    TypeDecl right = getRightOperand().type();
+    if(!left.isString() && !right.isString())
+      super.typeCheck();
+    else if(left.isVoid())
+      error("The type void of the left hand side is not numeric");
+    else if(right.isVoid())
+      error("The type void of the right hand side is not numeric");
+  }     
+
+  // 15.19
+  public void ShiftExpr.typeCheck() {
+    if(!getLeftOperand().type().isIntegralType())
+      error(getLeftOperand().type().typeName() + " is not integral");
+    if(!getRightOperand().type().isIntegralType())
+      error(getRightOperand().type().typeName() + " is not integral");
+  }
+  
+  // 15.22
+  public void BitwiseExpr.typeCheck() {
+    TypeDecl left = getLeftOperand().type();
+    TypeDecl right = getRightOperand().type();
+    if(left.isIntegralType() && right.isIntegralType())
+      return;
+    else if(left.isBoolean() && right.isBoolean())
+      return;
+    else
+      error(left.typeName() + " is not compatible with " + right.typeName());
+  }
+
+  // 15.20
+  public void RelationalExpr.typeCheck() {
+    if(!getLeftOperand().type().isNumericType())
+      error(getLeftOperand().type().typeName() + " is not numeric");
+    if(!getRightOperand().type().isNumericType())
+      error(getRightOperand().type().typeName() + " is not numeric");
+  }
+
+  // 15.23, 15.24
+  public void LogicalExpr.typeCheck() {
+    if(!getLeftOperand().type().isBoolean())
+      error(getLeftOperand().type().typeName() + " is not boolean");
+    if(!getRightOperand().type().isBoolean())
+      error(getRightOperand().type().typeName() + " is not boolean");
+  }
+
+  // 15.21
+  public void EqualityExpr.typeCheck() {
+    TypeDecl left = getLeftOperand().type();
+    TypeDecl right = getRightOperand().type();
+    if(left.isNumericType() && right.isNumericType())
+      return;
+    else if(left.isBoolean() && right.isBoolean())
+      return;
+    else if((left.isReferenceType() || left.isNull()) && (right.isReferenceType() || right.isNull())) {
+      if(left.castingConversionTo(right) || right.castingConversionTo(left))
+        return;
+    }
+    error(left.typeName() + " can not be compared to " + right.typeName());
+  }
+
+  // 15.20.2
+  public void InstanceOfExpr.typeCheck() {
+    TypeDecl relationalExpr = getExpr().type();
+    TypeDecl referenceType = getTypeAccess().type();
+    if(!relationalExpr.isUnknown()) {
+      if(!relationalExpr.isReferenceType() && !relationalExpr.isNull())
+        error("The relational expression in instance of must be reference or null type");
+      if(!referenceType.isReferenceType())
+        error("The reference expression in instance of must be reference type");
+      if(!relationalExpr.castingConversionTo(referenceType))
+        error("The type " + relationalExpr.typeName() + " of the relational expression " + 
+          getExpr() +  " can not be cast into the type " + referenceType.typeName());
+      if(getExpr().isTypeAccess())
+        error("The relational expression " + getExpr() + " must not be a type name");
+    }
+  }
+  
+  // 15.16
+  public void CastExpr.typeCheck() {
+    TypeDecl expr = getExpr().type();
+    TypeDecl type = getTypeAccess().type();
+    if(!expr.isUnknown()) {
+      if(!expr.castingConversionTo(type))
+        error(expr.typeName() + " can not be cast into " + type.typeName());
+      if(!getTypeAccess().isTypeAccess())
+        error("" + getTypeAccess() + " is not a type access in cast expression");
+    }
+  }
+
+  public void ParExpr.typeCheck() {
+    if(getExpr().isTypeAccess())
+      error("" + getExpr() + " is a type and may not be used in parenthesized expression");
+  }
+  
+  // 15.15.3
+  public void PlusExpr.typeCheck() {
+    if(!getOperand().type().isNumericType())
+      error("unary plus only operates on numeric types");
+  }
+  
+  // 15.15.4
+  public void MinusExpr.typeCheck() {
+    if(!getOperand().type().isNumericType())
+      error("unary minus only operates on numeric types");
+  }
+
+  // 15.15.5
+  public void BitNotExpr.typeCheck() {
+    if(!getOperand().type().isIntegralType())
+      error("unary ~ only operates on integral types");
+  }
+
+  // 15.15.6
+  public void LogNotExpr.typeCheck() {
+    if(!getOperand().type().isBoolean())
+      error("unary ! only operates on boolean types");
+  }
+
+  // 15.14
+  public void PostfixExpr.typeCheck() {
+    if(!getOperand().isVariable())
+      error("postfix expressions only work on variables");
+    else if(!getOperand().type().isNumericType())
+      error("postfix expressions only operates on numeric types");
+  }
+
+  // 15.15.1
+  public void PreIncExpr.typeCheck() {
+    if(!getOperand().isVariable())
+      error("prefix increment expression only work on variables");
+    else if(!getOperand().type().isNumericType())
+      error("unary increment only operates on numeric types");
+  }
+  
+  // 15.15.2
+  public void PreDecExpr.typeCheck() {
+    if(!getOperand().isVariable())
+      error("prefix decrement expression only work on variables");
+    else if(!getOperand().type().isNumericType())
+      error("unary decrement only operates on numeric types");
+  }
+
+  public void IfStmt.typeCheck() {
+    TypeDecl cond = getCondition().type();
+    if(!cond.isBoolean()) {
+      error("the type of \"" + getCondition() + "\" is " + cond.name() + " which is not boolean");
+    }
+  }
+  public void WhileStmt.typeCheck() {
+    TypeDecl cond = getCondition().type();
+    if(!cond.isBoolean()) {
+      error("the type of \"" + getCondition() + "\" is " + cond.name() + " which is not boolean");
+    }
+  }
+  public void DoStmt.typeCheck() {
+    TypeDecl cond = getCondition().type();
+    if(!cond.isBoolean()) {
+      error("the type of \"" + getCondition() + "\" is " + cond.name() + " which is not boolean");
+    }
+  }
+  public void ForStmt.typeCheck() {
+    if(hasCondition()) {
+      TypeDecl cond = getCondition().type();
+      if(!cond.isBoolean()) {
+        error("the type of \"" + getCondition() + "\" is " + cond.name() + " which is not boolean");
+      }
+    }
+  }
+
+  public void SwitchStmt.typeCheck() {
+    TypeDecl type = getExpr().type();
+    if(!type.isIntegralType() || type.isLong())
+      error("Switch expression must be of char, byte, short, or int");
+  }
+
+  public void ConstCase.typeCheck() {
+    TypeDecl switchType = switchType();
+    TypeDecl type = getValue().type();
+    if(!type.assignConversionTo(switchType, getValue()))
+      error("Constant expression must be assignable to Expression");
+    if(!getValue().isConstant() && !getValue().type().isUnknown()) 
+      error("Switch expression must be constant");
+  }
+
+  inh TypeDecl Case.switchType();
+  eq SwitchStmt.getBlock().switchType() = getExpr().type();
+  eq Program.getChild().switchType() = unknownType();
+
+  public void SynchronizedStmt.typeCheck() {
+    TypeDecl type = getExpr().type();
+    if(!type.isReferenceType() || type.isNull())
+      error("*** The type of the expression must be a reference");
+  }
+
+  public void BasicCatch.typeCheck() {
+    if(!getParameter().type().instanceOf(typeThrowable()))
+      error("*** The catch variable must extend Throwable");
+  }
+
+  public void ThrowStmt.typeCheck() {
+    if(!getExpr().type().instanceOf(typeThrowable()))
+      error("*** The thrown expression must extend Throwable");
+  }
+
+  public void AssertStmt.typeCheck() {
+    // 14.10
+    if(!getfirst().type().isBoolean())
+      error("Assert requires boolean condition");
+    if(hasExpr() && getExpr().type().isVoid())
+      error("The second part of an assert statement may not be void");
+  }
+
+  public void MethodDecl.typeCheck() {
+    // Thrown vs super class method see MethodDecl.nameCheck
+    // 8.4.4
+    TypeDecl exceptionType = typeThrowable();
+    for(int i = 0; i < getNumException(); i++) {
+      TypeDecl typeDecl = getException(i).type();
+      if(!typeDecl.instanceOf(exceptionType))
+        error(signature() + " throws non throwable type " + typeDecl.fullName());
+    }
+
+    // check returns
+    if(!isVoid() && hasBlock() && getBlock().canCompleteNormally())
+      error("the body of a non void method may not complete normally");
+
+  }
+  // 14.16
+  inh TypeDecl TypeDecl.typeVoid();
+  inh TypeDecl ReturnStmt.returnType();
+  eq TypeDecl.getBodyDecl().returnType() = typeVoid();
+  eq MethodDecl.getBlock().returnType() = type();
+  eq Program.getChild().returnType() = typeVoid();
+
+  public void ReturnStmt.typeCheck() {
+    if(hasResult() && !returnType().isVoid()) {
+      if(!getResult().type().assignConversionTo(returnType(), getResult()))
+        error("return value must be an instance of " + returnType().typeName() + " which " + getResult().type().typeName() + " is not");
+    }
+    // 8.4.5 8.8.5
+    if(returnType().isVoid() && hasResult())
+      error("return stmt may not have an expression in void methods");
+    // 8.4.5
+    if(!returnType().isVoid() && !hasResult())
+      error("return stmt must have an expression in non void methods");
+    if(enclosingBodyDecl() instanceof InstanceInitializer || enclosingBodyDecl() instanceof StaticInitializer)
+      error("Initializers may not return");
+
+  }
+
+  public void ConstructorDecl.typeCheck() {
+    // 8.8.4 (8.4.4)
+    TypeDecl exceptionType = typeThrowable();
+    for(int i = 0; i < getNumException(); i++) {
+      TypeDecl typeDecl = getException(i).type();
+      if(!typeDecl.instanceOf(exceptionType))
+        error(signature() + " throws non throwable type " + typeDecl.fullName());
+    }
+  }
+
+  public void ClassInstanceExpr.typeCheck() {
+    if(isQualified() && qualifier().isTypeAccess() && !qualifier().type().isUnknown())
+      error("*** The expression in a qualified class instance expr must not be a type name");
+    // 15.9
+    if(isQualified() && !type().isInnerClass() && !((ClassDecl)type()).superclass().isInnerClass() && !type().isUnknown()) {
+      error("*** Qualified class instance creation can only instantiate inner classes and their anonymous subclasses");
+    }
+    if(!type().isClassDecl()) {
+      error("*** Can only instantiate classes, which " + type().typeName() + " is not"); 
+    }
+    typeCheckEnclosingInstance();
+    typeCheckAnonymousSuperclassEnclosingInstance();
+  }
+
+  public void ClassInstanceExpr.typeCheckEnclosingInstance() {
+    TypeDecl C = type();
+    if(!C.isInnerClass())
+      return;
+
+    TypeDecl enclosing = null;
+    if(C.isAnonymous()) {
+      if(noEnclosingInstance()) {
+        enclosing = null;
+      }
+      else {
+        enclosing = hostType();
+      }
+    }
+    else if(C.isLocalClass()) {
+      if(C.inStaticContext()) {
+        enclosing = null;
+      }
+      else if(noEnclosingInstance()) {
+        enclosing = unknownType();
+      }
+      else {
+        TypeDecl nest = hostType();
+        while(nest != null && !nest.instanceOf(C.enclosingType()))
+          nest = nest.enclosingType();
+        enclosing = nest;
+      }
+    }
+    else if(C.isMemberType()) {
+      if(!isQualified()) {
+        if(noEnclosingInstance()) {
+          error("No enclosing instance to initialize " + C.typeName() + " with");
+          //System.err.println("ClassInstanceExpr: Non qualified MemberType " + C.typeName() + " is in a static context when instantiated in " + this);
+          enclosing = unknownType();
+        }
+        else {
+          TypeDecl nest = hostType();
+          while(nest != null && !nest.instanceOf(C.enclosingType()))
+            nest = nest.enclosingType();
+          enclosing = nest == null ? unknownType() : nest;
+        }
+      }
+      else {
+        enclosing = enclosingInstance();
+      }
+    }
+    if(enclosing != null && !enclosing.instanceOf(type().enclosingType())) {
+      String msg = enclosing == null ? "None" : enclosing.typeName();
+      error("*** Can not instantiate " + type().typeName() + " with the enclosing instance " + msg + " due to incorrect enclosing instance");
+    }
+    else if(!isQualified() && C.isMemberType() && inExplicitConstructorInvocation() && enclosing == hostType()) {
+      error("*** The innermost enclosing instance of type " + enclosing.typeName() + " is this which is not yet initialized here.");
+    }
+  }
+
+  inh TypeDecl SuperConstructorAccess.enclosingInstance();
+  inh TypeDecl ClassInstanceExpr.enclosingInstance();
+  inh TypeDecl TypeDecl.enclosingInstance();
+  eq Program.getChild().enclosingInstance() = null;
+  eq StaticInitializer.getBlock().enclosingInstance() = null;
+  //eq InstanceInitializer.getBlock().enclosingInstance() = null;
+  eq TypeDecl.getBodyDecl().enclosingInstance() {
+    if(getBodyDecl(childIndex) instanceof MemberTypeDecl && !((MemberTypeDecl)getBodyDecl(childIndex)).typeDecl().isInnerType())
+      return null;
+    if(getBodyDecl(childIndex) instanceof ConstructorDecl)
+      return enclosingInstance();
+    return this;
+  }
+  eq AbstractDot.getRight().enclosingInstance() = getLeft().type();
+  eq ConstructorDecl.getConstructorInvocation().enclosingInstance() = unknownType();
+
+  syn boolean ClassInstanceExpr.noEnclosingInstance() = isQualified() ? qualifier().staticContextQualifier() : inStaticContext();
+
+  public void ClassInstanceExpr.typeCheckAnonymousSuperclassEnclosingInstance() {
+    if(type().isAnonymous() && ((ClassDecl)type()).superclass().isInnerType()) {
+      TypeDecl S = ((ClassDecl)type()).superclass();
+      if(S.isLocalClass()) {
+        if(S.inStaticContext()) {
+        }
+        else if(noEnclosingInstance()) {
+          error("*** No enclosing instance to class " + type().typeName() + " due to static context");
+        }
+        else if(inExplicitConstructorInvocation())
+          error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName() + " since this is not initialized yet");
+      }
+      else if(S.isMemberType()) {
+        if(!isQualified()) {
+          // 15.9.2 2nd paragraph
+          if(noEnclosingInstance()) {
+            error("*** No enclosing instance to class " + type().typeName() + " due to static context");
+          }
+          else {
+            TypeDecl nest = hostType();
+            while(nest != null && !nest.instanceOf(S.enclosingType()))
+              nest = nest.enclosingType();
+            if(nest == null) {
+              error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName());
+            }
+            else if(inExplicitConstructorInvocation()) {
+              error("*** No enclosing instance to superclass " + S.typeName() + " of " + type().typeName() + " since this is not initialized yet");
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public void ArrayTypeWithSizeAccess.typeCheck() {
+    super.typeCheck();
+    if(!getExpr().type().unaryNumericPromotion().isInt())
+      error(getExpr().type().typeName() + " is not int after unary numeric promotion");
+  }
+
+  // 15.25
+  public void ConditionalExpr.typeCheck() {
+    if(!getCondition().type().isBoolean())
+      error("The first operand of a conditional expression must be a boolean");
+    if(type().isUnknown() && !getTrueExpr().type().isUnknown() && !getFalseExpr().type().isUnknown()) {
+      error("The types of the second and third operand in this conditional expression do not match"); 
+    }
+  }
+
+ public void IntegerLiteral.typeCheck() {
+   if(constant().error)
+     error("The value of an int literal must be a decimal value in the range -2147483648..2147483647 or a hexadecimal or octal literal that fits in 32 bits.");
+
+ }
+ public void LongLiteral.typeCheck() {
+   if(constant().error)
+     error("The value of the long literal " + getLITERAL() + " is not legal");
+
+ }
+
+ public void FloatingPointLiteral.typeCheck() {
+   if(!isZero() && constant().floatValue() == 0.0f)
+     error("It is an error for nonzero floating-point " + getLITERAL() + " to round to zero");
+   if(constant().floatValue() == Float.NEGATIVE_INFINITY || constant().floatValue() == Float.POSITIVE_INFINITY)
+     error("It is an error for floating-point " + getLITERAL() + " to round to an infinity");
+     
+ }
+ public void DoubleLiteral.typeCheck() {
+   if(!isZero() && constant().doubleValue() == 0.0f)
+     error("It is an error for nonzero floating-point " + getLITERAL() + " to round to zero");
+   if(constant().doubleValue() == Double.NEGATIVE_INFINITY || constant().doubleValue() == Double.POSITIVE_INFINITY)
+     error("It is an error for floating-point " + getLITERAL() + " to round to an infinity");
+ }
+} 

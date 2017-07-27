@@ -1,0 +1,322 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect BooleanExpressions {
+  // Evaluate boolean expressions by jumping to a target that indicates true or false
+  // The true_label() and false_label() are either defined locally if it is the root of a boolean expression
+  // They are defined through inherited attributes when being part of a more complex expression
+
+  // branch to this label if the expression is false
+  syn lazy soot.jimple.Stmt Expr.false_label() = getParent().definesLabel() ? condition_false_label() : newLabel();
+  // branch to this label if the expression is true
+  syn lazy soot.jimple.Stmt Expr.true_label() = getParent().definesLabel() ? condition_true_label() : newLabel();
+  
+  // these nodes defines labels for their children
+  syn boolean ASTNode.definesLabel() = false;
+  eq Opt.definesLabel() = getParent().definesLabel();
+  eq List.definesLabel() = getParent().definesLabel();
+  eq AbstractDot.definesLabel() = getParent().definesLabel();
+  eq ParExpr.definesLabel() = getParent().definesLabel();
+  
+  eq LogNotExpr.definesLabel() = true;
+  eq ConditionalExpr.definesLabel() = true;
+  eq RelationalExpr.definesLabel() = false;
+  
+  eq LogicalExpr.definesLabel() = true;
+  eq IfStmt.definesLabel() = true;
+  eq WhileStmt.definesLabel() = true;
+  eq DoStmt.definesLabel() = true;
+  eq ForStmt.definesLabel() = true;
+ 
+  // provide labels for these control statement conditions
+  eq IfStmt.getCondition().condition_false_label() = else_branch_label();
+  eq IfStmt.getCondition().condition_true_label() = then_branch_label();
+  eq WhileStmt.getCondition().condition_false_label() = end_label();
+  eq WhileStmt.getCondition().condition_true_label() = stmt_label();
+  eq DoStmt.getCondition().condition_false_label() = end_label();
+  eq DoStmt.getCondition().condition_true_label() = begin_label();
+  eq ForStmt.getCondition().condition_false_label() = end_label();
+  eq ForStmt.getCondition().condition_true_label() = begin_label();
+  
+  // propagate labels downwards for complex boolean expressions
+  inh soot.jimple.Stmt Expr.condition_false_label();
+  eq Program.getCompilationUnit(int i).condition_false_label() {
+    throw new Error("condition_false_label not implemented");
+  }
+  inh soot.jimple.Stmt Expr.condition_true_label();
+  eq Program.getCompilationUnit(int i).condition_true_label() {
+    throw new Error("condition_true_label not implemented");
+  }
+  
+  eq LogNotExpr.getOperand().condition_false_label() = true_label();
+  eq LogNotExpr.getOperand().condition_true_label() = false_label();
+
+  eq ConditionalExpr.getCondition().condition_false_label() = else_branch_label();
+  eq ConditionalExpr.getCondition().condition_true_label() = then_branch_label();
+  eq ConditionalExpr.getTrueExpr().condition_false_label() = false_label();
+  eq ConditionalExpr.getTrueExpr().condition_true_label() = true_label();
+  eq ConditionalExpr.getFalseExpr().condition_false_label() = false_label();
+  eq ConditionalExpr.getFalseExpr().condition_true_label() = true_label();
+  
+  eq RelationalExpr.getLeftOperand().condition_false_label() = false_label();
+  eq RelationalExpr.getLeftOperand().condition_true_label() = true_label();
+  eq RelationalExpr.getRightOperand().condition_false_label() = false_label();
+  eq RelationalExpr.getRightOperand().condition_true_label() = true_label();
+
+  eq AndLogicalExpr.getLeftOperand().condition_false_label() = false_label();
+  eq AndLogicalExpr.getLeftOperand().condition_true_label() = next_test_label();
+  eq AndLogicalExpr.getRightOperand().condition_false_label() = false_label();
+  eq AndLogicalExpr.getRightOperand().condition_true_label() = true_label();
+  
+  eq OrLogicalExpr.getLeftOperand().condition_false_label() = next_test_label();
+  eq OrLogicalExpr.getLeftOperand().condition_true_label() = true_label();
+  eq OrLogicalExpr.getRightOperand().condition_false_label() = false_label();
+  eq OrLogicalExpr.getRightOperand().condition_true_label() = true_label();
+
+  syn boolean Expr.canBeTrue() = !isFalse();
+  eq ParExpr.canBeTrue() = getExpr().canBeTrue();
+  eq AbstractDot.canBeTrue() = lastAccess().canBeTrue();
+  eq OrLogicalExpr.canBeTrue() = getLeftOperand().canBeTrue() || getRightOperand().canBeTrue();
+  eq AndLogicalExpr.canBeTrue() = getLeftOperand().canBeTrue() && getRightOperand().canBeTrue();
+  eq ConditionalExpr.canBeTrue() = type().isBoolean() && (getTrueExpr().canBeTrue() && getFalseExpr().canBeTrue() 
+    || getCondition().isTrue() && getTrueExpr().canBeTrue()
+    || getCondition().isFalse() && getFalseExpr().canBeTrue());
+  eq LogNotExpr.canBeTrue() = getOperand().canBeFalse();
+  
+  syn boolean Expr.canBeFalse() = !isTrue();
+  eq ParExpr.canBeFalse() = getExpr().canBeFalse();
+  eq AbstractDot.canBeFalse() = lastAccess().canBeFalse();
+  eq OrLogicalExpr.canBeFalse() = getLeftOperand().canBeFalse() && getRightOperand().canBeFalse();
+  eq AndLogicalExpr.canBeFalse() = getLeftOperand().canBeFalse() || getRightOperand().canBeFalse();
+  eq ConditionalExpr.canBeFalse() = type().isBoolean() && (getTrueExpr().canBeFalse() && getFalseExpr().canBeFalse() 
+    || getCondition().isTrue() && getTrueExpr().canBeFalse()
+    || getCondition().isFalse() && getFalseExpr().canBeFalse());
+  eq LogNotExpr.canBeFalse() = getOperand().canBeTrue();
+  
+  public soot.Value RelationalExpr.eval(Body b) { return emitBooleanCondition(b); }
+  public soot.Value LogNotExpr.eval(Body b) { return emitBooleanCondition(b); }
+  public soot.Value LogicalExpr.eval(Body b) { return emitBooleanCondition(b); }
+  protected soot.Value Expr.emitBooleanCondition(Body b) {
+    b.setLine(this);
+    emitEvalBranch(b);
+    soot.jimple.Stmt end_label = newLabel();
+    b.addLabel(false_label());
+    Local result = b.newTemp(soot.BooleanType.v());
+    b.add(b.newAssignStmt(result, BooleanType.emitConstant(false), this));
+    b.add(b.newGotoStmt(end_label, this));
+    b.addLabel(true_label());
+    b.add(b.newAssignStmt(result, BooleanType.emitConstant(true), this));
+    b.addLabel(end_label);
+    return result;
+  }
+
+  public soot.Value ConditionalExpr.eval(Body b) {
+    b.setLine(this);
+    if(type().isBoolean())
+      return emitBooleanCondition(b);
+    else {
+      Local result = b.newTemp(type().getSootType());
+      soot.jimple.Stmt endBranch = newLabel();
+      getCondition().emitEvalBranch(b);
+      if(getCondition().canBeTrue()) {
+        b.addLabel(then_branch_label());
+        b.add(b.newAssignStmt(result,
+          getTrueExpr().type().emitCastTo(b,
+            getTrueExpr(),
+            type()
+          ),
+          this
+        ));
+        if(getCondition().canBeFalse()) {
+          b.add(b.newGotoStmt(endBranch, this));
+        }
+      }
+      if(getCondition().canBeFalse()) {
+        b.addLabel(else_branch_label());
+        b.add(b.newAssignStmt(result,
+          getFalseExpr().type().emitCastTo(b,
+            getFalseExpr(),
+            type()
+          ),
+          this
+        ));
+      }
+      b.addLabel(endBranch);
+      return result;
+    }
+  }
+
+  syn lazy soot.jimple.Stmt ConditionalExpr.else_branch_label() = newLabel();
+  syn lazy soot.jimple.Stmt ConditionalExpr.then_branch_label() = newLabel();
+  
+  public void Expr.emitEvalBranch(Body b) {
+    b.setLine(this);
+    if(isTrue())
+      b.add(b.newGotoStmt(true_label(), this));
+    else if(isFalse())
+      b.add(b.newGotoStmt(false_label(), this));
+    else {
+      b.add(
+        b.newIfStmt(
+          b.newEqExpr(
+            asImmediate(b, eval(b)),
+            BooleanType.emitConstant(false),
+            this
+          ),
+          false_label(),
+          this
+        )
+      );
+      b.add(b.newGotoStmt(true_label(), this));
+    }
+  }
+  
+  public void ParExpr.emitEvalBranch(Body b)     { getExpr().emitEvalBranch(b); }
+  public void AbstractDot.emitEvalBranch(Body b) { lastAccess().emitEvalBranch(b); }
+  public void LogNotExpr.emitEvalBranch(Body b)  { getOperand().emitEvalBranch(b); }
+  
+  public void AndLogicalExpr.emitEvalBranch(Body b) {
+    b.setLine(this);
+    getLeftOperand().emitEvalBranch(b);
+    b.addLabel(next_test_label());
+    if(getLeftOperand().canBeTrue()) {
+      getRightOperand().emitEvalBranch(b);
+      if(getRightOperand().canBeTrue())
+        b.add(b.newGotoStmt(true_label(), this));
+    }
+  }
+  syn lazy soot.jimple.Stmt AndLogicalExpr.next_test_label() = newLabel();
+  
+  public void OrLogicalExpr.emitEvalBranch(Body b) {
+    b.setLine(this);
+    getLeftOperand().emitEvalBranch(b);
+    b.addLabel(next_test_label());
+    if(getLeftOperand().canBeFalse()) {
+      getRightOperand().emitEvalBranch(b);
+      if(getRightOperand().canBeFalse())
+        b.add(b.newGotoStmt(false_label(), this));
+    }
+  }
+
+  syn lazy soot.jimple.Stmt OrLogicalExpr.next_test_label() = newLabel();
+
+  public void ConditionalExpr.emitEvalBranch(Body b) {
+    b.setLine(this);
+    soot.jimple.Stmt endBranch = newLabel();
+    getCondition().emitEvalBranch(b);
+    b.addLabel(then_branch_label());
+    if(getCondition().canBeTrue()) {
+      getTrueExpr().emitEvalBranch(b);
+      b.add(b.newGotoStmt(true_label(), this));
+    }  
+    b.addLabel(else_branch_label());
+    if(getCondition().canBeFalse()) {
+      getFalseExpr().emitEvalBranch(b);
+      b.add(b.newGotoStmt(true_label(), this));
+    }
+  }
+  
+  public void RelationalExpr.emitEvalBranch(Body b) {
+    b.setLine(this);
+    if(isTrue())
+      b.add(b.newGotoStmt(true_label(), this));
+    else if(isFalse())
+      b.add(b.newGotoStmt(false_label(), this));
+    else {
+      soot.Value left;
+      soot.Value right;
+      TypeDecl type = getLeftOperand().type();
+      if(type.isNumericType()) {
+        type = binaryNumericPromotedType();
+        left = getLeftOperand().type().emitCastTo(b, // Binary numeric promotion
+          getLeftOperand(),
+          type
+        );
+        right = getRightOperand().type().emitCastTo(b, // Binary numeric promotion
+          getRightOperand(),
+          type
+        );
+        if(type.isDouble() || type.isFloat() || type.isLong()) {
+          Local l;
+          if(type.isDouble() || type.isFloat()) {
+            if(this instanceof GEExpr || this instanceof GTExpr) {
+              l = asLocal(b, b.newCmplExpr(asImmediate(b, left), asImmediate(b, right), this));
+            }
+            else {
+              l = asLocal(b, b.newCmpgExpr(asImmediate(b, left), asImmediate(b, right), this));
+            }
+          }
+          else {
+            l = asLocal(b, b.newCmpExpr(asImmediate(b, left), asImmediate(b, right), this));
+          }
+          b.add(b.newIfStmt(comparisonInv(b, l, BooleanType.emitConstant(false)), false_label(), this));
+          b.add(b.newGotoStmt(true_label(), this));
+        }
+        else {
+          b.add(b.newIfStmt(comparison(b, left, right), true_label(), this));
+          b.add(b.newGotoStmt(false_label(), this));
+          //b.add(b.newIfStmt(comparisonInv(b, left, right), false_label(), this));
+          //b.add(b.newGotoStmt(true_label(), this));
+        }
+      }
+      else {
+        left = getLeftOperand().eval(b);
+        right = getRightOperand().eval(b);
+        b.add(b.newIfStmt(comparison(b, left, right), true_label(), this));
+        b.add(b.newGotoStmt(false_label(), this));
+        //b.add(b.newIfStmt(comparisonInv(b, left, right), false_label(), this));
+        //b.add(b.newGotoStmt(true_label(), this));
+      }
+    }
+  }
+
+  public soot.Value RelationalExpr.comparison(Body b, soot.Value left, soot.Value right) {
+    throw new Error("comparison not supported for " + getClass().getName());
+  }
+  public soot.Value LTExpr.comparison(Body b, soot.Value left, soot.Value right) {
+    return b.newLtExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value LEExpr.comparison(Body b, soot.Value left, soot.Value right) {
+    return b.newLeExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value GEExpr.comparison(Body b, soot.Value left, soot.Value right) {
+    return b.newGeExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value GTExpr.comparison(Body b, soot.Value left, soot.Value right) {
+    return b.newGtExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value EQExpr.comparison(Body b, soot.Value left, soot.Value right) {
+    return b.newEqExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value NEExpr.comparison(Body b, soot.Value left, soot.Value right) {
+    return b.newNeExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+
+  public soot.Value RelationalExpr.comparisonInv(Body b, soot.Value left, soot.Value right) {
+    throw new Error("comparisonInv not supported for " + getClass().getName());
+  }
+  public soot.Value LTExpr.comparisonInv(Body b, soot.Value left, soot.Value right) {
+    return b.newGeExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value LEExpr.comparisonInv(Body b, soot.Value left, soot.Value right) {
+    return b.newGtExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value GEExpr.comparisonInv(Body b, soot.Value left, soot.Value right) {
+    return b.newLtExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value GTExpr.comparisonInv(Body b, soot.Value left, soot.Value right) {
+    return b.newLeExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value EQExpr.comparisonInv(Body b, soot.Value left, soot.Value right) {
+    return b.newNeExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+  public soot.Value NEExpr.comparisonInv(Body b, soot.Value left, soot.Value right) {
+    return b.newEqExpr(asImmediate(b, left), asImmediate(b, right), this);
+  }
+}

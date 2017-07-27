@@ -1,0 +1,116 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import java.util.Collection;
+import java.util.ArrayList;
+
+aspect EnhancedFor {
+  // type checking
+	public void EnhancedForStmt.typeCheck() {
+		if (!getExpr().type().isArrayDecl() && !getExpr().type().isIterable()) {
+			error("type " + getExpr().type().name() + 
+			      " of expression in foreach is neither array type nor java.lang.Iterable");
+		}	
+    else if(getExpr().type().isArrayDecl() && !getExpr().type().componentType().assignConversionTo(getVariableDeclaration().type(), null))
+      error("parameter of type " + getVariableDeclaration().type().typeName() + " can not be assigned an element of type " + getExpr().type().componentType().typeName()); 
+    else if(getExpr().type().isIterable() && !getExpr().type().isUnknown()) {
+      MethodDecl iterator = (MethodDecl)getExpr().type().memberMethods("iterator").iterator().next();
+      MethodDecl next = (MethodDecl)iterator.type().memberMethods("next").iterator().next();
+      TypeDecl componentType = next.type();
+      if(!componentType.assignConversionTo(getVariableDeclaration().type(), null))
+        error("parameter of type " + getVariableDeclaration().type().typeName() + " can not be assigned an element of type " + componentType.typeName()); 
+    }
+	}
+  
+	/**
+	 * True if type is java.lang.Iterable or subtype
+	   As long as we use the 1.4 API we check for java.util.Collection instead.
+	 */
+	syn lazy boolean TypeDecl.isIterable() = instanceOf(lookupType("java.lang", "Iterable"));
+  
+	// variable lookup
+  inh SimpleSet EnhancedForStmt.lookupVariable(String name);
+	eq EnhancedForStmt.getVariableDeclaration().lookupVariable(String name) = localLookupVariable(name);
+	eq EnhancedForStmt.getExpr().lookupVariable(String name) = localLookupVariable(name);
+	eq EnhancedForStmt.getStmt().lookupVariable(String name) = localLookupVariable(name);
+
+  eq EnhancedForStmt.getVariableDeclaration().nameType() = NameType.TYPE_NAME;
+  
+  EnhancedForStmt implements VariableScope;
+  eq EnhancedForStmt.getVariableDeclaration().outerScope() = this;
+  eq EnhancedForStmt.getExpr().outerScope() = this;
+  eq EnhancedForStmt.getStmt().outerScope() = this;
+
+	syn SimpleSet EnhancedForStmt.localLookupVariable(String name) {
+		if(getVariableDeclaration().name().equals(name)) {
+      return SimpleSet.emptySet.add(getVariableDeclaration());
+    }
+ 	  return lookupVariable(name);
+	}
+  
+	// pretty printing
+  public void EnhancedForStmt.toString(StringBuffer s) {
+    s.append(indent());
+    s.append("for (");
+    getVariableDeclaration().getModifiers().toString(s);
+    getVariableDeclaration().getTypeAccess().toString(s);
+    s.append(" " + getVariableDeclaration().name());
+    s.append(" : ");
+    getExpr().toString(s);
+    s.append(") ");
+    getStmt().toString(s);
+  }	
+  
+	// some attributes for the parameter
+	eq EnhancedForStmt.getVariableDeclaration().isMethodParameter() = false;
+	eq EnhancedForStmt.getVariableDeclaration().isConstructorParameter() = false;
+	eq EnhancedForStmt.getVariableDeclaration().isExceptionHandlerParameter() = false;
+
+  eq EnhancedForStmt.targetOf(ContinueStmt stmt) = !stmt.hasLabel();
+  eq EnhancedForStmt.targetOf(BreakStmt stmt) = !stmt.hasLabel();
+
+  // Unreachable Statements
+  eq EnhancedForStmt.canCompleteNormally() = reachable();
+  eq EnhancedForStmt.getStmt().reachable() = reachable();
+
+  // Definite Assignment
+  eq EnhancedForStmt.isDAafter(Variable v) {
+    if(!getExpr().isDAafter(v))
+      return false;
+    /*
+    for(Iterator iter = targetBreaks().iterator(); iter.hasNext(); ) {
+      BreakStmt stmt = (BreakStmt)iter.next();
+      if(!stmt.isDAafterReachedFinallyBlocks(v))
+        return false;
+    }
+    */
+    return true;
+  }
+  eq EnhancedForStmt.getExpr().isDAbefore(Variable v) = 
+    v == getVariableDeclaration() || isDAbefore(v);
+  eq EnhancedForStmt.getStmt().isDAbefore(Variable v) = getExpr().isDAafter(v);
+
+  eq EnhancedForStmt.isDUafter(Variable v) {
+    if(!getExpr().isDUafter(v))
+      return false;
+    for(Iterator iter = targetBreaks().iterator(); iter.hasNext(); ) {
+      BreakStmt stmt = (BreakStmt)iter.next();
+      if(!stmt.isDUafterReachedFinallyBlocks(v))
+        return false;
+    }
+    return true;
+  }
+  eq EnhancedForStmt.getExpr().isDUbefore(Variable v) = 
+    v != getVariableDeclaration() && isDUbefore(v);
+  eq EnhancedForStmt.getStmt().isDUbefore(Variable v) = getExpr().isDUafter(v);
+
+  eq EnhancedForStmt.getStmt().insideLoop() = true;
+  eq EnhancedForStmt.continueLabel() = true;
+
+}

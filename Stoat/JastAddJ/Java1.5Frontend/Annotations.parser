@@ -1,0 +1,163 @@
+TypeDecl type_declaration =
+  annotation_type_declaration.i {:  return i;  :}
+  ;
+  
+BodyDecl interface_member_declaration =
+  annotation_type_declaration.i 
+  {:  
+   MemberInterfaceDecl mid = new MemberInterfaceDecl(i);  
+   mid.setStart(i.getStart());
+   mid.setEnd(i.getEnd());
+   return mid;
+  :}
+  ;
+
+BodyDecl class_member_declaration =
+  annotation_type_declaration.i
+  {:  
+   MemberInterfaceDecl mid = new MemberInterfaceDecl(i);  
+   mid.setStart(i.getStart());
+   mid.setEnd(i.getEnd());
+   return mid;
+  :}
+  ;
+
+// a comment
+AnnotationDecl annotation_type_declaration =
+  modifiers.m? AT INTERFACE IDENTIFIER annotation_type_body.b 
+  {:  
+   AnnotationDecl a = new AnnotationDecl(new Modifiers(m), IDENTIFIER, b); 
+   a.setStart(m.getStart());
+   a.setEnd(b.getEnd());
+   return a;
+  :}
+  ;
+
+List annotation_type_body =
+  LBRACE annotation_type_element_declarations.i? RBRACE {: return i; :}
+  ;
+
+List annotation_type_element_declarations =
+     annotation_type_element_declaration.i {:  return new List().add(i); :}
+  |  annotation_type_element_declarations.l annotation_type_element_declaration.i {:  return l.add(i);  :};
+
+BodyDecl annotation_type_element_declaration =
+    modifiers.m? type.t IDENTIFIER LPAREN RPAREN default_value? SEMICOLON
+    {: 
+     AnnotationMethodDecl a = new AnnotationMethodDecl(new Modifiers(m), t, IDENTIFIER, new List(), new List(), new Opt(), default_value); 
+     a.setStart(m.getStart());
+     a.setEnd(SEMICOLON.getEnd());
+     return a;
+    :}
+  | constant_declaration
+  | class_declaration 
+    {: 
+     MemberClassDecl m = new MemberClassDecl(class_declaration); 
+     m.setStart(class_declaration.getStart());
+     m.setEnd(class_declaration.getEnd());
+     return m;
+    :}
+  | interface_declaration 
+    {: 
+     MemberInterfaceDecl m = new MemberInterfaceDecl(interface_declaration); 
+     m.setStart(interface_declaration.getStart());
+     m.setEnd(interface_declaration.getEnd());
+     return m;
+    :}
+  | enum_declaration 
+    {: 
+     MemberClassDecl m = new MemberClassDecl(enum_declaration); 
+     m.setStart(enum_declaration.getStart());
+     m.setEnd(enum_declaration.getEnd());
+     return m;
+    :}
+  | annotation_type_declaration 
+    {: 
+     MemberInterfaceDecl m = new MemberInterfaceDecl(annotation_type_declaration); 
+     m.setStart(annotation_type_declaration.getStart());
+     m.setEnd(annotation_type_declaration.getEnd());
+     return m;
+    :}    
+  | SEMICOLON {: return new StaticInitializer(new Block()); :}
+  ;
+
+ElementValue default_value =
+  DEFAULT element_value {: return element_value; :}
+  ;
+
+
+Modifier modifier =
+  annotation
+  ;
+
+Annotation annotation =
+    normal_annotation
+  | marker_annotation
+  | single_element_annotation
+  ;
+
+Modifier normal_annotation =
+  AT name LPAREN element_value_pairs? RPAREN 
+    {: 
+     Annotation a = new Annotation("annotation", name, element_value_pairs); 
+     a.setStart(AT.getStart());
+     a.setEnd(RPAREN.getEnd());
+     return a;
+    :}
+  ;
+
+List element_value_pairs =
+    element_value_pair {: return new List().add(element_value_pair); :}
+  | element_value_pairs COMMA element_value_pair {: return element_value_pairs.add(element_value_pair); :}
+  ;
+
+ElementValuePair element_value_pair =
+  IDENTIFIER EQ element_value 
+    {: 
+     ElementValuePair evp = new ElementValuePair(IDENTIFIER, element_value);
+     evp.setStart(IDENTIFIER.getStart());
+     evp.setEnd(element_value.getEnd());
+     return evp;
+    :}
+  ;
+
+ElementValue element_value =
+  conditional_expression              
+    {: 
+     ElementConstantValue e = new ElementConstantValue(conditional_expression);
+     e.setStart(conditional_expression.getStart());
+     e.setEnd(conditional_expression.getEnd());
+     return e; 
+    :}
+  | annotation                        {: return new ElementAnnotationValue(annotation); :}
+  | element_value_array_initializer.e {: return e; :}
+  ;
+
+ElementArrayValue element_value_array_initializer =
+  LBRACE element_values? COMMA? RBRACE {: return new ElementArrayValue(element_values); :}
+  ;
+
+List element_values =
+    element_value {: return new List().add(element_value); :}
+  | element_values COMMA element_value {: return element_values.add(element_value); :}
+  ;
+  
+Modifier marker_annotation =
+  AT name {: return new Annotation("annotation", name, new List()); :}
+  ;
+  
+Modifier single_element_annotation =
+  AT name LPAREN element_value RPAREN 
+    {: 
+     Annotation a = new Annotation("annotation", name, new List().add(new ElementValuePair("value", element_value)));
+     a.setStart(AT.getStart());
+     a.setEnd(RPAREN.getEnd());
+     return a;
+    :}
+  ;
+  
+
+CompilationUnit compilation_unit =
+  modifiers.a package_declaration.p import_declarations.i? type_declarations.t?
+    {: return new AnnotatedCompilationUnit(p.getID(), i, t, new Modifiers(a)); :}
+  ;

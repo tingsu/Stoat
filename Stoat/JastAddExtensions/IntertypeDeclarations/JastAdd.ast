@@ -1,0 +1,1 @@
+AspectDecl : ClassDecl ::= Modifiers <ID:String> BodyDecl* [SuperClassAccess:Access] Implements:Access*;

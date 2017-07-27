@@ -1,0 +1,2 @@
+EnhancedForStmt : BranchTargetStmt ::= VariableDeclaration Expr Stmt;
+

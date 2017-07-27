@@ -1,0 +1,9 @@
+/**
+ * Type access for a generic class with an empty type parameter list.
+ */
+DiamondAccess : Access ::= TypeAccess:Access;
+
+/**
+ * Placeholder method for type inference on generic instance creation.
+ */
+PlaceholderMethodDecl : GenericMethodDecl;

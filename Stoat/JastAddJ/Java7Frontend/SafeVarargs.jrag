@@ -1,0 +1,163 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received
+ * a copy of the modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect SafeVarargs {
+
+	/**
+	 * @return true if the modifier list includes the SafeVarargs annotation
+	 */
+	syn boolean TypeDecl.hasAnnotationSafeVarargs() =
+		getModifiers().hasAnnotationSafeVarargs();
+
+	/**
+	 * @return true if the modifier list includes the SafeVarargs annotation
+	 */
+	syn boolean BodyDecl.hasAnnotationSafeVarargs() = false;
+	
+	/**
+	 * @see AST.Modifiers#hasAnnotationSafeVarargs() Modifiers.hasAnnotationSafeVarargs()
+	 */
+	eq MemberTypeDecl.hasAnnotationSafeVarargs() =
+		typeDecl().hasAnnotationSafeVarargs();
+	
+	/**
+	 * @see AST.Modifiers#hasAnnotationSafeVarargs() Modifiers.hasAnnotationSafeVarargs()
+	 */
+	eq MethodDecl.hasAnnotationSafeVarargs() =
+		getModifiers().hasAnnotationSafeVarargs();
+	
+	/**
+	 * @see AST.Modifiers#hasAnnotationSafeVarargs() Modifiers.hasAnnotationSafeVarargs()
+	 */
+	eq ConstructorDecl.hasAnnotationSafeVarargs() =
+		getModifiers().hasAnnotationSafeVarargs();
+
+	/**
+	 * @see AST.Modifiers#hasAnnotationSafeVarargs() Modifiers.hasAnnotationSafeVarargs()
+	 */
+	eq FieldDeclaration.hasAnnotationSafeVarargs() =
+		getModifiers().hasAnnotationSafeVarargs();
+
+	/**
+	 * @return true if the modifier list includes the SafeVarargs annotation
+	 */
+	syn boolean Modifiers.hasAnnotationSafeVarargs() =
+		annotation(lookupType("java.lang", "SafeVarargs")) != null;
+
+	/**
+	 * It is an error if the SafeVarargs annotation is used on something
+	 * that is not a variable arity method or constructor.
+	 */
+	syn boolean BodyDecl.hasIllegalAnnotationSafeVarargs() =
+		hasAnnotationSafeVarargs();
+
+	/**
+	 * The SafeVarargs annotation is allowed on a constructor if it
+	 * has variable arity.
+	 */
+	eq ConstructorDecl.hasIllegalAnnotationSafeVarargs() =
+		hasAnnotationSafeVarargs() && !isVariableArity();
+
+	/**
+	 * The SafeVarargs annotation is allowed on a method if it
+	 * has variable arity and is either static or final.
+	 */
+	eq MethodDecl.hasIllegalAnnotationSafeVarargs() =
+		hasAnnotationSafeVarargs() && (!isVariableArity() || (!isFinal() && !isStatic()));
+
+	public void MethodAccess.checkWarnings() {
+
+		MethodDecl decl = decl();
+		if (decl.getNumParameter() == 0) return;
+		if (decl.getNumParameter() > getNumArg()) return;
+
+		ParameterDeclaration param = decl.getParameter(
+				decl.getNumParameter()-1);
+		if (!withinSuppressWarnings("unchecked") &&
+				!decl.hasAnnotationSafeVarargs() &&
+				param.isVariableArity() &&
+				!param.type().isReifiable())
+			warning("unchecked array creation for variable " +
+				"arity parameter of " + decl().name());
+	}
+
+	/**
+	 * We must report illegal uses of the SafeVarargs annotation.
+	 * It is only allowed on variable arity method and constructor declarations.
+	 */
+	public void BodyDecl.checkWarnings() {
+		if (hasIllegalAnnotationSafeVarargs())
+			error("@SafeVarargs is only allowed for variable " +
+				"arity method and constructor declarations");
+	}
+
+	/**
+	 * A type is reifiable if it either refers to a non-parameterized type,
+	 * is a raw type, is a parameterized type with only unbound wildcard
+	 * parameters or is an array type with a reifiable type parameter.
+	 *
+	 * @see "JLSv3 &sect;4.7"
+	 */
+	syn boolean TypeDecl.isReifiable() = true;
+
+	/**
+	 * A type variable is never reifiable.
+	 * @return false
+	 */
+	eq TypeVariable.isReifiable() = false;
+
+	/**
+	 * A parameterized type is reifiable only if it's
+	 * type parameters are all unbound wildcard types.
+	 */
+	eq ParInterfaceDecl.isReifiable() {
+		if (isRawType())
+			return true;
+		for (int i = 0; i < getNumArgument(); ++i) {
+			if (!getArgument(i).type().isWildcard())
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * A parameterized type is reifiable only if it's
+	 * type parameters are all unbound wildcard types.
+	 */
+	eq ParClassDecl.isReifiable() {
+		if (isRawType())
+			return true;
+		for (int i = 0; i < getNumArgument(); ++i) {
+			if (!getArgument(i).type().isWildcard())
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * An array type is reifiable only if the elements of the
+	 * array are reifiable.
+	 */
+	eq ArrayDecl.isReifiable() = elementType().isReifiable();
+
+	/**
+	 * Check if the method is missing a SafeVarargs annotation.
+	 */
+	public void MethodDecl.checkWarnings() {
+		// check for illegal use of @SafeVarargs
+		super.checkWarnings();
+
+		if (!suppressWarnings("unchecked") &&
+				!hasAnnotationSafeVarargs() &&
+				isVariableArity() &&
+				!getParameter(getNumParameter()-1).type().isReifiable())
+			warning("possible heap pollution for " +
+				"variable arity parameter");
+	}
+
+}

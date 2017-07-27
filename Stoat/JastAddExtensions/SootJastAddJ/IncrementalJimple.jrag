@@ -1,0 +1,53 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+ 
+ aspect IncrementalJimple {
+ 
+	public void Program.releaseCompilationUnitForFile(String fileName) {
+	    //clear caches
+		lookupType_String_String_values = new HashMap();
+		hasPackage_String_values = new HashMap();
+
+		loadedCompilationUnit.remove(fileName);
+
+		List<CompilationUnit> newList = new List<CompilationUnit>();
+		for (soot.JastAddJ.CompilationUnit cu : getCompilationUnits()) {
+			boolean dontAdd = false;
+			if(cu.fromSource()) {
+				String pathName = cu.pathName();
+				if (pathName.equals(fileName)) {
+					dontAdd = true;
+				}
+			}
+			if(!dontAdd) {
+				newList.add(cu);
+			}
+		}
+		setCompilationUnitList(newList);		
+	} 
+	
+	refine EmitJimpleRefinements eq ClassDecl.sootClass() {
+		if(!Scene.v().isIncrementalBuild()) {
+			return refined();
+		}
+			
+	    if(Scene.v().containsClass(jvmName())) {
+			Scene.v().removeClass(Scene.v().getSootClass(jvmName()));
+		}
+	
+	    SootClass sc = null;
+	    if(options().verbose())
+	    	System.out.println("Creating from source " + jvmName());        
+	    sc = new SootClass(jvmName());
+	    sc.setResolvingLevel(SootClass.DANGLING);
+		Scene.v().addClass(sc);
+	    return sc;
+	}
+	 
+ }

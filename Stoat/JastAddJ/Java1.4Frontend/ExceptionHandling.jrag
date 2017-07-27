@@ -1,0 +1,295 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect ExceptionHandling {
+
+  // exception types
+  eq Program.getChild().typeException() = lookupType("java.lang", "Exception");
+  inh lazy TypeDecl TypeDecl.typeException();
+  eq Program.getChild().typeRuntimeException() = lookupType("java.lang", "RuntimeException");
+  inh lazy TypeDecl TypeDecl.typeRuntimeException();
+  eq Program.getChild().typeError() = lookupType("java.lang", "Error");
+  inh lazy TypeDecl TypeDecl.typeError();
+  eq Program.getChild().typeNullPointerException() = lookupType("java.lang", "NullPointerException");
+  inh lazy TypeDecl ThrowStmt.typeNullPointerException();
+  eq Program.getChild().typeThrowable() = lookupType("java.lang", "Throwable");
+  inh lazy TypeDecl BodyDecl.typeThrowable();
+
+  syn lazy boolean TypeDecl.isException() = instanceOf(typeException());
+
+  /**
+   * Unfortunately the concept of checked vs. unchecked exceptions
+   * has been inverted in JastAddJ compared to the Java specification.
+   * This is a slightly unfortunate design flaw which we cannot change
+   * at this time.
+   */
+  syn lazy boolean TypeDecl.isCheckedException() = isException() &&
+    (instanceOf(typeRuntimeException()) || instanceOf(typeError()));
+
+  /**
+   * Unfortunately the concept of checked vs. unchecked exceptions
+   * has been inverted in JastAddJ compared to the Java specification.
+   * This is a slightly unfortunate design flaw which we cannot change
+   * at this time.
+   */
+  syn lazy boolean TypeDecl.isUncheckedException() = isException() && !isCheckedException();
+
+  inh boolean MethodAccess.handlesException(TypeDecl exceptionType);
+  inh boolean ConstructorAccess.handlesException(TypeDecl exceptionType);
+  inh lazy boolean ThrowStmt.handlesException(TypeDecl exceptionType);
+  inh lazy boolean InstanceInitializer.handlesException(TypeDecl exceptionType);
+  inh lazy boolean StaticInitializer.handlesException(TypeDecl exceptionType);
+  inh boolean FieldDeclaration.handlesException(TypeDecl exceptionType);
+  inh lazy boolean TryStmt.handlesException(TypeDecl exceptionType);
+  inh lazy boolean ConstructorDecl.handlesException(TypeDecl exceptionType);
+  inh lazy boolean MethodDecl.handlesException(TypeDecl exceptionType);
+  inh boolean ClassInstanceExpr.handlesException(TypeDecl exceptionType);
+  
+  public void ASTNode.exceptionHandling() {
+  }
+  
+  public void MethodAccess.exceptionHandling() {
+    for(Iterator iter = exceptionCollection().iterator(); iter.hasNext(); ) {
+      TypeDecl exceptionType = (TypeDecl)iter.next();
+      if(!handlesException(exceptionType))
+        error("" + decl().hostType().fullName() + "." + this + " invoked in " + hostType().fullName() + " may throw uncaught exception " + exceptionType.fullName());
+    }
+  }
+
+  syn lazy Collection MethodAccess.exceptionCollection() {
+    //System.out.println("Computing exceptionCollection for " + name());
+    HashSet set = new HashSet();
+    Iterator iter = decls().iterator();
+    if(!iter.hasNext())
+      return set;
+
+    MethodDecl m = (MethodDecl)iter.next();
+    //System.out.println("Processing first found method " + m.signature() + " in " + m.hostType().fullName());
+
+    for(int i = 0; i < m.getNumException(); i++) {
+      TypeDecl exceptionType = m.getException(i).type();
+      set.add(exceptionType);
+    }
+    while(iter.hasNext()) {
+      HashSet first = new HashSet();
+      first.addAll(set);
+      HashSet second = new HashSet();
+      m = (MethodDecl)iter.next();
+      //System.out.println("Processing the next method " + m.signature() + " in " + m.hostType().fullName());
+      for(int i = 0; i < m.getNumException(); i++) {
+        TypeDecl exceptionType = m.getException(i).type();
+        second.add(exceptionType);
+      }
+      set = new HashSet();
+      for(Iterator i1 = first.iterator(); i1.hasNext(); ) {
+        TypeDecl firstType = (TypeDecl)i1.next(); 
+        for(Iterator i2 = second.iterator(); i2.hasNext(); ) {
+          TypeDecl secondType = (TypeDecl)i2.next();
+          if(firstType.instanceOf(secondType)) {
+            set.add(firstType);
+          }
+          else if(secondType.instanceOf(firstType)) {
+            set.add(secondType);
+          }
+        }
+      }
+    }
+    return set;
+  }
+
+  public void ClassDecl.exceptionHandling() {
+    constructors();
+    super.exceptionHandling();
+  }
+
+  public void ConstructorAccess.exceptionHandling() {
+    for(int i = 0; i < decl().getNumException(); i++) {
+      TypeDecl exceptionType = decl().getException(i).type();
+      if(!handlesException(exceptionType))
+        error("" + this + " may throw uncaught exception " + exceptionType.fullName());
+    }
+  }
+
+  public void ClassInstanceExpr.exceptionHandling() {
+    for (Access exception : decl().getExceptionList()) {
+      TypeDecl exceptionType = exception.type();
+      if (!handlesException(exceptionType))
+        error("" + this + " may throw uncaught exception " +
+            exceptionType.fullName() + "; it must be caught or declared as being thrown");
+    }
+  }
+
+  public void ThrowStmt.exceptionHandling() {
+    TypeDecl exceptionType = getExpr().type();
+    if(exceptionType == typeNull())
+      exceptionType = typeNullPointerException();
+    // 8.4.4
+    if(!handlesException(exceptionType))
+      error("" + this + " throws uncaught exception " + exceptionType.fullName());
+  }
+
+  eq Program.getChild().handlesException(TypeDecl exceptionType) {
+    throw new Error("Operation handlesException not supported");
+  }
+  eq CompilationUnit.getTypeDecl().handlesException(TypeDecl exceptionType) =
+    !exceptionType.isUncheckedException();
+  
+  eq MethodDecl.getBlock().handlesException(TypeDecl exceptionType) =
+    throwsException(exceptionType) || handlesException(exceptionType);
+  
+  syn lazy boolean MethodDecl.throwsException(TypeDecl exceptionType) {
+    for(int i = 0; i < getNumException(); i++)
+      if(exceptionType.instanceOf(getException(i).type()))
+        return true;
+    return false;
+  }
+  
+  eq ConstructorDecl.getBlock().handlesException(TypeDecl exceptionType) = 
+    throwsException(exceptionType) || handlesException(exceptionType);
+
+  eq ConstructorDecl.getConstructorInvocation().handlesException(TypeDecl exceptionType) = 
+    throwsException(exceptionType) || handlesException(exceptionType);
+
+  syn lazy boolean ConstructorDecl.throwsException(TypeDecl exceptionType) {
+    for(int i = 0; i < getNumException(); i++)
+      if(exceptionType.instanceOf(getException(i).type()))
+        return true;
+    return false;
+  }
+
+  eq FieldDeclaration.getInit().handlesException(TypeDecl exceptionType) {
+    if(hostType().isAnonymous())
+      return true;
+    if(!exceptionType.isUncheckedException())
+      return true;
+    for(Iterator iter = hostType().constructors().iterator(); iter.hasNext(); ) {
+      ConstructorDecl decl = (ConstructorDecl)iter.next();
+      if(!decl.throwsException(exceptionType))
+        return false;
+    }
+    return true;
+  }
+
+  // 8.6
+  eq InstanceInitializer.getBlock().handlesException(TypeDecl exceptionType) {
+    if(hostType().isAnonymous())
+      return true;
+    if(!exceptionType.isUncheckedException())
+      return true;
+    for(Iterator iter = hostType().constructors().iterator(); iter.hasNext(); ) {
+      ConstructorDecl decl = (ConstructorDecl)iter.next();
+      if(!decl.throwsException(exceptionType))
+        return false;
+    }
+    return true;
+  }
+  
+  eq StaticInitializer.getBlock().handlesException(TypeDecl exceptionType) =
+    hostType().isAnonymous() ? handlesException(exceptionType) : !exceptionType.isUncheckedException();
+  
+  eq TryStmt.getCatchClause().handlesException(TypeDecl exceptionType) {
+    if(hasFinally() && !getFinally().canCompleteNormally())
+      return true;
+    return handlesException(exceptionType);
+  }
+  
+  eq TryStmt.getBlock().handlesException(TypeDecl exceptionType) {
+    for(int i = 0; i < getNumCatchClause(); i++)
+      if(getCatchClause(i).handles(exceptionType))
+        return true;
+    if(hasFinally() && !getFinally().canCompleteNormally())
+      return true;
+    return handlesException(exceptionType);
+  }
+
+  // the catch clause catches the exception
+  syn boolean CatchClause.handles(TypeDecl exceptionType) = false;
+  eq BasicCatch.handles(TypeDecl exceptionType) =
+    !getParameter().type().isUnknown()
+    && exceptionType.instanceOf(getParameter().type());
+    
+  /**
+   * The block of the try statement can throw an exception of
+   * a type assignable to the given type.
+   */
+  syn lazy boolean TryStmt.catchableException(TypeDecl type) =
+    getBlock().reachedException(type);
+
+  protected boolean ASTNode.reachedException(TypeDecl type) {
+    for(int i = 0; i < getNumChild(); i++)
+      if(getChild(i).reachedException(type))
+        return true;
+    return false;
+  }
+
+  protected boolean TryStmt.reachedException(TypeDecl type) {
+    boolean found = false;
+    // found is true if the exception type is caught by a catch clause
+    for(int i = 0; i < getNumCatchClause() && !found; i++)
+      if(getCatchClause(i).handles(type))
+        found = true;
+    // if an exception is thrown in the block and the exception is not caught and
+    // either there is no finally block or the finally block can complete normally
+    if(!found && (!hasFinally() || getFinally().canCompleteNormally()) )
+      if(getBlock().reachedException(type))
+        return true;
+    // even if the exception is caught by the catch clauses they may 
+    // throw new exceptions
+    for(int i = 0; i < getNumCatchClause(); i++)
+      if(getCatchClause(i).reachedException(type))
+        return true;
+    return hasFinally() && getFinally().reachedException(type);
+  }
+
+  syn lazy boolean TypeDecl.mayCatch(TypeDecl thrownType) =
+    thrownType.instanceOf(this) || this.instanceOf(thrownType);
+
+  protected boolean MethodAccess.reachedException(TypeDecl catchType) {
+    for(Iterator iter = exceptionCollection().iterator(); iter.hasNext(); ) {
+      TypeDecl exceptionType = (TypeDecl)iter.next();
+      if(catchType.mayCatch(exceptionType))
+        return true;
+    }
+    return super.reachedException(catchType);
+  }
+  
+  protected boolean ThrowStmt.reachedException(TypeDecl catchType) {
+    TypeDecl exceptionType = getExpr().type();
+    if(exceptionType == typeNull())
+      exceptionType = typeNullPointerException();
+    if(catchType.mayCatch(exceptionType))
+      return true;
+    return super.reachedException(catchType);
+  }
+  
+  // 8.8.4 (8.4.4)
+  protected boolean ConstructorAccess.reachedException(TypeDecl catchType) {
+    for(int i = 0; i < decl().getNumException(); i++) {
+      TypeDecl exceptionType = decl().getException(i).type();
+      if(catchType.mayCatch(exceptionType))
+        return true;
+    }
+    return super.reachedException(catchType);
+  }
+
+  protected boolean ClassInstanceExpr.reachedException(TypeDecl catchType) {
+    ConstructorDecl decl = decl();
+    for(int i = 0; i < decl.getNumException(); i++) {
+      TypeDecl exceptionType = decl.getException(i).type();
+      if(catchType.mayCatch(exceptionType))
+        return true;
+    }
+    for(int i = 0; i < getNumArg(); i++) {
+      if(getArg(i).reachedException(catchType))
+        return true;
+    }
+    return false;
+  }
+  
+}

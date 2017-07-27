@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="test/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/libs"/>
+	<classpathentry kind="lib" path="/libs/ant.jar"/>
+	<classpathentry kind="lib" path="/libs/jasminclasses-custom.jar"/>
+	<classpathentry kind="lib" path="/libs/java_cup.jar"/>
+	<classpathentry kind="lib" path="/libs/javabdd_0.6.jar"/>
+	<classpathentry kind="lib" path="/libs/jedd-runtime.jar"/>
+	<classpathentry kind="lib" path="/libs/JFlex.jar"/>
+	<classpathentry kind="lib" path="/libs/paddle-custom.jar"/>
+	<classpathentry kind="lib" path="/libs/polyglot.jar"/>
+	<classpathentry kind="lib" path="/libs/polyglot-JFlex.jar"/>
+	<classpathentry kind="lib" path="/libs/sootclasses-custom.jar"/>
+	<classpathentry kind="lib" path="/libs/xact-complete.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

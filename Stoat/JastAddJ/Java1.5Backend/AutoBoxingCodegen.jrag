@@ -1,0 +1,391 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect AutoBoxingCodegen {
+    // Code generation for Boxing Conversion
+  refine CodeGenerationConversions void BooleanType.emitCastTo(CodeGeneration gen, TypeDecl type) {
+    if(type.unboxed() == this || type.isObject())
+      boxed().emitBoxingOperation(gen);
+  }
+  void ReferenceType.byteToThis(CodeGeneration gen) {
+    if(isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(!isNumericType())
+      typeByte().boxed().byteToThis(gen);
+    else {
+      unboxed().byteToThis(gen);
+      emitBoxingOperation(gen);
+    }
+  }
+  void ReferenceType.charToThis(CodeGeneration gen) {
+    if(isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(!isNumericType())
+      typeChar().boxed().charToThis(gen);
+    else {
+      unboxed().charToThis(gen);
+      emitBoxingOperation(gen);
+    }
+  }
+  void ReferenceType.shortToThis(CodeGeneration gen) {
+    if(isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(!isNumericType())
+      typeShort().boxed().shortToThis(gen);
+    else {
+      unboxed().shortToThis(gen);
+      emitBoxingOperation(gen);
+    }
+  }
+  void ReferenceType.intToThis(CodeGeneration gen) {
+    if(isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(!isNumericType())
+      typeInt().boxed().intToThis(gen);
+    else {
+      unboxed().intToThis(gen);
+      emitBoxingOperation(gen);
+    }
+  }
+  void ReferenceType.longToThis(CodeGeneration gen) {
+    if(isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(!isNumericType())
+      typeLong().boxed().longToThis(gen);
+    else {
+      unboxed().longToThis(gen);
+      emitBoxingOperation(gen);
+    }
+  }
+  void ReferenceType.floatToThis(CodeGeneration gen) {
+    if(isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(!isNumericType())
+      typeFloat().boxed().floatToThis(gen);
+    else {
+      unboxed().floatToThis(gen);
+      emitBoxingOperation(gen);
+    }
+  }
+  void ReferenceType.doubleToThis(CodeGeneration gen) {
+    if(isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(!isNumericType())
+      typeDouble().boxed().doubleToThis(gen);
+    else {
+      unboxed().doubleToThis(gen);
+      emitBoxingOperation(gen);
+    }
+  }
+  protected void TypeDecl.emitBoxingOperation(CodeGeneration gen) {
+    // Box the value on the stack into this Reference type
+    String classname = constantPoolName();
+    String desc = "(" + unboxed().typeDescriptor() + ")" + typeDescriptor();
+    String name = "valueOf";
+    int index = gen.constantPool().addMethodref(classname, name, desc);
+    gen.emit(Bytecode.INVOKESTATIC, variableSize() - unboxed().variableSize()).add2(index);
+  }
+
+  // Code generation for Unboxing Conversion
+  refine CodeGenerationConversions public void ReferenceType.emitCastTo(CodeGeneration gen, TypeDecl type) {
+    if(type instanceof PrimitiveType) {
+      emitUnboxingOperation(gen);
+      unboxed().emitCastTo(gen, type);
+    }
+    else 
+      refined(gen, type);
+  }
+  protected void TypeDecl.emitUnboxingOperation(CodeGeneration gen) {
+    // Unbox the value on the stack from this Reference type
+    String classname = constantPoolName();
+    String desc = "(" + ")" + unboxed().typeDescriptor();
+    String name = unboxed().name() + "Value";
+    int index = gen.constantPool().addMethodref(classname, name, desc);
+    gen.emit(Bytecode.INVOKEVIRTUAL, unboxed().variableSize() - 1).add2(index);
+  }
+
+  // Generate unboxing code for conditions
+  // 14.9 If, 14.12 While, 14.13 Do, 14.14 For
+  // 
+  // emitEvalBranch is used to emit the condition from these constructs
+  // refine behavior to include unboxing of the value when needed
+  refine CreateBCode public void Expr.emitEvalBranch(CodeGeneration gen) {
+    if(type().isReferenceType()) {
+      createBCode(gen);
+      type().emitUnboxingOperation(gen);
+      gen.emitCompare(Bytecode.IFEQ, false_label());
+      gen.emitGoto(true_label());
+    }
+    else {
+      refined(gen);
+    }
+  }
+
+
+  // 14.11 Switch
+  refine CreateBCode public void SwitchStmt.createBCode(CodeGeneration gen) {
+    super.createBCode(gen);
+    int cond_label = hostType().constantPool().newLabel();
+    int switch_label = hostType().constantPool().newLabel();
+
+    gen.emitGoto(cond_label);
+    getBlock().createBCode(gen);
+    if(canCompleteNormally())
+      gen.emitGoto(end_label());
+    gen.addLabel(cond_label);
+    getExpr().createBCode(gen);
+    if(getExpr().type().isReferenceType())
+      getExpr().type().emitUnboxingOperation(gen);
+
+    TreeMap map = new TreeMap();
+    for(int i = 0; i < getBlock().getNumStmt(); i++) {
+      if(getBlock().getStmt(i) instanceof ConstCase) {
+        ConstCase ca = (ConstCase)getBlock().getStmt(i);
+        map.put(new Integer(ca.getValue().constant().intValue()), ca);
+      }        
+    }
+
+    long low = map.isEmpty() ? 0 : ((Integer)map.firstKey()).intValue();
+    long high = map.isEmpty() ? 0 : ((Integer)map.lastKey()).intValue();
+
+    long tableSwitchSize = 8L + (high - low + 1L) * 4L;
+    long lookupSwitchSize = 4L + map.size() * 8L;
+
+    gen.addLabel(switch_label);
+    if(tableSwitchSize < lookupSwitchSize) {
+      gen.emit(Bytecode.TABLESWITCH);
+      int pad = emitPad(gen);
+      int defaultOffset = defaultOffset(gen, switch_label);
+      if(defaultOffset == 0) {
+        defaultOffset = 1 + pad + 4 + 4 + 4 + 4 * (int)(high - low + 1);
+      }
+      gen.add4(defaultOffset);
+      gen.add4((int)low);
+      gen.add4((int)high);
+      for(long i = low; i <= high; i++) {
+        ConstCase ca = (ConstCase)map.get(new Integer((int)i));
+        if(ca != null) {
+          int offset = gen.addressOf(ca.label(gen))
+            - gen.addressOf(switch_label);
+          gen.add4(offset);
+        }
+        else {
+          gen.add4(defaultOffset);
+        }
+      }
+    }
+    else {
+      gen.emit(Bytecode.LOOKUPSWITCH);
+      int pad = emitPad(gen);
+      int defaultOffset = defaultOffset(gen, switch_label);
+      if(defaultOffset == 0) {
+        defaultOffset = 1 + pad + 4 + 4 + 8 * numCase();
+      }
+      gen.add4(defaultOffset);
+      gen.add4(map.size());
+      for(Iterator iter = map.values().iterator(); iter.hasNext(); ) {
+        ConstCase ca = (ConstCase)iter.next();
+        gen.add4(ca.getValue().constant().intValue());
+        int offset = gen.addressOf(ca.label(gen))
+          - gen.addressOf(switch_label);
+        gen.add4(offset);
+      }
+    }
+    gen.addLabel(end_label());
+  }
+
+  // 15.12.2 Determine Method Signature
+
+ 
+  // 15.14.2 Postix Increment Operator ++
+  // 15.14.3 Postix Decrement Operator --
+  refine CreateBCode public void Unary.emitPostfix(CodeGeneration gen, int constant) {
+    Expr operand = getOperand();
+    while(operand instanceof ParExpr)
+      operand = ((ParExpr)operand).getExpr();
+    Access access = ((Access)operand).lastAccess();
+    access.createAssignLoadDest(gen);
+    if(needsPush())
+      access.createPushAssignmentResult(gen);
+    TypeDecl type = access.type().binaryNumericPromotion(typeInt());
+    access.type().emitCastTo(gen, type); // Added for AutoBoxing
+    type.emitPushConstant(gen, constant);
+    type.add(gen);
+    type.emitCastTo(gen, access.type());
+    access.emitStore(gen);
+  }
+
+  // 15.15.1 Prefix Increment Operator ++
+  // 15.15.2 Prefix Decrement Operator --
+  refine CreateBCode public void Unary.emitPrefix(CodeGeneration gen, int constant) {
+    Expr operand = getOperand();
+    while(operand instanceof ParExpr)
+      operand = ((ParExpr)operand).getExpr();
+    Access access = ((Access)operand).lastAccess();
+    access.createAssignLoadDest(gen);
+    TypeDecl type = access.type().binaryNumericPromotion(typeInt());
+    access.type().emitCastTo(gen, type); // Added for AutoBoxing
+    type.emitPushConstant(gen, constant);
+    type.add(gen);
+    type.emitCastTo(gen, access.type());
+    if(needsPush())
+      access.createPushAssignmentResult(gen);
+    access.emitStore(gen);
+  }
+
+  refine CreateBCode public void ArrayCreationExpr.createBCode(CodeGeneration gen) {
+    if(hasArrayInit()){
+      getArrayInit().createBCode(gen);
+    }
+    else {
+      getTypeAccess().createBCode(gen); // push array sizes
+      if(type().componentType().isPrimitive() && !type().componentType().isReferenceType()) {
+        gen.emit(Bytecode.NEWARRAY).add(type().componentType().arrayPrimitiveTypeDescriptor());
+      }
+      else {
+        if(numArrays() == 1) {
+          String n = type().componentType().arrayTypeDescriptor();
+          int index = gen.constantPool().addClass(n);
+          gen.emit(Bytecode.ANEWARRAY).add2(index);
+        }
+        else {
+          String n = type().arrayTypeDescriptor();
+          int index = gen.constantPool().addClass(n);
+          gen.emit(Bytecode.MULTIANEWARRAY, 1 - numArrays()).add2(index).add(numArrays());
+        }
+      }
+    }
+  }
+
+  refine CreateBCode public void ArrayTypeWithSizeAccess.createBCode(CodeGeneration gen) {
+    getAccess().createBCode(gen);
+    getExpr().createBCode(gen);
+    if(getExpr().type().isReferenceType())
+      getExpr().type().emitUnboxingOperation(gen);
+  }
+
+  refine CreateBCode public void ArrayInit.createBCode(CodeGeneration gen) {
+    IntegerLiteral.push(gen, getNumInit());
+    if(type().componentType().isPrimitive() && !type().componentType().isReferenceType()) {
+      gen.emit(Bytecode.NEWARRAY).add(type().componentType().arrayPrimitiveTypeDescriptor());
+    } 
+    else {
+      String n = type().componentType().arrayTypeDescriptor();
+      int index = gen.constantPool().addClass(n);
+      gen.emit(Bytecode.ANEWARRAY).add2(index);
+    }
+    for(int i = 0; i < getNumInit(); i++) {
+      gen.emitDup();
+      IntegerLiteral.push(gen, i);
+      getInit(i).createBCode(gen);
+      if(getInit(i) instanceof ArrayInit)
+        gen.emit(Bytecode.AASTORE);
+      else {
+        getInit(i).type().emitAssignConvTo(gen, expectedType()); // AssignConversion
+        gen.emit(expectedType().arrayStore());
+      }
+    }
+  }
+
+  refine CodeGenerationConversions void TypeDecl.emitAssignConvTo(CodeGeneration gen, TypeDecl type) {
+    if(!type.isIntegralType() || !isIntegralType() || type.isLong() || type.isReferenceType() || isReferenceType())
+      emitCastTo(gen, type);
+  }
+
+
+  protected void Unary.boxingGen(CodeGeneration gen) {
+    getOperand().createBCode(gen);
+    TypeDecl type = getOperand().type();
+    if(type.isReferenceType())
+      type.emitCastTo(gen, type());
+    emitOperation(gen);
+  }
+
+  public void MinusExpr.createBCode(CodeGeneration gen) { boxingGen(gen); } 
+  public void PlusExpr.createBCode(CodeGeneration gen) { boxingGen(gen); } 
+  public void BitNotExpr.createBCode(CodeGeneration gen) { boxingGen(gen); } 
+
+  refine CreateBCode public void AssignExpr.createBCode(CodeGeneration gen) {
+    TypeDecl dest = getDest().type();
+    TypeDecl source = getSource().type();
+    TypeDecl type;
+    if(dest.isNumericType() && source.isNumericType())
+      type = dest.binaryNumericPromotion(source);
+    else if(dest.isBoolean() && source.isBoolean()) {
+      type = dest.isReferenceType() ? dest.unboxed() : dest;
+    }
+    else
+      type = dest;
+    getDest().createAssignLoadDest(gen);
+    dest.emitCastTo(gen, type);
+    getSource().createBCode(gen);
+    source.emitCastTo(gen, type);
+    createAssignOp(gen, type);
+    type.emitCastTo(gen, dest);
+    if(needsPush()) {
+      getDest().createPushAssignmentResult(gen);
+    }
+    getDest().emitStore(gen);
+  }
+
+  public void EqualityExpr.emitEvalBranch(CodeGeneration gen) {
+    if(isTrue())
+      gen.emitGoto(true_label());
+    else if(isFalse())
+      gen.emitGoto(false_label());
+    else {
+      TypeDecl type = getLeftOperand().type();
+      if(type.isNumericType() && !(type.isReferenceType() && getRightOperand().type().isReferenceType())) {
+        type = binaryNumericPromotedType();
+        getLeftOperand().createBCode(gen);
+        getLeftOperand().type().emitCastTo(gen, type); // Binary numeric promotion
+        getRightOperand().createBCode(gen);
+        getRightOperand().type().emitCastTo(gen, type); // Binary numeric promotion
+      }
+      else if(type.isBoolean() && type != getRightOperand().type()) {
+        type = binaryNumericPromotedType();
+        getLeftOperand().createBCode(gen);
+        getLeftOperand().type().emitCastTo(gen, type); // Binary numeric promotion
+        getRightOperand().createBCode(gen);
+        getRightOperand().type().emitCastTo(gen, type); // Binary numeric promotion
+      }
+      else {
+        getLeftOperand().createBCode(gen);
+        getRightOperand().createBCode(gen);
+      }
+      compareBranch(gen, true_label(), type);
+      gen.emitGoto(false_label());
+      // compareNotBranch does not work for float comparison with NaN
+      //compareNotBranch(gen, false_label(), type);
+      //gen.emitGoto(true_label());
+    }
+  }
+
+  refine CreateBCode public void ArrayAccess.createBCode(CodeGeneration gen) {
+    prevExpr().createBCode(gen);
+    getExpr().createBCode(gen);
+    getExpr().type().emitCastTo(gen, typeInt());
+    gen.emit(type().arrayLoad());
+  }
+
+  refine CreateBCode public void ArrayAccess.createAssignSimpleLoadDest(CodeGeneration gen) {
+    prevExpr().createBCode(gen);
+    getExpr().createBCode(gen);
+    getExpr().type().emitCastTo(gen, typeInt());
+  }
+
+  refine CreateBCode public void ArrayAccess.createAssignLoadDest(CodeGeneration gen) {
+    prevExpr().createBCode(gen);
+    gen.emitDup();
+    getExpr().createBCode(gen);
+    getExpr().type().emitCastTo(gen, typeInt());
+    typeInt().emitDup_x1(gen);
+    gen.emit(type().arrayLoad());
+  }
+
+  public void ConditionalExpr.emitBooleanCondition(CodeGeneration gen) {
+    super.emitBooleanCondition(gen);
+    if(type().isReferenceType())
+      type().emitBoxingOperation(gen);
+  }
+
+}

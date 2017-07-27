@@ -1,0 +1,66 @@
+I'm trying to add DKMS support in a kernel module i'm working on.
+
+I have placed the kernel module source with a static lib to be linked against in the following directory:
+
+/usr/src/dpx/1.0
+With the following files:
+
+dkms.conf
+Makefile
+dpxmtt.c
+lib.a
+dkms.conf file is like this:
+
+MAKE="make"
+CLEAN="make clean"
+BUILT_MODULE_NAME=dpx
+BUILT_MODULE_LOCATION=src/
+DEST_MODULE_LOCATION=/kernel/drivers/input/touchscreen
+PACKAGE_NAME=dpxm
+PACKAGE_VERSION=1.0
+REMAKE_INITRD=yes
+And the makefile is like this:
+
+EXTRA_CFLAGS+=-DLINUX_DRIVER -mhard-float
+
+obj-m += dpx.o
+dpx-objs:= dpxmtt.o ../source/lib.a
+
+all:
+make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+
+clean:
+make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+The ../source/lib.a is an hack since when the makefile is invoked by the dkms building system it was saying that it couldn't be found in directory (the build directory), but since it was being copied to the source directory, i'm referencing it relatively.
+
+When I call
+
+sudo dkms build -m dpx -v 1.0
+The result is almost perfect:
+
+santos@NS-PC:~$ sudo dkms build -m dpx -v 1.0
+
+Kernel preparation unnecessary for this kernel.  Skipping...
+
+Building module:
+cleaning build area....
+make KERNELRELEASE=3.0.0-14-generic....
+ERROR (dkms apport): binary package for dpx: 1.0 not found
+Error!  Build of dpx.ko failed for: 3.0.0-14-generic (i686)
+Consult the make.log in the build directory
+/var/lib/dkms/dpx/1.0/build/ for more information.
+nsantos@NS-PC:~$ 
+And the content of the log file is:
+
+DKMS make.log for dpx-1.0 for kernel 3.0.0-14-generic (i686)
+Thu Jan 19 11:07:54 WET 2012
+make -C /lib/modules/3.0.0-14-generic/build M=/var/lib/dkms/dpx/1.0/build modules
+make[1]: Entering directory `/usr/src/linux-headers-3.0.0-14-generic'
+  CC [M]  /var/lib/dkms/dpx/1.0/build/dpxmtt.o
+  LD [M]  /var/lib/dkms/dpx/1.0/build/dpx.o
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /var/lib/dkms/dpx/1.0/build/dpx.mod.o
+  LD [M]  /var/lib/dkms/dpx/1.0/build/dpx.ko
+
+make[1]: Leaving directory `/usr/src/linux-headers-3.0.0-14-generic'

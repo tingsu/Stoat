@@ -1,0 +1,230 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import java.util.*;
+import java.util.ArrayList;
+
+aspect ConstructScope {
+  inh Collection ConstructorAccess.lookupConstructor();
+  eq Program.getChild().lookupConstructor() = Collections.EMPTY_LIST;
+  eq TypeDecl.getBodyDecl().lookupConstructor() = constructors();
+  eq AbstractDot.getRight().lookupConstructor() = getLeft().type().constructors();
+
+  inh Collection SuperConstructorAccess.lookupSuperConstructor();
+  eq TypeDecl.getBodyDecl().lookupSuperConstructor() = lookupSuperConstructor();
+  syn Collection TypeDecl.lookupSuperConstructor() = Collections.EMPTY_LIST;
+  eq ClassDecl.lookupSuperConstructor() = hasSuperclass() ? superclass().constructors() : Collections.EMPTY_LIST;
+  eq InterfaceDecl.lookupSuperConstructor() = typeObject().constructors();
+  eq Program.getChild().lookupSuperConstructor() = Collections.EMPTY_LIST;
+  eq AbstractDot.getRight().lookupSuperConstructor() = getLeft().type().lookupSuperConstructor();
+
+  inh TypeDecl ClassInstanceExpr.typeObject();
+  
+  // compute the most specific constructor in a collection
+  // the constructor is invoked with the arguments specified in argList
+  // the curent context (this) is used to evaluate the hostType for accessibility
+  syn SimpleSet Expr.mostSpecificConstructor(Collection constructors) {
+    SimpleSet maxSpecific = SimpleSet.emptySet;
+    for(Iterator iter = constructors.iterator(); iter.hasNext(); ) {
+      ConstructorDecl decl = (ConstructorDecl)iter.next();
+      if(applicableAndAccessible(decl)) {
+        if(maxSpecific.isEmpty())
+          maxSpecific = maxSpecific.add(decl);
+        else {
+          if(decl.moreSpecificThan((ConstructorDecl)maxSpecific.iterator().next()))
+            maxSpecific = SimpleSet.emptySet.add(decl);
+          else if(!((ConstructorDecl)maxSpecific.iterator().next()).moreSpecificThan(decl))
+            maxSpecific = maxSpecific.add(decl);
+        }
+      }
+    }
+    return maxSpecific;
+  }
+
+  syn boolean Expr.applicableAndAccessible(ConstructorDecl decl) = false;
+  eq ConstructorAccess.applicableAndAccessible(ConstructorDecl decl) =
+    decl.applicable(getArgList()) && decl.accessibleFrom(hostType());
+  eq ClassInstanceExpr.applicableAndAccessible(ConstructorDecl decl) = 
+    decl.applicable(getArgList()) && decl.accessibleFrom(hostType()) && 
+    (!decl.isProtected() || hasTypeDecl() || decl.hostPackage().equals(hostPackage()));
+  
+  syn lazy SimpleSet ConstructorAccess.decls() = mostSpecificConstructor(lookupConstructor());
+  
+  syn lazy SimpleSet SuperConstructorAccess.decls() {
+    Collection c = hasPrevExpr() && !prevExpr().isTypeAccess() ?
+      hostType().lookupSuperConstructor() : lookupSuperConstructor();
+    return mostSpecificConstructor(c);
+  }
+  
+  syn lazy ConstructorDecl ConstructorAccess.decl() {
+    SimpleSet decls = decls();
+    if(decls.size() == 1)
+      return (ConstructorDecl)decls.iterator().next();
+    return unknownConstructor();
+  }
+  inh ConstructorDecl ConstructorAccess.unknownConstructor();
+
+  syn lazy SimpleSet ClassInstanceExpr.decls() {
+    TypeDecl typeDecl = hasTypeDecl() ? getTypeDecl() : getAccess().type();
+    return mostSpecificConstructor(typeDecl.constructors());
+  }
+  
+  syn lazy ConstructorDecl ClassInstanceExpr.decl() {
+    SimpleSet decls = decls();
+    if(decls.size() == 1)
+      return (ConstructorDecl)decls.iterator().next();
+    return unknownConstructor();
+  }
+  inh ConstructorDecl ClassInstanceExpr.unknownConstructor();
+}
+
+aspect ConstructorLookup {
+  public ConstructorDecl TypeDecl.lookupConstructor(ConstructorDecl signature) {
+    for(Iterator iter = constructors().iterator(); iter.hasNext(); ) {
+      ConstructorDecl decl = (ConstructorDecl)iter.next();
+      if(decl.sameSignature(signature)) {
+        return decl;
+      }
+    }
+    return null;
+  }
+
+  syn lazy Collection TypeDecl.constructors() {
+    Collection c = new ArrayList();
+    for(int i = 0; i < getNumBodyDecl(); i++) {
+      if(getBodyDecl(i) instanceof ConstructorDecl) {
+        c.add(getBodyDecl(i));
+      }
+    }
+    return c;
+  }
+}
+
+aspect ConstructorDecl {
+  syn lazy String ConstructorDecl.name() = getID();
+  // 8.8.2
+  syn lazy String ConstructorDecl.signature() {
+    StringBuffer s = new StringBuffer();
+    s.append(name() + "(");
+    for(int i = 0; i < getNumParameter(); i++) {
+      s.append(getParameter(i));
+      if(i != getNumParameter() - 1)
+        s.append(", ");
+    }
+    s.append(")");
+    return s.toString();
+  }
+
+  // 8.8.2
+  syn lazy boolean ConstructorDecl.sameSignature(ConstructorDecl c) {
+    if(!name().equals(c.name()))
+      return false;
+    if(c.getNumParameter() != getNumParameter())
+      return false;
+    for(int i = 0; i < getNumParameter(); i++)
+      if(!c.getParameter(i).type().equals(getParameter(i).type()))
+        return false;
+    return true;
+  }
+
+  syn lazy boolean ConstructorDecl.moreSpecificThan(ConstructorDecl m) {
+    for(int i = 0; i < getNumParameter(); i++) {
+      if(!getParameter(i).type().instanceOf(m.getParameter(i).type()))
+        return false;
+    }
+    return true;
+  }
+
+  public boolean ConstructorDecl.applicable(List argList) {
+    if(getNumParameter() != argList.getNumChild())
+      return false;
+    for(int i = 0; i < getNumParameter(); i++) {
+      TypeDecl arg = ((Expr)argList.getChild(i)).type();
+      TypeDecl parameter = getParameter(i).type();
+      if(!arg.instanceOf(parameter)) {
+        return false;
+      }  
+    }
+    return true;
+  }
+}
+aspect ImplicitConstructor {
+  syn boolean List.requiresDefaultConstructor() {
+    if(getParent() instanceof ClassDecl) {
+      ClassDecl c = (ClassDecl)getParent();
+      return c.noConstructor() && c.getBodyDeclListNoTransform() == this && !(c instanceof AnonymousDecl);
+    }
+    return false;
+  }
+
+  /**
+   * Flag to indicate if this constructor is an auto-generated
+   * default constructor. Default constructors are not pretty
+   * printed.
+   */
+  private boolean ConstructorDecl.isDefaultConstructor = false;
+  /**
+   * Set the default constructor flag. Causes this constructor
+   * to not be pretty printed.
+   */
+  public void ConstructorDecl.setDefaultConstructor() {
+    isDefaultConstructor = true;
+  }
+  /**
+   * @return true if this is an auto-generated default constructor
+   */
+  syn boolean ConstructorDecl.isDefaultConstructor() =
+    isDefaultConstructor;
+    
+  rewrite List {
+    when(requiresDefaultConstructor())
+    to List {
+      ClassDecl c = (ClassDecl)getParent();
+      Modifiers m = new Modifiers();
+      if(c.isPublic()) m.addModifier(new Modifier("public"));
+      else if(c.isProtected()) m.addModifier(new Modifier("protected"));
+      else if(c.isPrivate()) m.addModifier(new Modifier("private"));
+      ConstructorDecl constructor = new ConstructorDecl(
+            m,
+            c.name(),
+            new List(),
+            new List(),
+            new Opt(),
+            new Block()
+      );
+      constructor.setDefaultConstructor();
+      c.addBodyDecl(constructor);
+      return this;
+    }
+  }
+
+  syn boolean ClassDecl.noConstructor() {
+    if(!compilationUnit().fromSource())
+      return false;
+    for(int i = 0; i < getNumBodyDecl(); i++)
+      if(getBodyDecl(i) instanceof ConstructorDecl)
+        return false;
+    return true;
+  }
+  
+  // 8.8.5
+  rewrite ConstructorDecl {
+    when(!hasConstructorInvocation() && !hostType().isObject())
+    to ConstructorDecl {
+      setConstructorInvocation(
+        new ExprStmt(
+          new SuperConstructorAccess("super", new List())
+          )
+        );
+      return this;
+    }
+  }
+}
+
+

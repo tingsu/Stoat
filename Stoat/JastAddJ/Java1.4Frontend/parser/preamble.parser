@@ -1,0 +1,54 @@
+%header {:
+ package parser;
+ import AST.*;
+:};
+%embed {:
+  class Events extends Parser.Events {
+    public void scannerError(Scanner.Exception e) {
+      errors.add(new Problem(null, e.getMessage(), e.line, e.column, Problem.Severity.ERROR, Problem.Kind.LEXICAL));
+    }
+    public void syntaxError(Symbol token) {
+      int line = token.getLine(token.getStart());
+      int column = token.getColumn(token.getStart());
+      int endLine = token.getLine(token.getEnd());
+      int endColumn = token.getColumn(token.getEnd());
+      String value = token.value != null ? token.value.toString() : Terminals.NAMES[token.getId()];
+      errors.add(new Problem(null, "unexpected token \"" + value + "\"", line, column, endLine, endColumn, Problem.Severity.ERROR, Problem.Kind.SYNTACTIC));
+    }
+    public void unexpectedTokenRemoved(Symbol token) {
+    }
+    public void missingTokenInserted(Symbol token) {
+    }
+    public void misspelledTokenReplaced(Symbol token) {
+    }
+    public void errorPhraseRemoved(Symbol error) {
+    }
+  }
+
+        {
+            report = new Events(); // Use error handler in parser
+        }
+
+   public CompilationUnit parse(java.io.InputStream is, String fileName) throws java.io.IOException, beaver.Parser.Exception {
+     CompilationUnit cu;
+     errors = new ArrayList();
+     try {
+       scanner.JavaScanner scanner = new scanner.JavaScanner(new scanner.Unicode(is));
+       cu = (CompilationUnit)parse(scanner);
+     } catch(Parser.Exception e) {
+       // build empty compilation unit for failed error recovery
+       cu = new CompilationUnit();
+     } catch(Error e) {
+       cu = new CompilationUnit();
+       errors.add(new Problem(null, e.getMessage(), 0, 0, Problem.Severity.ERROR, Problem.Kind.LEXICAL));
+     }
+     for(java.util.Iterator iter = errors.iterator(); iter.hasNext(); ) {
+       Problem p = (Problem)iter.next();
+       p.setFileName(fileName);
+       cu.addParseError(p);
+     }
+     return cu;
+   }
+   protected java.util.Collection errors = new ArrayList();
+:};
+

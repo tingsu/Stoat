@@ -1,0 +1,26 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received
+ * a copy of the modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect SuppressWarnings {
+  syn boolean VariableDeclaration.hasAnnotationSuppressWarnings(String s) =
+    getModifiers().hasAnnotationSuppressWarnings(s);
+
+  inh boolean VariableDeclaration.withinSuppressWarnings(String s);
+  inh boolean FieldDeclaration.withinSuppressWarnings(String s);
+  inh boolean AssignSimpleExpr.withinSuppressWarnings(String s);
+  inh boolean CastExpr.withinSuppressWarnings(String s);
+  inh boolean MethodDecl.withinSuppressWarnings(String s);
+  inh boolean MethodAccess.withinSuppressWarnings(String s);
+
+  syn boolean VariableDeclaration.suppressWarnings(String type) =
+    hasAnnotationSuppressWarnings(type) || withinSuppressWarnings(type);
+  syn boolean FieldDeclaration.suppressWarnings(String type) =
+    hasAnnotationSuppressWarnings(type) || withinSuppressWarnings(type);
+  syn boolean MethodDecl.suppressWarnings(String type) =
+    hasAnnotationSuppressWarnings(type) || withinSuppressWarnings(type);
+}

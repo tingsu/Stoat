@@ -1,0 +1,51 @@
+// generic type declarations
+GenericClassDecl : ClassDecl ::= Modifiers <ID:String> [SuperClassAccess:Access] Implements:Access* BodyDecl* TypeParameter:TypeVariable*; // ES: removing /ParTypeDecl:ParClassDecl*/ to replace with parameterized syn nta
+GenericInterfaceDecl : InterfaceDecl ::= Modifiers <ID:String> SuperInterfaceId:Access* BodyDecl* TypeParameter:TypeVariable*; // ES: removing /ParTypeDecl:ParInterfaceDecl*/ to replace with parameterized syn nta
+
+// parameterized type declarations
+ParClassDecl : ClassDecl ::= Argument:Access* /[SuperClassAccess:Access]/ /Implements:Access*/ /BodyDecl*/;
+RawClassDecl : ParClassDecl ::= /Argument:Access*/; // ES testing to add an ast NTA list for arguments
+
+ParInterfaceDecl : InterfaceDecl ::= Argument:Access* /SuperInterfaceId:Access*/ /BodyDecl*/;
+RawInterfaceDecl : ParInterfaceDecl ::= /Argument:Access*/; // ES testing to add an ast NTA list for arguments
+
+// ES: Adding a List subclass to put in the ast NTA list for types implementing MemberSubstitutor
+BodyDeclList : List;
+
+// parameterized type access
+ParTypeAccess : Access ::= TypeAccess:Access TypeArgument:Access*;
+
+TypeVariable : ReferenceType ::= Modifiers <ID:String> BodyDecl* TypeBound:Access*;
+
+abstract AbstractWildcard : Access;
+Wildcard : AbstractWildcard;
+WildcardExtends : AbstractWildcard ::= Access;
+WildcardSuper : AbstractWildcard ::= Access;
+
+abstract AbstractWildcardType : TypeDecl;
+WildcardType : AbstractWildcardType;
+WildcardExtendsType : AbstractWildcardType ::= Access;
+WildcardSuperType : AbstractWildcardType ::= Access;
+
+MethodDeclSubstituted : MethodDecl ::= <Original:MethodDecl>;
+ConstructorDeclSubstituted : ConstructorDecl ::= <Original:ConstructorDecl>;
+FieldDeclarationSubstituted : FieldDeclaration ::= <Original:FieldDeclaration>;
+ParameterDeclarationSubstituted : ParameterDeclaration ::= <Original:ParameterDeclaration>;
+VariableArityParameterDeclarationSubstituted : VariableArityParameterDeclaration ::= <Original:VariableArityParameterDeclaration>;
+
+// ES: Adding /BodyDecl*/ to types implementing MemberSubstitutor in Generics.jrag
+//ClassDeclSubstituted : ClassDecl ::= <Original:TypeDecl>;
+//InterfaceDeclSubstituted : InterfaceDecl ::= <Original:TypeDecl>;
+//GenericClassDeclSubstituted : GenericClassDecl ::= <Original:TypeDecl>;
+//GenericInterfaceDeclSubstituted : GenericInterfaceDecl ::= <Original:TypeDecl>;
+ClassDeclSubstituted : ClassDecl ::= <Original:TypeDecl> /BodyDecl*/;
+InterfaceDeclSubstituted : InterfaceDecl ::= <Original:TypeDecl> /BodyDecl*/;
+GenericClassDeclSubstituted : GenericClassDecl ::= <Original:TypeDecl> /BodyDecl*/;
+GenericInterfaceDeclSubstituted : GenericInterfaceDecl ::= <Original:TypeDecl> /BodyDecl*/;
+
+LUBType : ReferenceType ::= Modifiers <ID:String> BodyDecl* TypeBound:Access*;
+GLBType : ReferenceType ::= Modifiers <ID:String> BodyDecl* TypeBound:Access*;
+
+WildcardsCompilationUnit : CompilationUnit;
+
+BridgeMethodDecl : MethodDecl;

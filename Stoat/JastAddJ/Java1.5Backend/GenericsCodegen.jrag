@@ -1,0 +1,518 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect GenericsCodegen {
+   refine InnerClasses eq ClassDecl.superEnclosing() {
+     return superclass().erasure().enclosing();
+   }
+
+   eq TypeVariable.typeDescriptor() = erasure().typeDescriptor();
+   eq ParClassDecl.typeDescriptor() = erasure().typeDescriptor();
+   eq ParInterfaceDecl.typeDescriptor() = erasure().typeDescriptor();
+
+   eq GenericClassDeclSubstituted.typeDescriptor() = original().typeDescriptor();
+   eq GenericInterfaceDeclSubstituted.typeDescriptor() = original().typeDescriptor();
+   eq ClassDeclSubstituted.typeDescriptor() = original().typeDescriptor();
+   eq InterfaceDeclSubstituted.typeDescriptor() = original().typeDescriptor();
+
+   eq GenericClassDeclSubstituted.constantPoolName() = original().constantPoolName();
+   eq GenericInterfaceDeclSubstituted.constantPoolName() = original().constantPoolName();
+   eq ClassDeclSubstituted.constantPoolName() = original().constantPoolName();
+   eq InterfaceDeclSubstituted.constantPoolName() = original().constantPoolName();
+
+   eq ClassDeclSubstituted.uniqueIndex() = original().uniqueIndex();
+   eq GenericClassDeclSubstituted.uniqueIndex() = original().uniqueIndex();
+   eq InterfaceDeclSubstituted.uniqueIndex() = original().uniqueIndex();
+   eq GenericInterfaceDeclSubstituted.uniqueIndex() = original().uniqueIndex();
+   eq ParTypeDecl.uniqueIndex() = genericDecl().uniqueIndex();
+
+   eq TypeVariable.arrayTypeDescriptor() = erasure().arrayTypeDescriptor();
+   eq ParClassDecl.arrayTypeDescriptor() = erasure().arrayTypeDescriptor();
+   eq ParInterfaceDecl.arrayTypeDescriptor() = erasure().arrayTypeDescriptor();
+   //eq WildcardType.typeDescriptor() = erasure().typeDescriptor();
+
+   eq GenericClassDeclSubstituted.arrayTypeDescriptor() = original().arrayTypeDescriptor();
+   eq GenericInterfaceDeclSubstituted.arrayTypeDescriptor() = original().arrayTypeDescriptor();
+   eq ClassDeclSubstituted.arrayTypeDescriptor() = original().arrayTypeDescriptor();
+   eq InterfaceDeclSubstituted.arrayTypeDescriptor() = original().arrayTypeDescriptor();
+
+   public ConstructorDecl ConstructorDeclSubstituted.createAccessor() {
+     return sourceConstructorDecl().createAccessor();
+   }
+   
+   protected TypeDecl ConstructorDeclSubstituted.createAnonymousJavaTypeDecl() {
+     return sourceConstructorDecl().createAnonymousJavaTypeDecl();
+   }
+
+  syn FieldDeclaration FieldDeclaration.erasedField() = this;
+  eq FieldDeclarationSubstituted.erasedField() = getOriginal().erasedField();
+
+  syn MethodDecl MethodDecl.erasedMethod() = this;
+  eq MethodDeclSubstituted.erasedMethod() = getOriginal().erasedMethod();
+  eq ParMethodDecl.erasedMethod() = genericMethodDecl().erasedMethod();
+
+  refine CodeGeneration public void VarAccess.emitStore(CodeGeneration gen) {
+    Variable v = decl();
+    if(v instanceof FieldDeclaration) {
+      FieldDeclaration f = (FieldDeclaration)v;
+      f = f.erasedField();
+      if(requiresAccessor())
+        f.createAccessorWrite(fieldQualifierType()).emitInvokeMethod(gen, fieldQualifierType());
+      else
+        f.emitStoreField(gen, fieldQualifierType());
+    }
+    else
+      refined(gen);
+  }
+  refine CreateBCode public void VarAccess.createAssignLoadDest(CodeGeneration gen) {
+    Variable v = decl();
+    if(v instanceof FieldDeclaration) {
+      createLoadQualifier(gen);
+      if(v.isInstanceVariable())
+        gen.emitDup();
+      FieldDeclaration f = (FieldDeclaration)v;
+      f = f.erasedField();
+      if(requiresAccessor())
+        f.createAccessor(fieldQualifierType()).emitInvokeMethod(gen, fieldQualifierType());
+      else
+        f.emitLoadField(gen, fieldQualifierType());
+    }
+    else
+      refined(gen);
+  }
+
+  refine CreateBCode public void VarAccess.createBCode(CodeGeneration gen) {
+    Variable v = decl();
+    if(v instanceof FieldDeclaration) {
+      FieldDeclaration f = (FieldDeclaration)v;
+      f = f.erasedField();
+      createLoadQualifier(gen);
+      if(f.isConstant() && (f.type().isPrimitive() || f.type().isString())) {
+        if(!f.isStatic())
+          fieldQualifierType().emitPop(gen);
+        f.constant().createBCode(gen);
+      }
+      else if(requiresAccessor())
+        f.createAccessor(fieldQualifierType()).emitInvokeMethod(gen, fieldQualifierType());
+      else
+        f.emitLoadField(gen, fieldQualifierType());
+      if(f.type() != decl().type())
+        gen.emitCheckCast(decl().type());
+    }
+    else
+      refined(gen);
+  }
+
+  refine CreateBCode public void MethodAccess.createBCode(CodeGeneration gen) {
+    MethodDecl decl = decl().erasedMethod();
+    createLoadQualifier(gen);
+
+    if(decl.type().isUnknown()) {
+      System.err.println("Could not bind " + this);
+      for (int i = 0; i < getNumArg(); ++i) {
+        System.err.println("Argument " + getArg(i) + " is of type " + getArg(i).type().typeName());
+        if(getArg(i).varDecl() != null) System.err.println(getArg(i).varDecl() + " in " + getArg(i).varDecl().hostType().typeName());
+      }
+      if(isQualified())
+        System.err.println("Qualifier " + qualifier() + " is of type " + qualifier().type().typeName());
+      throw new Error("Could not bind " + this);
+    }
+    if(decl.getNumParameter() != getNumArg()) {
+      System.out.println(this + " does not have the same number of arguments as " + decl);
+    }
+
+    for (int i = 0; i < getNumArg(); ++i) {
+      getArg(i).createBCode(gen);
+      // the cast or boxing/unboxing operation must know the bound rather than the erased type
+      getArg(i).type().emitCastTo(gen, decl().getParameter(i).type()); // MethodInvocationConversion
+    }
+    if(!decl.isStatic() && isQualified() && prevExpr().isSuperAccess()) {
+      if(!hostType().instanceOf(prevExpr().type()))
+        decl().createSuperAccessor(superAccessorTarget()).emitInvokeMethod(gen, superAccessorTarget());
+      else
+        decl.emitInvokeSpecialMethod(gen, methodQualifierType());
+    }
+    else
+      decl.emitInvokeMethod(gen, methodQualifierType());
+
+    if(decl.type() != decl().type())
+      gen.emitCheckCast(decl().type());
+  }
+
+  refine InnerClasses protected TypeDecl MethodAccess.methodQualifierType() {
+    TypeDecl typeDecl = refined();
+    if(typeDecl == null)
+      return null;
+    typeDecl = typeDecl.erasure();
+    MethodDecl m = decl().sourceMethodDecl();
+    Collection methods = typeDecl.memberMethods(m.name());
+    if(!methods.contains(decl()) && !methods.contains(m))
+      return m.hostType();
+    return typeDecl.erasure();
+  }
+
+  refine InnerClasses protected TypeDecl VarAccess.fieldQualifierType() {
+    TypeDecl typeDecl = refined();
+    return typeDecl == null ? null : typeDecl.erasure();
+  }
+
+  public void ConstructorDeclSubstituted.emitInvokeConstructor(CodeGeneration gen) {
+    erasedConstructor().emitInvokeConstructor(gen);
+  }
+  syn ConstructorDecl ConstructorDecl.erasedConstructor() = this;
+  eq ConstructorDeclSubstituted.erasedConstructor() = getOriginal().erasedConstructor();
+
+
+  eq TypeVariable.constantPoolName() = erasure().constantPoolName();
+  eq ParClassDecl.constantPoolName() = genericDecl().constantPoolName();
+  eq ParInterfaceDecl.constantPoolName() = genericDecl().constantPoolName();
+  eq GenericClassDecl.constantPoolName() {
+    if(!isNestedType()) {
+      String packageName = packageName();
+      if(!packageName.equals("")) {
+        packageName = packageName.replace('.', '/') + "/";
+      }
+      return packageName + getID();
+    }
+    else {
+      String prefix = enclosingType().constantPoolName();
+      if(isAnonymous()) {
+        return prefix + "$" + uniqueIndex();
+      }
+      else if(isLocalClass()) {
+        return prefix + "$" + uniqueIndex() + getID();
+      }
+      return prefix + "$" + getID();
+    }
+  }
+  eq GenericInterfaceDecl.constantPoolName() {
+    if(!isNestedType()) {
+      String packageName = packageName();
+      if(!packageName.equals("")) {
+        packageName = packageName.replace('.', '/') + "/";
+      }
+      return packageName + getID();
+    }
+    else {
+      String prefix = enclosingType().constantPoolName();
+      if(isAnonymous()) {
+        return prefix + "$" + uniqueIndex();
+      }
+      else if(isLocalClass()) {
+        return prefix + "$" + uniqueIndex() + getID();
+      }
+      return prefix + "$" + getID();
+    }
+  }
+
+  public void BridgeMethodDecl.transformation() { }
+  public void MethodDeclSubstituted.transformation() { }
+  public void ParMethodDecl.transformation() { }
+
+  public static final int Modifiers.ACC_BRIDGE = 0x0040;
+
+  eq BridgeMethodDecl.flags() {
+    int res = super.flags();
+    res |= Modifiers.ACC_BRIDGE;
+    res |= Modifiers.ACC_SYNTHETIC;
+    return res;
+  }
+
+  syn SimpleSet TypeDecl.bridgeCandidates(String signature) = SimpleSet.emptySet;
+  eq InterfaceDecl.bridgeCandidates(String signature) = ancestorMethods(signature);
+  eq ClassDecl.bridgeCandidates(String signature) {
+    SimpleSet set = ancestorMethods(signature);
+    for(Iterator iter = interfacesMethodsSignature(signature).iterator(); iter.hasNext(); )
+      set = set.add(iter.next());
+    return set;
+  }
+  
+  public void MethodDecl.transformation() {
+    super.transformation();
+    HashSet processed = new HashSet();
+    for(Iterator iter = hostType().bridgeCandidates(signature()).iterator(); iter.hasNext(); ) {
+      MethodDecl m = (MethodDecl)iter.next();
+      if(this.overrides(m)) {
+        MethodDecl erased = m.erasedMethod();
+        if(!erased.signature().equals(signature()) || erased.type().erasure() != type().erasure()) {
+          StringBuffer keyBuffer = new StringBuffer();
+          for(int i = 0; i < getNumParameter(); i++) {
+            keyBuffer.append(erased.getParameter(i).type().erasure().fullName());
+          }
+          keyBuffer.append(erased.type().erasure().fullName());
+          String key = keyBuffer.toString();
+          if(!processed.contains(key)) {
+            processed.add(key);
+
+            List args = new List();
+            List parameters = new List();
+            for(int i = 0; i < getNumParameter(); i++) {
+              args.add(new CastExpr(getParameter(i).type().erasure().createBoundAccess(), new VarAccess("p" + i)));
+              parameters.add(new ParameterDeclaration(erased.getParameter(i).type().erasure(), "p" + i));
+            }
+            Stmt stmt;
+            if(type().isVoid()) {
+              stmt = new ExprStmt(
+                  createBoundAccess(
+                    args
+                    )
+                  );
+            }
+            else {
+              stmt = new ReturnStmt(
+                  createBoundAccess(
+                    args
+                    )
+                  );
+            }
+            List modifiersList = new List();
+            if(isPublic())
+              modifiersList.add(new Modifier("public"));
+            else if(isProtected())
+              modifiersList.add(new Modifier("protected"));
+            else if(isPrivate())
+              modifiersList.add(new Modifier("private"));
+            MethodDecl bridge = new BridgeMethodDecl(
+                new Modifiers(modifiersList),
+                erased.type().erasure().createBoundAccess(),
+                erased.name(),
+                parameters,
+                (List)getExceptionList().fullCopy(),
+                new Opt(
+                  new Block(
+                    new List().add(stmt)
+                    )
+                  )
+                );
+            hostType().addBodyDecl(bridge);
+          }
+        }
+      }
+    }
+  }
+
+  public void ParTypeDecl.transformation() {
+  }
+
+  refine Transformations public void TypeAccess.transformation() {
+    super.transformation();
+    if(type().elementType().isNestedType() && hostType() != null)
+      hostType().addUsedNestedType(type().elementType().erasure().sourceTypeDecl());
+  }
+
+  // add Signature Attribute 
+  refine AnnotationsCodegen eq TypeDecl.attributes() {
+    Collection c = refined();
+    if(needsSignatureAttribute())
+      c.add(new SignatureAttribute(constantPool(), classSignature()));
+    return c;
+  }
+
+  refine AnnotationsCodegen eq MethodDecl.attributes() {
+    Collection c = refined();
+    if(needsSignatureAttribute())
+      c.add(new SignatureAttribute(hostType().constantPool(), methodTypeSignature()));
+    return c;
+  }
+
+  refine AnnotationsCodegen eq FieldDeclaration.attributes() {
+    Collection c = refined();
+    if(needsSignatureAttribute())
+      c.add(new SignatureAttribute(hostType().constantPool(), type().fieldTypeSignature()));
+    return c;
+  }
+
+  class SignatureAttribute extends Attribute {
+    public SignatureAttribute(ConstantPool cp, String signature) {
+      super(cp, "Signature");
+      u2(cp.addUtf8(signature));
+    }
+  }
+
+  // Determine which classes, interfaces, methods, and fields need a signature attribute
+  syn lazy boolean TypeDecl.needsSignatureAttribute() = false;
+  eq GenericClassDecl.needsSignatureAttribute() = true;
+  eq GenericInterfaceDecl.needsSignatureAttribute() = true;
+  eq ParClassDecl.needsSignatureAttribute() = true;
+  eq ParInterfaceDecl.needsSignatureAttribute() = true;
+  eq AbstractWildcardType.needsSignatureAttribute() = true;
+  eq TypeVariable.needsSignatureAttribute() = true;
+  eq ArrayDecl.needsSignatureAttribute() = elementType().needsSignatureAttribute();
+  eq ClassDecl.needsSignatureAttribute() {
+    if(hasSuperclass() && superclass().needsSignatureAttribute())
+      return true;
+    for(Iterator iter = interfacesIterator(); iter.hasNext(); )
+      if(((TypeDecl)iter.next()).needsSignatureAttribute())
+        return true;
+    return false;
+  }
+  eq InterfaceDecl.needsSignatureAttribute() {
+    for(Iterator iter = superinterfacesIterator(); iter.hasNext(); )
+      if(((TypeDecl)iter.next()).needsSignatureAttribute())
+        return true;
+    return false;
+  }
+
+  syn boolean BodyDecl.needsSignatureAttribute() = false;
+  syn boolean MethodDecl.needsSignatureAttribute() {
+    if(type().needsSignatureAttribute())
+      return true;
+    for(int i = 0; i < getNumParameter(); i++)
+      if(getParameter(i).type().needsSignatureAttribute())
+        return true;
+    return false;
+  }
+
+  eq GenericMethodDecl.needsSignatureAttribute() = true;
+  syn boolean ConstructorDecl.needsSignatureAttribute() {
+    for(int i = 0; i < getNumParameter(); i++)
+      if(getParameter(i).type().needsSignatureAttribute())
+        return true;
+    return false;
+  }
+  eq GenericConstructorDecl.needsSignatureAttribute() = true;
+
+  eq FieldDeclaration.needsSignatureAttribute() = type().needsSignatureAttribute();
+
+  // compute the signature string used for the signature attribute
+  syn lazy String TypeDecl.classSignature() = "";
+  eq ClassDecl.classSignature() {
+    StringBuffer buf = new StringBuffer();
+    // SuperclassSignature
+    if(hasSuperclass())
+      buf.append(superclass().classTypeSignature());
+    // SuperinterfaceSignature*
+    for(Iterator iter = interfacesIterator(); iter.hasNext(); )
+      buf.append(((TypeDecl)iter.next()).classTypeSignature());
+    return buf.toString();
+  }
+  eq InterfaceDecl.classSignature() {
+    StringBuffer buf = new StringBuffer();
+    // SuperclassSignature
+    buf.append(typeObject().classTypeSignature());
+    // SuperinterfaceSignature*
+    for(Iterator iter = superinterfacesIterator(); iter.hasNext(); )
+      buf.append(((TypeDecl)iter.next()).classTypeSignature());
+    return buf.toString();
+  }
+  eq GenericClassDecl.classSignature() {
+    StringBuffer buf = new StringBuffer();
+    // FormalTypeParameters
+    buf.append("<");
+    for(int i = 0; i < getNumTypeParameter(); i++)
+      buf.append(getTypeParameter(i).formalTypeParameter());
+    buf.append(">");
+    buf.append(super.classSignature());
+    return buf.toString();
+  }
+  eq GenericInterfaceDecl.classSignature() {
+    StringBuffer buf = new StringBuffer();
+    // FormalTypeParameters
+    buf.append("<");
+    for(int i = 0; i < getNumTypeParameter(); i++)
+      buf.append(getTypeParameter(i).formalTypeParameter());
+    buf.append(">");
+    buf.append(super.classSignature());
+    return buf.toString();
+  }
+
+  // FormalTypeParameter
+  syn String TypeVariable.formalTypeParameter() {
+    StringBuffer buf = new StringBuffer();
+    // Identifier
+    buf.append(name());
+    buf.append(":");
+    if(getNumTypeBound() > 0) {
+      // ClassBound InterfaceBound*
+      if(getTypeBound(0).type().isClassDecl())
+        buf.append(getTypeBound(0).type().fieldTypeSignature());
+      else
+        buf.append(":" + getTypeBound(0).type().fieldTypeSignature());
+      for(int i = 1; i < getNumTypeBound(); i++)
+        buf.append(":" + getTypeBound(i).type().fieldTypeSignature());
+    }
+    return buf.toString();
+  }
+
+  syn lazy String TypeDecl.fieldTypeSignature() = classTypeSignature();
+  eq ArrayDecl.fieldTypeSignature() = "[" + componentType().fieldTypeSignature();
+  eq TypeVariable.fieldTypeSignature() = classTypeSignature();
+  eq WildcardType.fieldTypeSignature() = "*";
+  eq WildcardExtendsType.fieldTypeSignature() = "+" + extendsType().fieldTypeSignature();
+  eq WildcardSuperType.fieldTypeSignature() = "-" + superType().fieldTypeSignature();
+  eq PrimitiveType.fieldTypeSignature() = classTypeSignature();
+  eq VoidType.fieldTypeSignature() = classTypeSignature();
+
+  syn lazy String TypeDecl.classTypeSignature() = "L" + classTypeSignatureContents() + ";";
+  eq ArrayDecl.classTypeSignature() = "[" + componentType().classTypeSignature();
+  eq TypeVariable.classTypeSignature() = "T" + name() + ";";
+  eq PrimitiveType.classTypeSignature() = typeDescriptor();
+  eq VoidType.classTypeSignature() = typeDescriptor();
+
+  syn String TypeDecl.classTypeSignatureContents() {
+    StringBuffer buf = new StringBuffer();
+    if(isTopLevelType()) {
+      if(!packageName().equals(""))
+        buf.append(packageName().replace('.', '/') + "/");
+    }
+    else
+      buf.append(enclosingType().classTypeSignatureContents() + ".");
+    buf.append(name());
+    buf.append(typeArgumentsOpt());
+    return buf.toString();
+  }
+  syn String TypeDecl.typeArgumentsOpt() = "";
+  eq ParTypeDecl.typeArgumentsOpt() {
+    StringBuffer buf = new StringBuffer();
+    buf.append("<");
+    for(int i = 0; i < getNumArgument(); i++)
+      buf.append(getArgument(i).type().fieldTypeSignature());
+    buf.append(">");
+    return buf.toString();
+  }
+  eq RawClassDecl.typeArgumentsOpt() = "";
+  eq RawInterfaceDecl.typeArgumentsOpt() = "";
+
+  syn String MethodDecl.methodTypeSignature() {
+    StringBuffer buf = new StringBuffer();
+    buf.append("(");
+    for(int i = 0; i < getNumParameter(); i++)
+      buf.append(getParameter(i).type().classTypeSignature());
+    buf.append(")");
+    buf.append(type().classTypeSignature());
+    for(int i = 0; i < getNumException(); i++)
+      buf.append("^" + getException(i).type().classTypeSignature());
+    return buf.toString();
+  }
+  eq GenericMethodDecl.methodTypeSignature() {
+    StringBuffer buf = new StringBuffer();
+    buf.append("<");
+    for(int i = 0; i < getNumTypeParameter(); i++) {
+      TypeVariable param = getTypeParameter(i);
+      buf.append(param.getID() + ":" + param.classBound() + param.interfaceBounds());
+    }
+    buf.append(">");
+    buf.append(super.methodTypeSignature());
+    return buf.toString();
+  }
+  syn lazy String TypeVariable.classBound() {
+    if (getNumTypeBound() > 0) {
+      return getTypeBound(0).type().fieldTypeSignature();
+    }
+    return "";
+  }
+  syn lazy String TypeVariable.interfaceBounds() {
+    StringBuffer buf = new StringBuffer();
+    for (int i = 1; i < getNumTypeBound(); ++i) {
+      buf.append(":");
+      buf.append(getTypeBound(i).type().fieldTypeSignature());
+    }
+    return buf.toString();
+  }
+}

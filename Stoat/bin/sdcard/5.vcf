@@ -1,0 +1,18 @@
+BEGIN:VCARD
+VERSION:3.0
+CLASS:PUBLIC
+PRODID:-//class_vcard from TroyWolf.com//NONSGML Version 1//EN
+REV:2012-10-31 02:23:26
+FN:Troy Wolf
+N:Wolf;Troy;;;
+NICKNAME:TJ
+TITLE:Web Developer
+ORG:TroyWolf.com
+ADR;TYPE=work:;;7027 N. Hickory;Kansas City;MO;64118;
+ADR;TYPE=home:;;7027 N. Hickory;Kansas City;MO;64118;
+EMAIL;TYPE=internet,pref:troy@troywolf.com
+TEL;TYPE=cell,voice:(816) 739-9653
+URL;TYPE=work:http://www.troywolf.com
+BDAY:1971-08-13
+TZ:-06:00
+END:VCARD

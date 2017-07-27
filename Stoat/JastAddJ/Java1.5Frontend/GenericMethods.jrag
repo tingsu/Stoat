@@ -1,0 +1,300 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect GenericMethods {
+  public void ParMethodAccess.typeCheck() {
+    super.typeCheck();
+    if(!decl().hostType().isUnknown()) {
+      if(!(decl() instanceof ParMethodDecl))
+        error("can not have type parameters on a non generic method");
+      else {
+        ParMethodDecl m = (ParMethodDecl)decl();
+        if(!(m instanceof RawMethodDecl) && m.numTypeParameter() != getNumTypeArgument())
+          error("generic method " + m.signature() + " requires " + m.numTypeParameter() + " type arguments");
+        else {
+        }
+      }
+    }
+  }
+
+  
+  // ES: removing this, it has been replaced with a paramaterized syn nta attribute
+  //syn lazy final List GenericMethodDecl.getParMethodDeclList() = new List();
+  //
+  // ES: removing this, it appears not to be used. Maybe needed earlier due to some interface (?)
+  //syn lazy final List GenericConstructorDecl.getParConstructorDeclList() = new List();
+  //
+
+  syn lazy final MethodDecl GenericMethodDecl.rawMethodDecl() = lookupParMethodDecl(new ArrayList());
+  //syn lazy final ParConstructorDecl GenericConstructorDecl.rawConstructorDecl() = lookupParConstructorDecl(new ArrayList());
+
+  /* ES: replacing this with
+  syn lazy GenericMethodDecl ParMethodDecl.genericMethodDecl() {
+	  if(getParent() != null && getParent().getParent() instanceof GenericMethodDecl)
+		  return (GenericMethodDecl)getParent().getParent();
+	  return null;
+  }
+  with:
+  */
+  syn lazy GenericMethodDecl ParMethodDecl.genericMethodDecl() {
+	  return getGenericMethodDecl();
+  }
+  
+  syn lazy GenericConstructorDecl ParConstructorDecl.genericConstructorDecl() {
+	  if(getParent() != null && getParent().getParent() instanceof GenericConstructorDecl)
+		  return (GenericConstructorDecl)getParent().getParent();
+	  return null;
+  }
+
+/* ES: replacing this:
+  syn lazy MethodDecl GenericMethodDecl.lookupParMethodDecl(java.util.List typeArguments) {
+    l: for(int i = 0; i < getNumParMethodDecl(); i++) {
+      ParMethodDecl decl = getParMethodDecl(i);
+      if(decl instanceof RawMethodDecl) {
+        if(typeArguments.isEmpty())
+          return decl;
+      }
+      else if(decl.getNumTypeArgument() == typeArguments.size()) {
+        for(int j = 0; j < decl.getNumTypeArgument(); j++)
+          if(decl.getTypeArgument(j).type() != typeArguments.get(j))
+            continue l;
+        return decl;
+      }
+    }
+    return newParMethodDecl(typeArguments);
+  }
+  with:
+*/
+  syn nta MethodDecl GenericMethodDecl.lookupParMethodDecl(java.util.List typeArguments) {
+    return newParMethodDecl(typeArguments);
+  }
+
+
+/* ES: replacing this:
+  public ParMethodDecl GenericMethodDecl.newParMethodDecl(java.util.List typeArguments) {
+    ParMethodDecl methodDecl = typeArguments.isEmpty() ? new RawMethodDecl() : new ParMethodDecl();
+    addParMethodDecl(methodDecl);
+    List list = new List();
+    if(typeArguments.isEmpty()) {
+      GenericMethodDecl original = original();
+      for(int i = 0; i < original.getNumTypeParameter(); i++)
+        list.add(original.getTypeParameter(i).erasure().createBoundAccess());
+    }
+    else {
+      for(Iterator iter = typeArguments.iterator(); iter.hasNext(); )
+        list.add(((TypeDecl)iter.next()).createBoundAccess());
+    }
+    methodDecl.setTypeArgumentList(list);
+    methodDecl.setModifiers((Modifiers)getModifiers().fullCopy());
+    methodDecl.setTypeAccess(getTypeAccess().type().substituteReturnType(methodDecl));
+    methodDecl.setID(getID());
+    methodDecl.setParameterList(getParameterList().substitute(methodDecl));
+    methodDecl.setExceptionList(getExceptionList().substitute(methodDecl));
+    return getParMethodDecl(getNumParMethodDecl()-1);
+  }
+  with:
+*/
+  public ParMethodDecl GenericMethodDecl.newParMethodDecl(java.util.List typeArguments) {
+    ParMethodDecl methodDecl = typeArguments.isEmpty() ? new RawMethodDecl() : new ParMethodDecl();
+    // adding a link to GenericMethodDecl to be used during substitution 
+    // instead of the not yet existing parent link
+    methodDecl.setGenericMethodDecl(this); 
+    List list = new List();
+    if(typeArguments.isEmpty()) {
+      GenericMethodDecl original = original();
+      for(int i = 0; i < original.getNumTypeParameter(); i++)
+        list.add(original.getTypeParameter(i).erasure().createBoundAccess());
+    }
+    else {
+      for(Iterator iter = typeArguments.iterator(); iter.hasNext(); )
+        list.add(((TypeDecl)iter.next()).createBoundAccess());
+    }
+    methodDecl.setTypeArgumentList(list);
+    methodDecl.setModifiers((Modifiers)getModifiers().fullCopy());
+    methodDecl.setTypeAccess(getTypeAccess().type().substituteReturnType(methodDecl));
+    methodDecl.setID(getID());
+    methodDecl.setParameterList(getParameterList().substitute(methodDecl));
+    methodDecl.setExceptionList(getExceptionList().substitute(methodDecl));
+    return methodDecl;
+  }
+
+
+}
+
+aspect TypeCheck {
+  // Disable error checking in instantiated generic methods
+  public void ParMethodDecl.collectErrors() {
+  }
+  // Allow covariant return types
+  refine TypeHierarchyCheck eq MethodDecl.mayOverrideReturn(MethodDecl m) {
+    return type().instanceOf(m.type());
+  }
+}
+
+aspect GenericMethodsNameAnalysis {
+
+  eq ParMethodAccess.getTypeArgument().nameType() = NameType.TYPE_NAME;
+  eq ParMethodAccess.getTypeArgument().lookupType(String name) = unqualifiedScope().lookupType(name);
+  eq GenericMethodDecl.getTypeParameter().nameType() = NameType.TYPE_NAME;
+  
+  inh SimpleSet GenericMethodDecl.lookupType(String name);
+  syn SimpleSet GenericMethodDecl.localLookupType(String name) {
+    for(int i = 0; i < getNumTypeParameter(); i++) {
+      if(original().getTypeParameter(i).name().equals(name))
+        return SimpleSet.emptySet.add(original().getTypeParameter(i));
+    }
+    return SimpleSet.emptySet;
+  }
+  eq GenericMethodDecl.getChild().lookupType(String name) = localLookupType(name).isEmpty() ? lookupType(name) : localLookupType(name);
+
+  eq ParConstructorAccess.getTypeArgument().nameType() = NameType.TYPE_NAME;
+  eq ParConstructorAccess.getTypeArgument().lookupType(String name) = unqualifiedScope().lookupType(name);
+  eq ParSuperConstructorAccess.getTypeArgument().nameType() = NameType.TYPE_NAME;
+  eq ParSuperConstructorAccess.getTypeArgument().lookupType(String name) = unqualifiedScope().lookupType(name);
+  eq GenericConstructorDecl.getTypeParameter().nameType() = NameType.TYPE_NAME;
+
+  inh SimpleSet GenericConstructorDecl.lookupType(String name);
+  syn SimpleSet GenericConstructorDecl.localLookupType(String name) {
+    for(int i = 0; i < getNumTypeParameter(); i++) {
+      if(original().getTypeParameter(i).name().equals(name))
+        return SimpleSet.emptySet.add(original().getTypeParameter(i));
+    }
+    return SimpleSet.emptySet;
+  }
+  eq GenericConstructorDecl.getChild().lookupType(String name) = localLookupType(name).isEmpty() ? lookupType(name) : localLookupType(name);
+
+  eq ParClassInstanceExpr.getTypeArgument().nameType() = NameType.TYPE_NAME;
+  eq ParClassInstanceExpr.getTypeArgument().lookupType(String name) = unqualifiedScope().lookupType(name);
+
+}
+
+aspect GenericMethodsPrettyPrint {
+
+  public void ParMethodAccess.toString(StringBuffer s) {
+    s.append("<");
+    for(int i = 0; i < getNumTypeArgument(); i++) {
+      if(i != 0) s.append(", ");
+      getTypeArgument(i).toString(s);
+    }
+    s.append(">");
+    super.toString(s);
+  }
+  public void ParConstructorAccess.toString(StringBuffer s) {
+    s.append("<");
+    for(int i = 0; i < getNumTypeArgument(); i++) {
+      if(i != 0) s.append(", ");
+      getTypeArgument(i).toString(s);
+    }
+    s.append(">");
+    super.toString(s);
+  }
+  public void ParSuperConstructorAccess.toString(StringBuffer s) {
+    s.append("<");
+    for(int i = 0; i < getNumTypeArgument(); i++) {
+      if(i != 0) s.append(", ");
+      getTypeArgument(i).toString(s);
+    }
+    s.append(">");
+    super.toString(s);
+  }
+  public void ParClassInstanceExpr.toString(StringBuffer s) {
+    s.append("<");
+    for(int i = 0; i < getNumTypeArgument(); i++) {
+      if(i != 0) s.append(", ");
+      getTypeArgument(i).toString(s);
+    }
+    s.append(">");
+    super.toString(s);
+  }
+
+  private void GenericMethodDecl.ppTypeParameters(StringBuffer s) {
+    s.append(" <");
+    for(int i = 0; i < getNumTypeParameter(); i++) {
+      if(i != 0) s.append(", ");
+      original().getTypeParameter(i).toString(s);
+    }
+    s.append("> ");
+  }
+
+  public void GenericMethodDecl.toString(StringBuffer s) {
+    s.append(indent());
+    getModifiers().toString(s);
+    
+    ppTypeParameters(s);
+    
+    getTypeAccess().toString(s);
+    s.append(" " + getID());
+    s.append("(");
+    if(getNumParameter() > 0) {
+      getParameter(0).toString(s);
+      for(int i = 1; i < getNumParameter(); i++) {
+        s.append(", ");
+        getParameter(i).toString(s);
+      }
+    }
+    s.append(")");
+    if(getNumException() > 0) {
+      s.append(" throws ");
+      getException(0).toString(s);
+      for(int i = 1; i < getNumException(); i++) {
+        s.append(", ");
+        getException(i).toString(s);
+      }
+    }
+    if(hasBlock()) {
+      s.append(" ");
+      getBlock().toString(s);
+    }
+    else {
+      s.append(";\n");
+    }
+  }
+  public void GenericConstructorDecl.toString(StringBuffer s) {
+    s.append(indent());
+    getModifiers().toString(s);
+
+    s.append(" <");
+    for(int i = 0; i < getNumTypeParameter(); i++) {
+      if(i != 0) s.append(", ");
+      original().getTypeParameter(i).toString(s);
+    }
+    s.append("> ");
+
+    s.append(getID() + "(");
+    if(getNumParameter() > 0) {
+      getParameter(0).toString(s);
+      for(int i = 1; i < getNumParameter(); i++) {
+        s.append(", ");
+        getParameter(i).toString(s);
+      }
+    }
+    s.append(")");
+    if(getNumException() > 0) {
+      s.append(" throws ");
+      getException(0).toString(s);
+      for(int i = 1; i < getNumException(); i++) {
+        s.append(", ");
+        getException(i).toString(s);
+      }
+    }
+
+    s.append(" {");
+    if(hasConstructorInvocation()) {
+      s.append(indent());
+      getConstructorInvocation().toString(s);
+    }
+    for(int i = 0; i < getBlock().getNumStmt(); i++) {
+      s.append(indent());
+      getBlock().getStmt(i).toString(s);
+    }
+    s.append(indent());
+    s.append("}");
+  }
+
+}

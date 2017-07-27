@@ -1,0 +1,28 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect IntertypeFieldPrettyPrint {
+ public void IntertypeFieldDeclaration.toString(StringBuffer s) {
+    s.append(indent());
+    s.append("/*");
+    getModifiers().toString(s);
+    getTypeAccess().toString(s);
+    s.append(" ");
+    getTargetType().toString(s);
+    s.append("." + name());
+    if(hasInit()) {
+      s.append(" = ");
+      getInit().toString(s);
+    }
+    s.append(";\n");
+    s.append("*/");
+  }
+
+
+}

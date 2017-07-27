@@ -1,0 +1,102 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect EnhancedForToBytecode {
+  // Code generation
+  syn lazy int EnhancedForStmt.cond_label() = hostType().constantPool().newLabel();
+  syn lazy int EnhancedForStmt.update_label() = hostType().constantPool().newLabel();
+  syn lazy int EnhancedForStmt.end_label() = hostType().constantPool().newLabel();
+
+  syn lazy int EnhancedForStmt.extraLocalIndex() = localNum();
+  eq EnhancedForStmt.getVariableDeclaration().localNum() = localNum() + (getExpr().type().isArrayDecl() ? 2 : 1);
+  eq EnhancedForStmt.getStmt().localNum() = getVariableDeclaration().localNum() + getVariableDeclaration().type().size();
+
+   // EnhancedForStmt can be both break and continue target
+  eq EnhancedForStmt.break_label() = end_label();
+  eq EnhancedForStmt.continue_label() = update_label();
+
+  public void EnhancedForStmt.createBCode(CodeGeneration gen) {
+    if(getExpr().type().isArrayDecl()) {
+      getExpr().createBCode(gen);
+      gen.emitStoreReference(extraLocalIndex());
+      IntegerLiteral.push(gen, 0);
+      gen.emit(Bytecode.ISTORE).add(extraLocalIndex()+1);
+      gen.addLabel(cond_label());
+      gen.emit(Bytecode.ILOAD).add(extraLocalIndex()+1);
+      gen.emitLoadReference(extraLocalIndex());
+      gen.emit(Bytecode.ARRAYLENGTH);
+      gen.emitCompare(Bytecode.IF_ICMPGE, end_label());
+      gen.emitLoadReference(extraLocalIndex());
+      gen.emit(Bytecode.ILOAD).add(extraLocalIndex()+1);
+      gen.emit(getExpr().type().componentType().arrayLoad());
+      getExpr().type().componentType().emitCastTo(gen, getVariableDeclaration().type());
+      getVariableDeclaration().type().emitStoreLocal(gen, getVariableDeclaration().localNum());
+      getStmt().createBCode(gen);
+      gen.addLabel(update_label());
+      gen.emit(Bytecode.IINC).add(extraLocalIndex()+1).add(1);
+      gen.emitGoto(cond_label());
+      gen.addLabel(end_label());
+    }
+    else {
+      getExpr().createBCode(gen);
+      iteratorMethod().emitInvokeMethod(gen, lookupType("java.lang", "Iterable"));
+      gen.emitStoreReference(extraLocalIndex());
+      gen.addLabel(cond_label());
+      gen.emitLoadReference(extraLocalIndex());
+      hasNextMethod().emitInvokeMethod(gen, lookupType("java.util", "Iterator"));
+      gen.emitCompare(Bytecode.IFEQ, end_label());
+      gen.emitLoadReference(extraLocalIndex());
+      nextMethod().emitInvokeMethod(gen, lookupType("java.util", "Iterator"));
+      VariableDeclaration obj = getVariableDeclaration();
+      if (!obj.type().boxed().isUnknown()) {
+        gen.emitCheckCast(obj.type().boxed());
+        obj.type().boxed().emitCastTo(gen, obj.type());
+        obj.type().emitStoreLocal(gen, obj.localNum());
+      } else {
+        gen.emitCheckCast(obj.type());
+        gen.emitStoreReference(obj.localNum());
+      }
+      getStmt().createBCode(gen);
+      gen.addLabel(update_label());	
+      gen.emitGoto(cond_label());
+      gen.addLabel(end_label());
+    }
+  }
+
+  private MethodDecl EnhancedForStmt.iteratorMethod() {
+    TypeDecl typeDecl = lookupType("java.lang", "Iterable");
+		for (Iterator iter = typeDecl.memberMethods("iterator").iterator(); iter.hasNext();) {
+			MethodDecl m = (MethodDecl)iter.next();
+			if (m.getNumParameter() == 0) {
+				return m;
+      }
+    }
+    throw new Error("Could not find java.lang.Iterable.iterator()");
+  }
+  private MethodDecl EnhancedForStmt.hasNextMethod() {
+    TypeDecl typeDecl = lookupType("java.util", "Iterator");
+		for (Iterator iter = typeDecl.memberMethods("hasNext").iterator(); iter.hasNext();) {
+			MethodDecl m = (MethodDecl)iter.next();
+			if (m.getNumParameter() == 0) {
+				return m;
+      }
+    }
+    throw new Error("Could not find java.util.Collection.hasNext()");
+  }
+  private MethodDecl EnhancedForStmt.nextMethod() {
+    TypeDecl typeDecl = lookupType("java.util", "Iterator");
+		for (Iterator iter = typeDecl.memberMethods("next").iterator(); iter.hasNext();) {
+			MethodDecl m = (MethodDecl)iter.next();
+			if (m.getNumParameter() == 0) {
+				return m;
+      }
+    }
+    throw new Error("Could not find java.util.Collection.next()");
+  }
+}

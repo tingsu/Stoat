@@ -1,0 +1,129 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect AutoBoxingCodegen {
+  // Code generation for Boxing Conversion
+  public soot.Value BooleanType.emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
+    if(type == this)
+      return v;
+    else if(type.unboxed() == this || type.isObject())
+      return boxed().emitBoxingOperation(b, v, location);
+    else
+      return v;
+  }
+  public soot.Value NumericType.emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
+    if(type.isUnknown()) throw new Error("Trying to cast to Unknown");
+    if(type == this)
+      return v;
+    if((isLong() || this instanceof FloatingPointType) && type.isIntegralType()) {
+      v = b.newCastExpr(
+        asImmediate(b, v), typeInt().getSootType(), location);
+      return typeInt().emitCastTo(b, v, type, location);
+    }
+    else if(type instanceof NumericType) {
+      return b.newCastExpr(
+        asImmediate(b, v),
+        type.getSootType(),
+        location
+      );
+    }
+    else if(!type.isNumericType())
+      return emitCastTo(b, v, boxed(), location);
+    else
+      return boxed().emitBoxingOperation(b, emitCastTo(b, v, type.unboxed(), location), location);
+  }
+
+  refine EmitJimple public soot.Value TypeDecl.emitCastTo(Body b, Expr expr, TypeDecl type) {
+    if(type instanceof LUBType || type instanceof GLBType || type instanceof AbstractWildcardType)
+      type = typeObject();
+    else if(expr.isConstant() && isPrimitive() && type.isReferenceType())
+    	  return boxed().emitBoxingOperation(b, emitConstant(cast(expr.constant())), expr);
+    else if(expr.isConstant() && !expr.type().isEnumDecl()) {
+      if(type.isPrimitive())
+        return emitConstant(type.cast(expr.constant()));
+      else
+        return emitConstant(expr.constant());
+    }
+    return emitCastTo(b, expr.eval(b), type, expr);
+  }
+
+
+  protected soot.Value TypeDecl.emitBoxingOperation(Body b, soot.Value v, ASTNode location) {
+    // Box the value on the stack into this Reference type
+    ArrayList parameters = new ArrayList();
+    parameters.add(unboxed().getSootType());
+    SootMethodRef ref = Scene.v().makeMethodRef(
+      getSootClassDecl(),
+      "valueOf",
+      parameters,
+      getSootType(),
+      true
+    );
+    ArrayList args = new ArrayList();
+    args.add(asLocal(b, v));
+    return b.newStaticInvokeExpr(ref, args, location);
+  }
+
+  // Code generation for Unboxing Conversion
+  public soot.Value ReferenceType.emitCastTo(Body b, soot.Value v, TypeDecl type, ASTNode location) {
+    if(this == type)
+      return v;
+    else if(type instanceof PrimitiveType)
+      return type.boxed().emitUnboxingOperation(b, emitCastTo(b, v, type.boxed(), location), location);
+    else 
+      return super.emitCastTo(b, v, type, location);
+  }
+
+  protected soot.Value TypeDecl.emitUnboxingOperation(Body b, soot.Value v, ASTNode location) {
+    // Unbox the value on the stack from this Reference type
+    SootMethodRef ref = Scene.v().makeMethodRef(
+      getSootClassDecl(),
+      unboxed().name() + "Value",
+      new ArrayList(),
+      unboxed().getSootType(),
+      false
+    );
+    return b.newVirtualInvokeExpr(asLocal(b, v), ref, new ArrayList(), location);
+  }
+
+  // Generate unboxing code for conditions
+  // 14.9 If, 14.12 While, 14.13 Do, 14.14 For
+  // 
+  // emitEvalBranch is used to emit the condition from these constructs
+  // refine behavior to include unboxing of the value when needed
+  refine BooleanExpressions public void Expr.emitEvalBranch(Body b) {
+    if(type().isReferenceType()) {
+      b.setLine(this);
+      b.add(
+        b.newIfStmt(
+          b.newEqExpr(
+            asImmediate(b, type().emitUnboxingOperation(b, eval(b), this)),
+            BooleanType.emitConstant(false),
+            this
+          ),
+          false_label(),
+          this
+        )
+      );
+      b.add(b.newGotoStmt(true_label(), this));
+
+    }
+    else
+      refined(b);
+  }
+
+  // 14.11 Switch
+
+  // 15.12.2 Determine Method Signature
+
+ 
+  // 15.14.2 Postix Increment Operator ++
+  // 15.14.3 Postix Decrement Operator --
+
+}

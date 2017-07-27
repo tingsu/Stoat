@@ -1,0 +1,23 @@
+Expr literal :=
+  NUMERIC_LITERAL
+  {: return new NumericLiteral(NUMERIC_LITERAL); :}
+| BOOLEAN_LITERAL
+  {:
+    return new BooleanLiteral(BOOLEAN_LITERAL);
+  :}
+
+| CHARACTER_LITERAL
+  {:
+    return new CharacterLiteral(CHARACTER_LITERAL);
+  :}
+
+| STRING_LITERAL
+  {:
+    return new StringLiteral(STRING_LITERAL);
+  :}
+
+| NULL_LITERAL
+  {:
+    return new NullLiteral(NULL_LITERAL);
+  :}
+;

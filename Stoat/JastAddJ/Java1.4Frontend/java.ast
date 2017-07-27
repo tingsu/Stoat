@@ -1,0 +1,223 @@
+Program ::= CompilationUnit*;
+
+// 7.3 Compilation Units
+CompilationUnit ::= <PackageDecl:java.lang.String> ImportDecl* TypeDecl*;
+
+// ES
+PrimitiveCompilationUnit : CompilationUnit;
+
+// 7.5 Import Declarations
+abstract ImportDecl ::= Access;
+SingleTypeImportDecl : ImportDecl;
+TypeImportOnDemandDecl : ImportDecl;
+
+abstract Access : Expr;
+
+AbstractDot : Access ::= Left:Expr Right:Access;
+Dot : AbstractDot;
+
+VarAccess : Access ::= <ID:String>;
+MethodAccess : Access ::= <ID:String> Arg:Expr*;
+ConstructorAccess : Access ::= <ID:String> Arg:Expr*;
+SuperConstructorAccess : ConstructorAccess;
+TypeAccess : Access ::= <Package:String> <ID:String>;
+PrimitiveTypeAccess : TypeAccess ::= /<Package:String>/ /<ID:String>/ <Name:String>;
+ArrayTypeAccess : TypeAccess ::= /<Package:String>/ /<ID:String>/ Access;
+ArrayTypeWithSizeAccess : ArrayTypeAccess ::= Expr;
+ThisAccess : Access ::= <ID:String>;
+SuperAccess : Access ::= <ID:String>;
+PackageAccess : Access ::= <Package:String>;
+
+ArrayAccess : Access ::= Expr;
+
+ParseName : Access ::= <ID:String>;
+PackageOrTypeAccess : Access ::= <ID:String>;
+AmbiguousAccess : Access ::= <ID:String>;
+
+ClassInstanceExpr : Access ::= Access Arg:Expr* [TypeDecl];
+
+ClassAccess : Access ::= ;
+ 
+abstract TypeDecl ::= Modifiers <ID:String> BodyDecl*;
+
+// 4.1 The Kinds of Types and Values
+abstract ReferenceType : TypeDecl;
+PrimitiveType : TypeDecl ::= Modifiers <ID:String> [SuperClassAccess:Access] BodyDecl*;
+EmptyType : PrimitiveType; // placeholder for ; in compilation unit
+NullType : TypeDecl;
+VoidType : TypeDecl;
+
+UnknownType : ClassDecl;
+
+// 4.2 Primitive Types and Values
+abstract NumericType : PrimitiveType;
+BooleanType : PrimitiveType;
+abstract IntegralType : NumericType;
+ByteType : IntegralType;
+ShortType : IntegralType;
+IntType : IntegralType;
+LongType : IntegralType;
+CharType : IntegralType;
+FloatingPointType : NumericType;
+FloatType : FloatingPointType;
+DoubleType : FloatingPointType;
+
+// 4.3 Reference Types and Values
+ClassDecl : ReferenceType ::= Modifiers <ID:String> [SuperClassAccess:Access] Implements:Access* BodyDecl*;
+InterfaceDecl : ReferenceType ::= Modifiers <ID:String> SuperInterfaceId:Access* BodyDecl*;
+ArrayDecl : ClassDecl;
+
+AnonymousDecl : ClassDecl ::= Modifiers <ID:String> /[SuperClassAccess:Access]/ /Implements:Access*/ BodyDecl*;
+
+abstract BodyDecl;
+InstanceInitializer : BodyDecl ::= Block;
+StaticInitializer : BodyDecl ::= Block;
+ConstructorDecl : BodyDecl ::= Modifiers <ID:String> Parameter:ParameterDeclaration* Exception:Access* [ConstructorInvocation:Stmt] Block;
+
+abstract MemberDecl : BodyDecl;
+
+FieldDecl : MemberDecl ::= Modifiers TypeAccess:Access VariableDecl*;
+FieldDeclaration : MemberDecl ::= Modifiers TypeAccess:Access <ID:String> [Init:Expr]; // Simplified FieldDecl
+
+VarDeclStmt : Stmt ::= Modifiers TypeAccess:Access VariableDecl*;
+VariableDeclaration : Stmt ::= Modifiers TypeAccess:Access <ID:String> [Init:Expr]; // Simplified VarDeclStmt
+
+VariableDecl ::= <ID:String> Dims* [Init:Expr];
+
+/**
+ * A parameter declaration as used in either method parameter lists
+ * or as a catch clause parameter.
+ */
+ParameterDeclaration ::= Modifiers TypeAccess:Access <ID:String>;
+
+ArrayInit : Expr ::= Init:Expr*;
+
+MethodDecl : MemberDecl ::= Modifiers TypeAccess:Access <ID:String> Parameter:ParameterDeclaration* Exception:Access* [Block];
+
+// 8.5 Member Type Declarations
+abstract MemberTypeDecl : MemberDecl;
+MemberClassDecl : MemberTypeDecl ::= ClassDecl;
+MemberInterfaceDecl : MemberTypeDecl ::= InterfaceDecl;
+
+IdUse ::= <ID:String>;
+
+abstract Expr;
+
+abstract AssignExpr : Expr ::= Dest:Expr Source:Expr;
+
+AssignSimpleExpr : AssignExpr ;
+
+abstract AssignMultiplicativeExpr : AssignExpr;
+AssignMulExpr : AssignMultiplicativeExpr ;
+AssignDivExpr : AssignMultiplicativeExpr ;
+AssignModExpr : AssignMultiplicativeExpr ;
+
+abstract AssignAdditiveExpr : AssignExpr;
+AssignPlusExpr : AssignAdditiveExpr ;
+AssignMinusExpr : AssignAdditiveExpr ;
+
+abstract AssignShiftExpr : AssignExpr;
+AssignLShiftExpr : AssignShiftExpr ;
+AssignRShiftExpr : AssignShiftExpr ;
+AssignURShiftExpr : AssignShiftExpr ;
+
+abstract AssignBitwiseExpr : AssignExpr;
+AssignAndExpr : AssignBitwiseExpr ;
+AssignXorExpr : AssignBitwiseExpr ;
+AssignOrExpr : AssignBitwiseExpr ;
+
+abstract PrimaryExpr : Expr;
+
+ParExpr : PrimaryExpr ::= Expr;
+
+ArrayCreationExpr : PrimaryExpr ::= TypeAccess:Access [ArrayInit];
+Dims ::= [Expr];
+
+abstract Unary : Expr ::= Operand:Expr;
+PreIncExpr : Unary ;
+PreDecExpr : Unary ;
+MinusExpr : Unary ;
+PlusExpr : Unary ;
+BitNotExpr : Unary ;
+LogNotExpr : Unary ;
+
+CastExpr : Expr ::= TypeAccess:Access Expr;
+
+abstract PostfixExpr : Unary;
+PostIncExpr : PostfixExpr ;
+PostDecExpr : PostfixExpr ;
+
+abstract Binary : Expr ::= LeftOperand:Expr RightOperand:Expr;
+
+abstract ArithmeticExpr : Binary;
+abstract MultiplicativeExpr : ArithmeticExpr;
+MulExpr : MultiplicativeExpr ;
+DivExpr : MultiplicativeExpr ;
+ModExpr : MultiplicativeExpr ;
+abstract AdditiveExpr : ArithmeticExpr;
+AddExpr : AdditiveExpr ;
+SubExpr : AdditiveExpr ;
+
+abstract ShiftExpr : Binary;
+LShiftExpr : ShiftExpr ;
+RShiftExpr : ShiftExpr ;
+URShiftExpr : ShiftExpr ;
+
+abstract BitwiseExpr : Binary;
+AndBitwiseExpr : BitwiseExpr ;
+OrBitwiseExpr : BitwiseExpr ;
+XorBitwiseExpr : BitwiseExpr ;
+
+abstract LogicalExpr : Binary;
+AndLogicalExpr : LogicalExpr ;
+OrLogicalExpr : LogicalExpr ;
+
+abstract RelationalExpr : Binary;
+LTExpr : RelationalExpr ;
+GTExpr : RelationalExpr ;
+LEExpr : RelationalExpr ;
+GEExpr : RelationalExpr ;
+
+abstract EqualityExpr : RelationalExpr;
+EQExpr : EqualityExpr ;
+NEExpr : EqualityExpr ;
+
+InstanceOfExpr : Expr ::= Expr TypeAccess:Access;
+
+
+ConditionalExpr : Expr ::= Condition:Expr TrueExpr:Expr FalseExpr:Expr;
+
+Modifiers ::= Modifier*;
+Modifier ::= <ID:String>;
+
+// Statements
+
+abstract Stmt;
+abstract BranchTargetStmt : Stmt;  // a statement that can be reached by break or continue
+Block : Stmt ::= Stmt*;
+EmptyStmt : Stmt;
+LabeledStmt : BranchTargetStmt ::= <Label:String> Stmt;
+ExprStmt : Stmt ::= Expr;
+
+SwitchStmt : BranchTargetStmt ::= Expr Block;
+abstract Case : Stmt;
+ConstCase : Case ::= Value:Expr;
+DefaultCase : Case;
+
+IfStmt : Stmt ::= Condition:Expr Then:Stmt [Else:Stmt];
+WhileStmt : BranchTargetStmt ::= Condition:Expr Stmt;
+DoStmt : BranchTargetStmt ::= Stmt Condition:Expr;
+ForStmt : BranchTargetStmt ::= InitStmt:Stmt* [Condition:Expr] UpdateStmt:Stmt* Stmt;
+
+BreakStmt : Stmt ::= <Label:String>;
+ContinueStmt : Stmt ::= <Label:String>;
+ReturnStmt : Stmt ::= [Result:Expr];
+ThrowStmt : Stmt ::= Expr;
+
+SynchronizedStmt : Stmt ::= Expr Block;
+
+TryStmt : Stmt ::= Block CatchClause* [Finally:Block];
+
+AssertStmt : Stmt ::= first:Expr [Expr];
+
+LocalClassDeclStmt : Stmt ::= ClassDecl;

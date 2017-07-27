@@ -1,0 +1,52 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist
+ * All rights reserved.
+ */
+
+/**
+ * JLS $5.1.9
+ *
+ * Add unchecked conversion warnings to the type checking
+ * of assignments, declaration initializers and cast expressions.
+ *
+ * TODO: The unchecked conversion warning can be suppressed with
+ * the SuppressWarnings annotation.
+ */
+aspect UncheckedConversion {
+  public void VariableDeclaration.checkWarnings() {
+    if (hasInit() && !suppressWarnings("unchecked"))
+      checkUncheckedConversion(getInit().type(), type());
+  }
+
+  public void FieldDeclaration.checkWarnings() {
+    if (hasInit() && !suppressWarnings("unchecked"))
+      checkUncheckedConversion(getInit().type(), type());
+  }
+
+  public void AssignSimpleExpr.checkWarnings() {
+    if (!withinSuppressWarnings("unchecked"))
+      checkUncheckedConversion(getSource().type(), getDest().type());
+  }
+
+  public void CastExpr.checkWarnings() {
+    if (!withinSuppressWarnings("unchecked"))
+      checkUncheckedConversion(getExpr().type(), getTypeAccess().type());
+  }
+
+  public void ASTNode.checkUncheckedConversion(TypeDecl source, TypeDecl dest) {
+    if (source.isUncheckedConversionTo(dest))
+      warning("unchecked conversion from raw type "+source.typeName()+
+        " to generic type "+dest.typeName());
+  }
+
+  /**
+   * An unchecked conversion occurs when converting from a
+   * raw type G to a generic type G<T1, ..., Tn>.
+   */
+  syn boolean TypeDecl.isUncheckedConversionTo(TypeDecl dest) =
+    (!dest.isRawType()) && this.isRawType();
+}

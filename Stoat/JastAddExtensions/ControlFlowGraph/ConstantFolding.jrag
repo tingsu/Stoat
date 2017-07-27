@@ -1,0 +1,463 @@
+import java.util.Iterator;
+
+aspect ConstantFolding {	
+
+	class CFMap extends HashMap {
+		
+		public final static long UNDEF = -99999999;
+		public final static long NAC   = -99999998;
+		
+		public CFMap(BitSet locals) {			
+			for(Iterator iter = locals.iterator(); iter.hasNext();){
+				Variable v = (Variable)iter.next();
+				if(v.type() instanceof IntType ||
+				   v.type() instanceof LongType ||
+				   v.type() instanceof ShortType)//IntegralType)//PrimitiveType)
+					this.put(v, UNDEF);			
+			}	
+		}
+		
+		public CFMap() {
+			super();
+		}
+		
+		public CFMap intersect(CFMap map) {
+			Iterator iter = keySet().iterator();
+
+			CFMap out = copy();
+			while(iter.hasNext()) {
+				Variable key = (Variable)iter.next();
+			    Long val1 = (Long)this.get(key);
+				Long val2 = (Long)map.get(key);
+				if(val1 == UNDEF) 
+					out.put(key, val2);
+				else if(val1 == NAC)
+					continue;	
+				else { //val1 = const
+					if(val2 == UNDEF || val1 == val2)
+						continue;
+					else
+						out.put(key, NAC);					
+				}
+			}
+			
+			return out;				
+		}
+		
+		public CFMap copy() {
+			CFMap map = new CFMap();
+			for(Iterator iter = keySet().iterator();iter.hasNext();){
+				Variable key = (Variable)iter.next();
+				map.put(key, get(key));
+			}
+			return map;
+		}
+		
+		public static long add(long left, long right) {
+			if(left == CFMap.NAC || right == CFMap.NAC)
+				return CFMap.NAC;
+			else if(left != NAC && left != UNDEF && //const
+					right!= NAC && right != UNDEF) 
+				return left + right;
+			else
+				return CFMap.UNDEF;
+		}
+		
+		public static long sub(long left, long right) {
+			if(left == CFMap.NAC || right == CFMap.NAC)
+				return CFMap.NAC;
+			else if(left != NAC && left != UNDEF && //const
+					right!= NAC && right != UNDEF) 
+				return left - right;
+			else
+				return CFMap.UNDEF;
+		}
+		
+		public static long mul(long left, long right) {
+			if(left == CFMap.NAC || right == CFMap.NAC)
+				return CFMap.NAC;
+			else if(left != NAC && left != UNDEF && //const
+					right!= NAC && right != UNDEF) 
+				return left * right;
+			else
+				return CFMap.UNDEF;
+		}
+		
+		public static long div(long left, long right) {
+			if(left == CFMap.NAC || right == CFMap.NAC)
+				return CFMap.NAC;
+			else if(left != NAC && left != UNDEF && //const
+					right!= NAC && right != UNDEF) 
+				return left / right;
+			else
+				return CFMap.UNDEF;
+		}
+		
+		public static long mod(long left, long right) {
+			if(left == CFMap.NAC || right == CFMap.NAC)
+				return CFMap.NAC;
+			else if(left != NAC && left != UNDEF && //const
+					right!= NAC && right != UNDEF) 
+				return left % right;
+			else
+				return CFMap.UNDEF;
+		}
+			
+
+	}
+/*	
+	interface CFValue {}
+	class UNDEF implements CFValue {}
+	class NAC implements CFValue {}
+	
+	class CFConst implements CFValue {}
+	class CFIntConst extends CFConst {
+		int val;
+	}	
+	class CFBoolConst extends CFConst {
+		boolean val;
+	}	
+*/	
+	
+	// undefMap()
+	syn CFMap Expr.undefMap() = new CFMap(locals());
+	syn CFMap Stmt.undefMap() = new CFMap(locals());
+
+	
+	/*
+	syn CFMap CFGNode.undefMap();
+	eq Expr.undefMap() = new CFMap(locals());
+	eq Stmt.undefMap() = new CFMap(locals());*/
+	
+	// in_cf()
+	syn CFMap Expr.in_cf() circular [undefMap()];
+	syn CFMap Stmt.in_cf() circular [undefMap()];
+	//syn CFMap CFGNode.in_cf() circular [undefMap()];
+	eq Stmt.in_cf() {
+
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return undefMap();
+		
+		Object o = iter.next();
+		CFMap map;
+		if(o instanceof Expr)
+			map = ((Expr)o).out_cf().copy();
+		else if(o instanceof Stmt)
+			map = ((Stmt)o).out_cf().copy();
+		else 
+			throw new Error("Stmt.in_cf()");
+		while(iter.hasNext()) {
+			Object o2 = iter.next();
+			CFMap map2;
+			if(o2 instanceof Expr)
+				map2 = ((Expr)o2).out_cf();
+			else if(o2 instanceof Stmt)
+				map2 = ((Stmt)o2).out_cf();	
+			else 
+				throw new Error("Stmt.in_cf()");
+			map = map.intersect(map2);
+		}
+		return map;
+
+	}	
+	
+	eq Expr.in_cf() {
+/*
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return undefMap();
+		CFMap map = ((CFGNode)iter.next()).out_cf();
+		while(iter.hasNext())
+			map = map.intersect(((CFGNode)iter.next()).out_cf());
+		return map;
+*/
+		Iterator iter = pred().iterator();
+		if(!iter.hasNext())
+			return undefMap();
+		
+		Object o = iter.next();
+		CFMap map;
+		if(o instanceof Expr)
+			map = ((Expr)o).out_cf().copy();
+		else if(o instanceof Stmt)
+			map = ((Stmt)o).out_cf().copy();
+		else 
+			throw new Error("Expr.in_cf()");
+		while(iter.hasNext()) {
+			Object o2 = iter.next();
+			CFMap map2;
+			if(o2 instanceof Expr)
+				map2 = ((Expr)o2).out_cf();
+			else if(o2 instanceof Stmt)
+				map2 = ((Stmt)o2).out_cf();	
+			else
+				throw new Error("Expr.in_cf()");
+			map = map.intersect(map2);
+		}
+		return map;
+		
+	}	
+	
+	
+	// out_cf()
+	syn CFMap Expr.out_cf() circular [undefMap()];
+	syn CFMap Stmt.out_cf() circular [undefMap()];
+	//syn CFMap CFGNode.out_cf() circular [undefMap()];
+	eq Expr.out_cf() = in_cf();
+	eq Stmt.out_cf() = in_cf();
+	
+	//eq AssignSimpleExpr.out_cf() 
+	eq AssignExpr.out_cf() {
+		if(!(getDest() instanceof VarAccess))
+			return super.out_cf();	
+		Variable dest = ((VarAccess)getDest()).decl();
+		Expr source = getSource();
+		
+		if(in_cf().containsKey(dest)) {	
+			
+			//System.out.println("** Assign:"+this);
+			
+			CFMap map = in_cf().copy();
+			if(this instanceof AssignSimpleExpr)
+				map.put(dest, source.calcuConst());
+			else if(this instanceof AssignPlusExpr) {
+				long val = CFMap.add((Long)map.get(dest), source.calcuConst());
+				map.put(dest, val);
+			}
+			else if(this instanceof AssignMinusExpr) {
+				long val = CFMap.sub((Long)map.get(dest), source.calcuConst());
+				map.put(dest, val);
+			}
+			else if(this instanceof AssignMulExpr) {
+				long val = CFMap.mul((Long)map.get(dest), source.calcuConst());
+				map.put(dest, val);
+			}
+			else if(this instanceof AssignDivExpr) {
+				long val = CFMap.div((Long)map.get(dest), source.calcuConst());
+				map.put(dest, val);
+			}
+			else if(this instanceof AssignModExpr) {
+				long val = CFMap.mod((Long)map.get(dest), source.calcuConst());
+				map.put(dest, val);
+			}
+					
+			return map;
+		}
+		else
+			return super.out_cf();
+			//return in_cf();
+	}
+	
+	eq VariableDeclaration.out_cf() {
+		if(hasInit() && in_cf().containsKey(this)) {	
+			CFMap map = in_cf().copy();			
+			map.put(this, getInit().calcuConst());
+			return map;
+		}
+		else
+			return in_cf();
+	}
+	
+	eq PreIncExpr.out_cf() {
+		if(!(getOperand() instanceof VarAccess)) //++a[1]
+			return in_cf();
+		Variable op = ((VarAccess)getOperand()).decl();
+		if(!in_cf().containsKey(op))
+			return in_cf();
+		long val = (Long)in_cf().get(op);
+		if(val == CFMap.NAC || val == CFMap.UNDEF)
+			return in_cf();
+		CFMap map = in_cf().copy();
+		map.put(op, val+1);
+		return map;
+	}
+	
+	eq PostIncExpr.out_cf() {
+		if(!(getOperand() instanceof VarAccess))
+			return in_cf();
+		Variable op = ((VarAccess)getOperand()).decl();
+		if(!in_cf().containsKey(op))
+			return in_cf();
+		long val = (Long)in_cf().get(op);
+		if(val == CFMap.NAC || val == CFMap.UNDEF)
+			return in_cf();
+		CFMap map = in_cf().copy();
+		map.put(op, val+1);
+		return map;
+	}
+	
+	eq PreDecExpr.out_cf() {
+		if(!(getOperand() instanceof VarAccess))
+			return in_cf();
+		Variable op = ((VarAccess)getOperand()).decl();
+		if(!in_cf().containsKey(op))
+			return in_cf();
+		long val = (Long)in_cf().get(op);
+		if(val == CFMap.NAC || val == CFMap.UNDEF)
+			return in_cf();
+		CFMap map = in_cf().copy();
+		map.put(op, val-1);
+		return map;
+	}
+	
+	eq PostDecExpr.out_cf() {
+		if(!(getOperand() instanceof VarAccess))
+			return in_cf();
+		Variable op = ((VarAccess)getOperand()).decl();
+		if(!in_cf().containsKey(op))
+			return in_cf();
+		long val = (Long)in_cf().get(op);
+		if(val == CFMap.NAC || val == CFMap.UNDEF)
+			return in_cf();
+		CFMap map = in_cf().copy();
+		map.put(op, val-1);
+		return map;
+	}
+	
+	/*
+	eq Unary.out_cf() {
+
+		if(!(getOperand() instanceof VarAccess))
+			return in_cf();
+		Variable op = ((VarAccess)getOperand()).decl();
+		if(!in_cf().containsKey(op))
+			return in_cf();
+		long val = (Long)in_cf().get(op);
+
+		
+		if(this instanceof PreIncExpr || this instanceof PostIncExpr) {	
+			//System.out.println("** PreExpr:"+this);
+			//System.err.println("Source_File: "+sourceFile());
+  			//System.err.println("Line_Number: "+lineNumber()+"\n");
+			long val = getOperand().calcuConst();
+			if(val == CFMap.NAC || val == CFMap.UNDEF)
+				return in_cf();
+			CFMap map = in_cf().copy();
+			map.put(op, val+1);
+			return map;
+		}
+		else if(this instanceof PreDecExpr || this instanceof PostDecExpr) {
+			//System.out.println("** PostExpr:"+this);
+			CFMap map = in_cf().copy();
+			map.put(op, val-1);
+			return map;
+		}
+		else
+			return in_cf();
+			
+	}*/
+	
+	
+
+	
+	syn long Expr.calcuConst() = CFMap.NAC;
+	eq VarAccess.calcuConst() {
+		if(in_cf().containsKey(decl()))
+			return (Long)in_cf().get(decl());
+		else
+			return CFMap.NAC;
+	}
+	
+	eq IntegerLiteral.calcuConst() = Long.parseLong(getLITERAL());	
+	eq LongLiteral.calcuConst() = Long.parseLong(getLITERAL());	
+		
+	
+	eq ArithmeticExpr.calcuConst() {
+		
+		long left = getLeftOperand().calcuConst();
+		long right = getRightOperand().calcuConst();
+
+		if(this instanceof AddExpr)
+			return CFMap.add(left, right);
+		if(this instanceof SubExpr)
+			return CFMap.sub(left, right);
+		if(this instanceof MulExpr)
+			return CFMap.mul(left, right);
+		if(this instanceof DivExpr)
+			return CFMap.div(left, right);
+		if(this instanceof ModExpr)
+			return CFMap.mod(left, right);
+		throw new Error("ArithmeticExpr.calcuConst()");
+				
+	}
+	
+	
+	eq PreIncExpr.calcuConst() {
+		long val = getOperand().calcuConst();
+		if(val == CFMap.NAC || val == CFMap.UNDEF)
+			return val;			
+		return ++val;
+	}
+	
+	eq PreDecExpr.calcuConst() {
+		long val = getOperand().calcuConst();
+		if(val == CFMap.NAC || val == CFMap.UNDEF)
+			return val;			
+		return --val;
+	}
+	
+	eq PostfixExpr.calcuConst() = getOperand().calcuConst();
+
+
+	
+	eq ParExpr.calcuConst() = getExpr().calcuConst();
+	//eq CastExpr.calcuConst() = getExpr().calcuConst();
+	eq CastExpr.calcuConst() = CFMap.NAC;
+	eq Dot.calcuConst() = CFMap.NAC;
+	
+	eq ShiftExpr.calcuConst() = CFMap.NAC;
+	eq BitwiseExpr.calcuConst() = CFMap.NAC;
+	
+
+	
+  	
+	
+  	
+  	// useless comparison
+  	syn boolean RelationalExpr.constUselessComparison() {
+  		Object left = getLeftOperand();
+  		Object right = getRightOperand();
+  		
+  		boolean l = false;
+  		boolean r = false;
+  		//left
+  		if(left instanceof Literal)
+  			l = true;
+  		else if(left instanceof VarAccess && 
+  				in_cf().get(((VarAccess)left).decl()) != null){
+  			long leftVal = (Long)in_cf().get(((VarAccess)left).decl());
+  			if(leftVal != CFMap.NAC && leftVal != CFMap.UNDEF)
+  				l = true;
+  		}
+  		//right
+ 		if(right instanceof Literal)
+  			r = true;
+  		else if(right instanceof VarAccess && 
+  				in_cf().get(((VarAccess)right).decl()) != null){
+  			long rightVal = (Long)in_cf().get(((VarAccess)right).decl());
+  			if(rightVal != CFMap.NAC && rightVal != CFMap.UNDEF)
+  				r = true;
+  		}
+ 		
+ 		//System.out.println(this);
+ 		//
+ 		if(l && r) {
+ 			System.err.println(this);
+  			System.err.println("Source_File: "+sourceFile());
+  			System.err.println("Line_Number: "+lineNumber()+"\n");
+  			return true;
+  		}
+  		else
+  			return false;
+  			 			 			
+  	}
+  	
+  	
+	// Collect dead code in each compilation unit
+	coll HashSet CompilationUnit.constUselessCode() [new HashSet()] with add root CompilationUnit;
+	RelationalExpr contributes this when constUselessComparison() 
+		to CompilationUnit.constUselessCode() for enclosingCompilationUnit();
+	
+  	
+}

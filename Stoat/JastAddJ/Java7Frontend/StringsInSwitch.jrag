@@ -1,0 +1,82 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+/**
+ * <p>This aspect adds the Project Coin/JSR 334 Strings in Switch language change
+ * to the JastAddJ frontend.
+ *
+ * <p>The following features were modified:
+ * <ul>
+ * <li>type checking of the switch expression</li>
+ * <li>duplicate checking of switch labels</li>
+ * </ul>
+ */
+aspect StringsInSwitch {
+	/**
+	 * <p>Overrides the type checking of the switch statement's expression.
+	 *
+	 * <p>In JSR 334 a switch statement may use an expression of type String.
+	 */
+	refine Enums public void SwitchStmt.typeCheck() {
+		TypeDecl type = getExpr().type();
+		if ((!type.isIntegralType() || type.isLong()) && !type.isEnumDecl()
+				&& !type.isString())
+			error("Switch expression must be of type " +
+					"char, byte, short, int, enum, or string");
+	}
+
+	/* Type checking for case labels need not be changed as it
+	 * already tests if the case labels have expressions which are
+	 * assignable to the switch expression
+	 */
+
+	syn boolean Case.isDefaultCase() = false;
+	eq DefaultCase.isDefaultCase() = true;
+
+	/**
+	 * <p>This attribute overrides the default duplicate checking for
+	 * switch case labels.
+	 */
+	refine Enums eq ConstCase.constValue(Case c) {
+		if (isDefaultCase() || c.isDefaultCase())
+			return isDefaultCase() && c.isDefaultCase();
+
+		Expr myValue = getValue();
+		Expr otherValue = ((ConstCase) c).getValue();
+		TypeDecl myType = myValue.type();
+		TypeDecl otherType = otherValue.type();
+		if (myType.isString() || otherType.isString()) {
+			if (!myType.isString() || !otherType.isString())
+				return false;
+			if (!myValue.isConstant() || !otherValue.isConstant())
+				return false;
+			return myValue.constant().stringValue().equals(
+					otherValue.constant().stringValue());
+		}
+
+		return refined(c);
+	}
+
+	/**
+	 * <p>Improve the type checking error messages given for case labels.
+	 */
+	refine Enums public void ConstCase.typeCheck() {
+		boolean isEnumConstant = getValue().isEnumConstant();
+		TypeDecl switchType = switchType();
+		TypeDecl type = getValue().type();
+		if (switchType.isEnumDecl() && !isEnumConstant)
+			error("Unqualified enumeration constant required");
+		if (!type.assignConversionTo(switchType, getValue()))
+			error("Case label has incompatible type "+switchType.name()+
+					", expected type compatible with "+type.name());
+		if (!getValue().isConstant() && !getValue().type().isUnknown() &&
+				!isEnumConstant) 
+			error("Case label must have constant expression");
+	}
+
+}

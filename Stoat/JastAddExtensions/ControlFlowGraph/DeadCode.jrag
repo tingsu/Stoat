@@ -1,0 +1,36 @@
+aspect DeadCode {	
+
+	// Add dead code check
+
+	/** Unused variable analysis **/
+
+	// EN: Moving this to CFNode
+	/*	
+	syn lazy boolean Stmt.isDead();
+	syn lazy boolean Expr.isDead();
+	eq Stmt.isDead() = !def().compl(out()).isEmpty();
+	eq Expr.isDead() = !def().compl(out()).isEmpty();
+	*/
+	syn lazy boolean CFGNode.isDead();
+	eq CFGNode.isDead() = !def().compl(out()).isEmpty();
+
+	// Lets keep all declarations dead or alive ... 
+	//	eq VariableDeclaration.isDead() = false; 
+	
+	// Collect dead code in each compilation unit
+	coll HashSet CompilationUnit.deadCode() [new HashSet()] 
+		with add root CompilationUnit;
+	Stmt contributes this when isDead() to CompilationUnit.deadCode() 
+		for enclosingCompilationUnit();
+	VarAccess contributes this when isDead() to CompilationUnit.deadCode() 
+		for enclosingCompilationUnit();
+	
+	// Make sure each statement knows its enclosing compilation unit
+	inh CompilationUnit CFGNode.enclosingCompilationUnit();
+
+	// EN: Raising the level for this equation to capture all nodes
+	//	eq CompilationUnit.getTypeDecl(int i).enclosingCompilationUnit() = this;
+	eq Program.getCompilationUnit(int i).enclosingCompilationUnit() = 
+		getCompilationUnit(i);
+}
+

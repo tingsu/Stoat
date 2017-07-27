@@ -1,0 +1,103 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect GenericsParTypeDecl {
+
+  eq ParTypeDecl.fullName() {
+    if(isNestedType())
+      return enclosingType().fullName() + "." + nameWithArgs();
+    String packageName = packageName();
+    if(packageName.equals(""))
+      return nameWithArgs();
+    return packageName + "." + nameWithArgs();
+  }
+
+  eq ParTypeDecl.typeName() {
+    if(isNestedType())
+      return enclosingType().typeName() + "." + nameWithArgs();
+    String packageName = packageName();
+    if(packageName.equals("") || packageName.equals(PRIMITIVE_PACKAGE_NAME))
+      return nameWithArgs();
+    return packageName + "." + nameWithArgs();
+  }
+
+  syn String ParTypeDecl.nameWithArgs() {
+    StringBuffer s = new StringBuffer();
+    s.append(name());
+    s.append("<");
+    for(int i = 0; i < getNumArgument(); i++) {
+      if(i != 0)
+        s.append(", ");
+      s.append(getArgument(i).type().fullName());
+    }
+    s.append(">");
+    return s.toString();
+  }
+  eq RawClassDecl.nameWithArgs() = name();
+  eq RawInterfaceDecl.nameWithArgs() = name();
+
+  inh lazy TypeDecl ParTypeDecl.genericDecl();
+  eq Program.getChild().genericDecl() = null;
+// ES: Changing inheritance a bit to include any child i.e., also syn nta(param)'s
+//  eq GenericClassDecl.getParTypeDecl().genericDecl() = this;
+//  eq GenericInterfaceDecl.getParTypeDecl().genericDecl() = this;
+  eq GenericClassDecl.getChild().genericDecl() = this;
+  eq GenericInterfaceDecl.getChild().genericDecl() = this;
+  eq ParClassDecl.getBodyDecl(int index).genericDecl() {
+    if(getBodyDecl(index) instanceof MemberTypeDecl) {
+      MemberTypeDecl m = (MemberTypeDecl)getBodyDecl(index);
+      return extractSingleType(genericDecl().memberTypes(m.typeDecl().name()));
+    }
+    return genericDecl();
+  }
+  eq ParInterfaceDecl.getBodyDecl(int index).genericDecl() {
+    if(getBodyDecl(index) instanceof MemberTypeDecl) {
+      MemberTypeDecl m = (MemberTypeDecl)getBodyDecl(index);
+      return extractSingleType(genericDecl().memberTypes(m.typeDecl().name()));
+    }
+    return genericDecl();
+  }
+  
+  syn boolean BodyDecl.visibleTypeParameters() = true;
+  eq MethodDecl.visibleTypeParameters() = !isStatic();
+  eq FieldDeclaration.visibleTypeParameters() = !isStatic();
+  eq StaticInitializer.visibleTypeParameters() = false;
+  eq MemberTypeDecl.visibleTypeParameters() = !isStatic();
+  
+  syn boolean TypeDecl.isTypeVariable() = false;
+  eq TypeVariable.isTypeVariable() = true;
+
+  public Access ParTypeDecl.createQualifiedAccess() {
+    List typeArgumentList = new List();
+    for(int i = 0; i < getNumArgument(); i++) {
+      Access a = (Access)getArgument(i);
+      if(a instanceof TypeAccess)
+        typeArgumentList.add(a.type().createQualifiedAccess());
+      else
+        typeArgumentList.add(a.fullCopy());
+    }
+    if(!isTopLevelType()) {
+      if(isRawType())
+        return enclosingType().createQualifiedAccess().qualifiesAccess(
+          new TypeAccess("", getID())
+        );
+      else
+        return enclosingType().createQualifiedAccess().qualifiesAccess(
+          new ParTypeAccess(new TypeAccess("", getID()), typeArgumentList)
+        );
+    }
+    else {
+      if(isRawType())
+        return new TypeAccess(packageName(), getID());
+      else
+        return new ParTypeAccess(new TypeAccess(packageName(), getID()), typeArgumentList);
+    }
+  }
+}
+

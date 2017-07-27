@@ -1,0 +1,8 @@
+aspect FlushCaches {
+
+	  public void ASTNode.flushCaches() {
+	    flushCache();
+	    for(int i = 0; i < getNumChild(); i++)
+	      getChild(i).flushCaches();
+	  }
+}

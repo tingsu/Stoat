@@ -1,0 +1,273 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect MultiCatch {
+
+	/**
+	 * Inherit the lookupVariable attribute.
+	 */
+	inh SimpleSet CatchParameterDeclaration.lookupVariable(String name);
+
+	CatchParameterDeclaration implements Variable;
+	syn boolean CatchParameterDeclaration.isParameter() = true;
+
+	// 4.5.3
+	syn boolean CatchParameterDeclaration.isClassVariable() = false;
+	syn boolean CatchParameterDeclaration.isInstanceVariable() = false;
+	inh boolean CatchParameterDeclaration.isMethodParameter();
+	inh boolean CatchParameterDeclaration.isConstructorParameter();
+	inh boolean CatchParameterDeclaration.isExceptionHandlerParameter();
+	syn boolean CatchParameterDeclaration.isLocalVariable() = false;
+
+	eq MultiCatch.getParameter().isMethodParameter() = false;
+	eq MultiCatch.getParameter().isConstructorParameter() = false;
+	eq MultiCatch.getParameter().isExceptionHandlerParameter() = true;
+
+	/**
+	 * The catch parameter of a multi-catch clause is implicitly final.
+	 */
+	syn boolean CatchParameterDeclaration.isFinal() = true;
+	syn boolean CatchParameterDeclaration.isVolatile() = getModifiers().isVolatile();
+	syn boolean CatchParameterDeclaration.isBlank() = false;
+	syn boolean CatchParameterDeclaration.isStatic() = false;
+
+	syn String CatchParameterDeclaration.name() = getID();
+
+	syn boolean CatchParameterDeclaration.hasInit() = false;
+	syn Expr CatchParameterDeclaration.getInit() {
+		throw new UnsupportedOperationException();
+	}
+	syn Constant CatchParameterDeclaration.constant() {
+		throw new UnsupportedOperationException();
+	}
+
+	inh TypeDecl CatchParameterDeclaration.hostType();
+	syn boolean CatchParameterDeclaration.isSynthetic() = getModifiers().isSynthetic();
+
+	/**
+	 * @see "Generics.jrag"
+	 */
+	eq CatchParameterDeclaration.sourceVariableDecl() = this;
+
+	// Name lookup
+	
+	// CatchParameterDeclaration is a SimpleSet
+	CatchParameterDeclaration implements SimpleSet;
+	syn int CatchParameterDeclaration.size() = 1;
+	syn boolean CatchParameterDeclaration.isEmpty() = false;
+	public SimpleSet CatchParameterDeclaration.add(Object o) {
+		return new SimpleSetImpl().add(this).add(o);
+	}
+	syn boolean CatchParameterDeclaration.contains(Object o) = this == o;
+	public boolean CatchParameterDeclaration.isSingleton() { return true; }
+	public boolean CatchParameterDeclaration.isSingleton(Object o) { return contains(o); }
+
+	CatchParameterDeclaration implements Iterator;
+	private CatchParameterDeclaration CatchParameterDeclaration.iterElem;
+	public Iterator CatchParameterDeclaration.iterator() { iterElem = this; return this; }
+	public boolean CatchParameterDeclaration.hasNext() { return iterElem != null; }
+	public Object CatchParameterDeclaration.next() { Object o = iterElem; iterElem = null; return o; }
+	public void CatchParameterDeclaration.remove() { throw new UnsupportedOperationException(); }
+
+	/**
+	 * Variable lookup in catch parameter scope.
+	 */
+	eq MultiCatch.getParameter().lookupVariable(String name) =
+		parameterDeclaration(name);
+
+	/**
+	 * Variable lookup in catch parameter scope.
+	 */
+	eq MultiCatch.parameterDeclaration(String name) =
+		getParameter().name().equals(name) ? getParameter() : SimpleSet.emptySet;
+
+	/**
+	 * Syntactic classification
+	 */
+	eq CatchParameterDeclaration.getTypeAccess(int i).nameType() = NameType.TYPE_NAME;
+
+	eq MultiCatch.handles(TypeDecl exceptionType) {
+		CatchParameterDeclaration param = getParameter();
+		for (int i = 0; i < param.getNumTypeAccess(); ++i) {
+			TypeDecl type = param.getTypeAccess(i).type();
+			if (!type.isUnknown() && exceptionType.instanceOf(type))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Type checking.
+	 * The types given in a disjunction type may not be
+	 * subtypes of each other.
+	 */
+	public void CatchParameterDeclaration.typeCheck() {
+		boolean pass = true;
+		for (int i = 0; i < getNumTypeAccess(); ++i) {
+			for (int j = 0; j < getNumTypeAccess(); ++j) {
+				if (i == j) continue;
+				TypeDecl t1 = getTypeAccess(i).type();
+				TypeDecl t2 = getTypeAccess(j).type();
+				if (t2.instanceOf(t1)) {
+					error(t2.fullName() + " is a subclass of " +
+							t1.fullName());
+					pass = false;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Reachability checking for multi-catch.
+	 */
+	eq MultiCatch.getBlock().reachable() {
+		boolean anyReachable = false;
+		CatchParameterDeclaration param = getParameter();
+		for (int i = 0; i < param.getNumTypeAccess(); ++i) {
+			TypeDecl type = param.getTypeAccess(i).type();
+			if (!reachableCatchClause(type))
+				error("The exception type "+type.fullName()+
+						" can not be caught "+
+						"by this multi-catch clause");
+			else
+				anyReachable = true;
+		}
+		return anyReachable;
+	}
+
+	/**
+	 * Pretty printing of multi-catch clause.
+	 */
+	public void MultiCatch.toString(StringBuffer sb) {
+		sb.append("catch (");
+		getParameter().toString(sb);
+		sb.append(") ");
+		getBlock().toString(sb);
+	}
+
+	/**
+	 * Pretty printing of catch parameter declaration.
+	 */
+	public void CatchParameterDeclaration.toString(StringBuffer sb) {
+		getModifiers().toString(sb);
+		for (int i = 0; i < getNumTypeAccess(); ++i) {
+			if (i > 0) sb.append(" | ");
+			getTypeAccess(i).toString(sb);
+		}
+		sb.append(" "+getID());
+	}
+
+	inh LUBType CatchParameterDeclaration.lookupLUBType(Collection bounds);
+
+	/**
+	 * A catch parameter declared with a disjunction type has the
+	 * effective type lub(t1, t2, ...)
+	 *
+	 * @see "JLSv3 &sect;15.12.2.7"
+	 */
+	syn TypeDecl CatchParameterDeclaration.type() {
+		ArrayList<TypeDecl> list = new ArrayList<TypeDecl>();
+		for (int i = 0; i < getNumTypeAccess(); i++)
+			list.add(getTypeAccess(i).type());
+		return lookupLUBType(list).lub();
+	}
+
+	inh VariableScope CatchParameterDeclaration.outerScope();
+	inh BodyDecl CatchParameterDeclaration.enclosingBodyDecl();
+
+	/**
+	 * Duplicate declaration checking for catch parameters.
+	 */
+	public void CatchParameterDeclaration.nameCheck() {
+		SimpleSet decls = outerScope().lookupVariable(name());
+		for(Iterator iter = decls.iterator(); iter.hasNext(); ) {
+			Variable var = (Variable)iter.next();
+			if (var instanceof VariableDeclaration) {
+				VariableDeclaration decl = (VariableDeclaration)var;
+				if (decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of "+
+						"catch parameter "+name());
+			} else if (var instanceof ParameterDeclaration) {
+				ParameterDeclaration decl = (ParameterDeclaration)var;
+				if (decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of "+
+						"catch parameter "+name());
+			} else if (var instanceof CatchParameterDeclaration) {
+				CatchParameterDeclaration decl = (CatchParameterDeclaration)var;
+				if (decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of "+
+						"catch parameter "+name());
+			}
+		}
+
+		// 8.4.1  
+		if (!lookupVariable(name()).contains(this))
+			error("duplicate declaration of catch parameter " +
+					name());
+	}
+
+	refine NameCheck
+	public void ParameterDeclaration.nameCheck() {
+		SimpleSet decls = outerScope().lookupVariable(name());
+		for(Iterator iter = decls.iterator(); iter.hasNext(); ) {
+			Variable var = (Variable)iter.next();
+			if(var instanceof VariableDeclaration) {
+				VariableDeclaration decl = (VariableDeclaration)var;
+				if (decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of parameter " + name());
+			} else if(var instanceof ParameterDeclaration) {
+				ParameterDeclaration decl = (ParameterDeclaration)var;
+				if(decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of parameter " + name());
+			} else if(var instanceof CatchParameterDeclaration) {
+				CatchParameterDeclaration decl = (CatchParameterDeclaration)var;
+				if(decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of parameter " + name());
+			}
+		}
+
+		// 8.4.1  
+		if(!lookupVariable(name()).contains(this)) {
+			error("duplicate declaration of parameter " + name());
+		}
+	}
+
+	refine NameCheck
+	public void VariableDeclaration.nameCheck() {
+		SimpleSet decls = outerScope().lookupVariable(name());
+		for(Iterator iter = decls.iterator(); iter.hasNext(); ) {
+			Variable var = (Variable)iter.next();
+			if(var instanceof VariableDeclaration) {
+				VariableDeclaration decl = (VariableDeclaration)var;
+				if(decl != this && decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of local variable " + name());
+			}
+			// 8.4.1
+			else if(var instanceof ParameterDeclaration) {
+				ParameterDeclaration decl = (ParameterDeclaration)var;
+				if(decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of local variable " + name());
+			} else if(var instanceof CatchParameterDeclaration) {
+				CatchParameterDeclaration decl = (CatchParameterDeclaration)var;
+				if(decl.enclosingBodyDecl() == enclosingBodyDecl())
+					error("duplicate declaration of local variable " + name());
+			}
+		}
+		if(getParent().getParent() instanceof Block) {
+			Block block = (Block)getParent().getParent();
+			for(int i = 0; i < block.getNumStmt(); i++) {
+				if(block.getStmt(i) instanceof Variable) {
+					Variable v = (Variable)block.getStmt(i);
+					if(v.name().equals(name()) && v != this) {
+						error("duplicate declaration of local variable " + name());
+					}
+				}
+			}
+		}
+	}
+}

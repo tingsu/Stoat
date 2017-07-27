@@ -1,0 +1,60 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect GenericsArrays {
+  refine Arrays eq TypeDecl.arrayType() {
+    String name = name() + "[]";
+
+    List body = new List();
+    body.add(
+      new FieldDeclaration(
+        new Modifiers(new List().add(new Modifier("public")).add(new Modifier("final"))),
+        new PrimitiveTypeAccess("int"),
+        "length",
+        new Opt() // [Init:Expr]
+      )
+    );
+    MethodDecl clone = null;
+    TypeDecl typeObject = typeObject();
+    for(int i = 0; clone == null && i < typeObject.getNumBodyDecl(); i++) {
+      if(typeObject.getBodyDecl(i) instanceof MethodDecl) {
+        MethodDecl m = (MethodDecl)typeObject.getBodyDecl(i);
+        if(m.name().equals("clone"))
+          clone = m;
+      }
+    }
+    if(clone != null) {
+      body.add(
+          // we create a substituted method that substitutes the clone method in object
+          // this has the following two consequences: the return value will be cast to the
+          // expected return type rather than object, and the invoked method will be the
+          // method in object rather in the array
+          new MethodDeclSubstituted(
+            new Modifiers(new List().add(new Modifier("public"))),
+            new ArrayTypeAccess(createQualifiedAccess()),
+            "clone",
+            new List(),
+            new List(),
+            new Opt(new Block()),
+            (MethodDecl)typeObject().memberMethods("clone").iterator().next()
+          )
+      );
+    }
+    TypeDecl typeDecl =
+      new ArrayDecl(
+        new Modifiers(new List().add(new Modifier("public"))),
+        name,
+        new Opt(typeObject().createQualifiedAccess()), // [SuperClassAccess]
+        new List().add(typeCloneable().createQualifiedAccess()).add(typeSerializable().createQualifiedAccess()), // Implements*
+        body // BodyDecl*
+      );
+    return typeDecl;
+  }
+
+}

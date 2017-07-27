@@ -1,0 +1,87 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect Flags {
+  public static final int Modifiers.ACC_PUBLIC       = 0x0001; // class field method
+  public static final int Modifiers.ACC_PRIVATE      = 0x0002; //       field method
+  public static final int Modifiers.ACC_PROTECTED    = 0x0004; //       field method
+  public static final int Modifiers.ACC_STATIC       = 0x0008; //       field method
+  public static final int Modifiers.ACC_FINAL        = 0x0010; // class field method
+  public static final int Modifiers.ACC_SYNCHRONIZED = 0x0020; //             method
+  public static final int Modifiers.ACC_SUPER        = 0x0020; // class
+  public static final int Modifiers.ACC_VOLATILE     = 0x0040; //       field
+  public static final int Modifiers.ACC_TRANSIENT    = 0x0080; //       field
+  public static final int Modifiers.ACC_NATIVE       = 0x0100; //             method
+  public static final int Modifiers.ACC_INTERFACE    = 0x0200; // class
+  public static final int Modifiers.ACC_ABSTRACT     = 0x0400; // class       method
+  public static final int Modifiers.ACC_SYNTHETIC    = 0x1000; //       field method
+  public static final int Modifiers.ACC_STRICT       = 0x0800; //             method
+
+
+  // mangle modifiers for nested types
+  public int TypeDecl.mangledFlags(int flags) {
+    boolean privateFlag = (flags & Modifiers.ACC_PRIVATE) != 0;
+    boolean protectedFlag = (flags & Modifiers.ACC_PROTECTED) != 0;
+    flags &= ~ Modifiers.ACC_PRIVATE;
+    flags &= ~ Modifiers.ACC_PROTECTED;
+    if(protectedFlag)
+      flags |= Modifiers.ACC_PUBLIC;
+    return flags;
+  }
+
+
+
+  syn lazy int MethodDecl.flags() {
+    int res = 0;
+    if(isPublic()) res |= Modifiers.ACC_PUBLIC;
+    if(isPrivate()) res |= Modifiers.ACC_PRIVATE;
+    if(isProtected()) res |= Modifiers.ACC_PROTECTED;
+    if(isStatic()) res |= Modifiers.ACC_STATIC;
+    if(isFinal()) res |= Modifiers.ACC_FINAL;
+    if(isSynchronized()) res |= Modifiers.ACC_SYNCHRONIZED;
+    if(isNative()) res |= Modifiers.ACC_NATIVE;
+    if(isAbstract()) res |= Modifiers.ACC_ABSTRACT;
+    if(isStrictfp() || (hostType().isStrictfp() && !hostType().isInterfaceDecl())) res |= Modifiers.ACC_STRICT;
+    return res;
+  }
+
+  syn lazy int ConstructorDecl.flags() {
+    int res = 0;
+    if(isPublic()) res |= Modifiers.ACC_PUBLIC;
+    if(isPrivate()) res |= Modifiers.ACC_PRIVATE;
+    if(isProtected()) res |= Modifiers.ACC_PROTECTED;
+    //if(isSynchronized()) res |= Modifiers.ACC_SYNCHRONIZED;
+    //if(isStrictfp()) res |= Modifiers.ACC_STRICT;
+    return res;
+  }
+
+  syn lazy int TypeDecl.flags() {
+    int res = 0;
+    if(isPublic()) res |= Modifiers.ACC_PUBLIC;
+    if(isPrivate()) res |= Modifiers.ACC_PRIVATE;
+    if(isProtected()) res |= Modifiers.ACC_PROTECTED;
+    if(isStatic()) res |= Modifiers.ACC_STATIC;
+    if(isFinal()) res |= Modifiers.ACC_FINAL;
+    // ACC_INTERFACE handled in InterfaceDecl
+    if(isAbstract()) res |= Modifiers.ACC_ABSTRACT;
+    return res;
+  }
+
+  syn lazy int FieldDeclaration.flags() {
+    int res = 0;
+    if(isPublic()) res |= Modifiers.ACC_PUBLIC;
+    if(isPrivate()) res |= Modifiers.ACC_PRIVATE;
+    if(isProtected()) res |= Modifiers.ACC_PROTECTED;
+    if(isStatic()) res |= Modifiers.ACC_STATIC;
+    if(isFinal()) res |= Modifiers.ACC_FINAL;
+    if(isVolatile()) res |= Modifiers.ACC_VOLATILE;
+    if(isTransient()) res |= Modifiers.ACC_TRANSIENT;
+    return res;
+  }
+}

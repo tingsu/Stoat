@@ -1,0 +1,243 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Eric Bodden, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import soot.*;
+import soot.util.*;
+import soot.jimple.*;
+import soot.coffi.ClassFile;
+import soot.coffi.CoffiMethodSource;
+import soot.coffi.method_info;
+import soot.coffi.CONSTANT_Utf8_info;
+
+aspect EmitJimpleRefinements {
+
+  refine GenericsCodegen eq TypeDecl.getSootType() {
+    return RefType.v(erasure().jvmName());
+  }
+
+  refine EmitJimple eq ClassDecl.sootClass() {
+    boolean needAddclass = false;
+    SootClass sc = null;
+    if(Scene.v().containsClass(jvmName())) {
+      SootClass cl = Scene.v().getSootClass(jvmName());
+      //fix for test case 653: if there's a class java.lang.Object etc. on the command line
+      //prefer that class over the Coffi class that may already have been loaded from bytecode
+      try {
+        MethodSource source = cl.getMethodByName("<clinit>").getSource();
+        if(source instanceof CoffiMethodSource) {
+          Scene.v().removeClass(cl);
+          needAddclass = true;
+        }
+      } catch(RuntimeException e) {
+        //method not found
+      }    	
+      sc = cl;       
+    }
+    else {
+      needAddclass = true;
+    }
+    if(needAddclass) {
+      if(options().verbose())
+        System.out.println("Creating from source " + jvmName());        
+      sc = new SootClass(jvmName());
+      sc.setResolvingLevel(SootClass.DANGLING);
+      Scene.v().addClass(sc);
+    } 
+    return sc;
+  }
+
+  refine EmitJimple eq InterfaceDecl.sootClass() {
+    if(options().verbose())
+      System.out.println("Creating from source " + jvmName());
+    SootClass sc = SootResolver.v().makeClassRef(jvmName());
+    sc.setModifiers(sootTypeModifiers()); // turn it into an interface
+    return sc;
+  }
+
+  refine GenericsCodegen eq TypeDecl.getSootClassDecl() {
+    if(erasure() != this)
+      return erasure().getSootClassDecl();
+    if(compilationUnit().fromSource()) {
+      return sootClass();
+    }
+    else {
+      if(options().verbose())
+        System.out.println("Loading .class file " + jvmName());
+      return SootResolver.v().makeClassRef(jvmName());
+      /*
+
+      RefType type = (RefType) Scene.v().getRefType(jvmName());
+      SootClass toReturn = null;
+      if( type != null ) toReturn = type.getSootClass();
+      if(toReturn != null) {
+        return toReturn;
+      } 
+      SootClass c = new SootClass(jvmName());
+      c.setPhantom(true);
+      Scene.v().addClass(c);
+      return c;
+      */
+
+
+      //  return Scene.v().getSootClass(jvmName());
+      /*
+         SootClass sc = Scene.v().loadClass(jvmName(), SootClass.SIGNATURES);
+         sc.setLibraryClass();
+         return sc;
+       */
+    }
+
+  }
+
+
+
+  refine EmitJimple public void MethodDecl.jimplify2() {
+    if(!generate() || sootMethod().hasActiveBody()  ||
+      (sootMethod().getSource() != null && (sootMethod().getSource() instanceof soot.coffi.CoffiMethodSource)) ) return;
+    try {
+      if(hasBlock() && !(hostType().isInterfaceDecl())) {
+        JimpleBody body = Jimple.v().newBody(sootMethod());
+        sootMethod().setActiveBody(body);
+        Body b = new Body(hostType(), body, this);
+        b.setLine(this);
+        for(int i = 0; i < getNumParameter(); i++)
+          getParameter(i).jimplify2(b);
+        getBlock().jimplify2(b);
+        if(type() instanceof VoidType)
+          b.add(Jimple.v().newReturnVoidStmt());
+      }
+    } catch (RuntimeException e) {
+      System.err.println("Error generating " + hostType().typeName() + ": " + this); 
+      throw e;
+    }
+  }
+  
+  refine EmitJimple public void ConstructorDecl.jimplify2() {
+    if(!generate() || sootMethod().hasActiveBody()  ||
+      (sootMethod().getSource() != null && (sootMethod().getSource() instanceof soot.coffi.CoffiMethodSource)) ) return;  
+     JimpleBody body = Jimple.v().newBody(sootMethod());
+    sootMethod().setActiveBody(body);
+    Body b = new Body(hostType(), body, this);
+    b.setLine(this);
+    for(int i = 0; i < getNumParameter(); i++)
+      getParameter(i).jimplify2(b);
+
+    boolean needsInit = true;
+
+    if(hasConstructorInvocation()) {
+      getConstructorInvocation().jimplify2(b);
+      Stmt stmt = getConstructorInvocation();
+      if(stmt instanceof ExprStmt) {
+        ExprStmt exprStmt = (ExprStmt)stmt;
+        Expr expr = exprStmt.getExpr();
+        if(!expr.isSuperConstructorAccess())
+          needsInit = false;
+
+      }
+    }
+
+    if(hostType().needsEnclosing()) {
+      TypeDecl type = hostType().enclosingType();
+      b.add(Jimple.v().newAssignStmt(
+        Jimple.v().newInstanceFieldRef(
+          b.emitThis(hostType()),
+          hostType().getSootField("this$0", type).makeRef()
+        ),
+        asLocal(b, Jimple.v().newParameterRef(type.getSootType(), 0))
+      ));
+    }
+    
+    for(Iterator iter = hostType().enclosingVariables().iterator(); iter.hasNext(); ) {
+      Variable v = (Variable)iter.next();
+      ParameterDeclaration p = (ParameterDeclaration)parameterDeclaration("val$" + v.name()).iterator().next();
+      b.add(Jimple.v().newAssignStmt(
+        Jimple.v().newInstanceFieldRef(
+          b.emitThis(hostType()),
+          Scene.v().makeFieldRef(hostType().getSootClassDecl(), "val$" + v.name(), v.type().getSootType(), false)
+          //hostType().getSootClassDecl().getField("val$" + v.name(), v.type().getSootType()).makeRef()
+        ),
+        p.local
+      ));
+    }
+
+    if(needsInit) {
+      TypeDecl typeDecl = hostType();
+      for(int i = 0; i < typeDecl.getNumBodyDecl(); i++) {
+        BodyDecl bodyDecl = typeDecl.getBodyDecl(i);
+        if(bodyDecl instanceof FieldDeclaration && bodyDecl.generate()) {
+          FieldDeclaration f = (FieldDeclaration)bodyDecl;
+          if(!f.isStatic() && f.hasInit()) {
+            soot.Local base = b.emitThis(hostType());
+            Local l = asLocal(b,
+              f.getInit().type().emitCastTo(b, f.getInit(), f.type()), // AssignConversion
+              f.type().getSootType()
+            );
+            b.setLine(f);
+            b.add(Jimple.v().newAssignStmt(
+              Jimple.v().newInstanceFieldRef(base, f.sootRef()),
+              l
+            ));
+          }
+        }
+        else if(bodyDecl instanceof InstanceInitializer && bodyDecl.generate()) {
+          bodyDecl.jimplify2(b);
+        }
+      }
+    }
+    getBlock().jimplify2(b);
+    b.add(Jimple.v().newReturnVoidStmt());
+  }
+
+  public void ASTNode.collectTypesToHierarchy(Collection<Type> set) {
+	 for(int i = 0; i < getNumChild(); i++)
+	  getChild(i).collectTypesToHierarchy(set);
+  }
+  
+  public void Expr.collectTypesToHierarchy(Collection<Type> set) {
+	  super.collectTypesToHierarchy(set);
+	  // collect all expr types that are reference types
+	  // select the element type in case it is an array type
+    addDependencyIfNeeded(set, type());
+  }
+
+  protected void Expr.addDependencyIfNeeded(Collection<Type> set, TypeDecl type) {
+    type = type.elementType().erasure();
+    if(type.isReferenceType() && !type.isUnknown())
+      set.add(type.getSootType());
+  }
+	
+  public void ASTNode.collectTypesToSignatures(Collection<Type> set) {
+	 for(int i = 0; i < getNumChild(); i++)
+	  getChild(i).collectTypesToSignatures(set);
+  }
+
+  public void VarAccess.collectTypesToSignatures(Collection<Type> set) {
+	 super.collectTypesToSignatures(set);
+   // if we access a field declaration we load the qualifying type 
+   // the element type is used to cater for reading the field length in an array type
+	 if(decl() instanceof FieldDeclaration)
+     addDependencyIfNeeded(set, fieldQualifierType());
+  }
+  public void MethodAccess.collectTypesToSignatures(Collection<Type> set) {
+	 super.collectTypesToSignatures(set);
+   addDependencyIfNeeded(set, methodQualifierType());
+  }
+  public void ClassInstanceExpr.collectTypesToSignatures(Collection<Type> set) {
+	 super.collectTypesToSignatures(set);
+   addDependencyIfNeeded(set, decl().erasedConstructor().hostType());
+  }
+  public void ConstructorAccess.collectTypesToSignatures(Collection<Type> set) {
+	 super.collectTypesToSignatures(set);
+   addDependencyIfNeeded(set, decl().erasedConstructor().hostType());
+  }
+  public void SuperConstructorAccess.collectTypesToSignatures(Collection<Type> set) {
+	 super.collectTypesToSignatures(set);
+   addDependencyIfNeeded(set, decl().erasedConstructor().hostType());
+  }
+}

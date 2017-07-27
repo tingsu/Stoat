@@ -1,0 +1,2 @@
+IntertypeConstructorDecl : ConstructorDecl ::= TargetType:Access;
+IntroducedConstructorDecl : ConstructorDecl ::= <ITDBodyDecl:IntertypeConstructorDecl>;

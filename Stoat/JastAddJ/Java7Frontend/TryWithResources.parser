@@ -1,0 +1,64 @@
+Stmt statement =
+ try_with_resource
+;
+
+TryWithResources try_with_resource =
+  TRY LPAREN resource_declaration_list.a RPAREN block.b
+  {:
+    return new TryWithResources(a, b, new List(), new Opt());
+  :}
+
+| TRY LPAREN resource_declaration_list.a RPAREN block.b catches.c
+  {:
+    return new TryWithResources(a, b, c, new Opt());
+  :}
+
+| TRY LPAREN resource_declaration_list.a RPAREN block.b finally.c
+  {:
+    return new TryWithResources(a, b, new List(), new Opt(c));
+  :}
+
+| TRY LPAREN resource_declaration_list.a RPAREN block.b catches.c finally.d
+  {:
+    return new TryWithResources(a, b, c, new Opt(d));
+  :}
+;
+
+List resource_declaration_list =
+  resource_declarations.a SEMICOLON?
+  {:
+    return a;
+  :}
+;
+
+List resource_declarations =
+  resource_declaration.a
+  {:
+    return new List().add(a);
+  :}
+
+| resource_declarations.a SEMICOLON resource_declaration.b
+  {:
+    return a.add(b);
+  :}
+;
+
+ResourceDeclaration resource_declaration =
+  resource_decl.a
+  {:
+    return a;
+  :}
+
+| resource_decl.a EQ variable_initializer.b
+  {:
+    a.setInit(b);
+    return a;
+  :}
+;
+
+ResourceDeclaration resource_decl =
+  modifiers.a? type.b IDENTIFIER
+  {:
+    return new ResourceDeclaration(new ResourceModifiers(a), b, IDENTIFIER, new Opt());
+  :}
+;

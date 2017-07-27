@@ -1,0 +1,9 @@
+BodyDecl intertype_member_declaration =
+  intertype_constructor_declaration
+  ;
+
+BodyDecl intertype_constructor_declaration =
+    modifiers.m? name.targetType DOT IDENTIFIER LPAREN formal_parameter_list.p? RPAREN throws.t? 
+		LBRACE explicit_constructor_invocation.c? block_statements.l? RBRACE
+    {: return new IntertypeConstructorDecl(new Modifiers(m), IDENTIFIER, p, t, c, new Block(l), targetType); :}
+  ;

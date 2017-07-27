@@ -1,0 +1,536 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect Statements {
+
+  public void Stmt.jimplify2(Body b) {
+  }
+
+  public void Block.jimplify2(Body b) {
+    for(int i = 0; i < getNumStmt(); i++)
+      getStmt(i).jimplify2(b);
+  }
+
+  public void EmptyStmt.jimplify2(Body b) {
+  }
+
+  syn lazy soot.jimple.Stmt LabeledStmt.label() = newLabel();
+  syn lazy soot.jimple.Stmt LabeledStmt.end_label() = newLabel();
+  public void LabeledStmt.jimplify2(Body b) {
+    b.setLine(this);
+    b.addLabel(label());
+    getStmt().jimplify2(b);
+    b.addLabel(end_label());
+  }
+
+  public void ExprStmt.jimplify2(Body b) {
+    b.setLine(this);
+    soot.Value value = getExpr().eval(b);
+    if(value instanceof soot.jimple.InvokeExpr) {
+      b.add(b.newInvokeStmt((soot.jimple.InvokeExpr)value, this));
+    }
+  }
+
+  syn lazy DefaultCase SwitchStmt.defaultCase() {
+    for(int i= 0; i < getBlock().getNumStmt(); i++) {
+      if(getBlock().getStmt(i) instanceof DefaultCase)
+        return (DefaultCase)getBlock().getStmt(i);
+    }
+    return null;
+  }
+
+  syn lazy soot.jimple.Stmt SwitchStmt.end_label() = newLabel();
+
+  public void SwitchStmt.jimplify2(Body b) {
+    soot.jimple.Stmt cond_label = newLabel();
+    soot.jimple.Stmt switch_label = newLabel();
+
+    b.setLine(this);
+    b.add(b.newGotoStmt(cond_label, this));
+    getBlock().jimplify2(b);
+    if(canCompleteNormally()) {
+      b.setLine(this);
+      b.add(b.newGotoStmt(end_label(), this));
+    }
+    b.addLabel(cond_label);
+    soot.Value expr = asImmediate(b, getExpr().eval(b));
+
+    TreeMap map = new TreeMap();
+    for(int i= 0; i < getBlock().getNumStmt(); i++) {
+      if(getBlock().getStmt(i) instanceof ConstCase) {
+        ConstCase ca = (ConstCase)getBlock().getStmt(i);
+        map.put(new Integer(ca.getValue().constant().intValue()), ca);
+      }        
+    }
+
+    long low = map.isEmpty() ? 0 : ((Integer)map.firstKey()).intValue();
+    long high = map.isEmpty() ? 0 : ((Integer)map.lastKey()).intValue();
+
+    long tableSwitchSize = 8L + (high - low + 1L) * 4L;
+    long lookupSwitchSize = 4L + map.size() * 8L;
+
+    b.addLabel(switch_label);
+    soot.jimple.Stmt defaultStmt = defaultCase() != null ? defaultCase().label() : end_label();
+    if(tableSwitchSize < lookupSwitchSize) {
+      ArrayList targets = new ArrayList();
+      for(long i = low; i <= high; i++) {
+        ConstCase ca = (ConstCase)map.get(new Integer((int)i));
+        if(ca != null)
+          targets.add(ca.label());
+        else
+          targets.add(defaultStmt);
+      }
+      b.setLine(this);
+      b.add(b.newTableSwitchStmt(expr, (int)low, (int)high, targets, defaultStmt, this));
+    }
+    else {
+      ArrayList targets = new ArrayList();
+      ArrayList values = new ArrayList();
+      for(Iterator iter = map.values().iterator(); iter.hasNext(); ) {
+        ConstCase ca = (ConstCase)iter.next();
+        targets.add(ca.label());
+        values.add(IntType.emitConstant(ca.getValue().constant().intValue()));
+      }
+
+      b.setLine(this);
+      b.add(b.newLookupSwitchStmt(expr, values, targets, defaultStmt, this));
+    }
+    b.addLabel(end_label());
+  }
+
+  syn lazy soot.jimple.Stmt Case.label() = newLabel();
+
+  public void Case.jimplify2(Body b) {
+    b.addLabel(label());
+  }
+
+  syn lazy soot.jimple.Stmt IfStmt.else_branch_label() = newLabel();
+  syn lazy soot.jimple.Stmt IfStmt.then_branch_label() = newLabel();
+  public void IfStmt.jimplify2(Body b) {
+    soot.jimple.Stmt endBranch = newLabel();
+    if(getCondition().isConstant()) {
+      if(getCondition().isTrue())
+        getThen().jimplify2(b);
+      else if(getCondition().isFalse() && hasElse())
+        getElse().jimplify2(b);
+    }
+    else {
+      soot.jimple.Stmt elseBranch = else_branch_label();
+      soot.jimple.Stmt thenBranch = then_branch_label();
+      getCondition().emitEvalBranch(b);
+      b.addLabel(thenBranch);
+      getThen().jimplify2(b);
+      if(getThen().canCompleteNormally() && hasElse()) {
+        b.setLine(this);
+        b.add(b.newGotoStmt(endBranch, this));
+      }
+      b.addLabel(elseBranch);
+      if(hasElse())
+        getElse().jimplify2(b);
+    }
+    if(getThen().canCompleteNormally() && hasElse())
+      b.addLabel(endBranch);
+  }
+
+
+  syn lazy soot.jimple.Stmt WhileStmt.cond_label() = newLabel();
+  syn lazy soot.jimple.Stmt WhileStmt.end_label() = newLabel();
+  syn lazy soot.jimple.Stmt WhileStmt.stmt_label() = newLabel();
+
+  public void WhileStmt.jimplify2(Body b) {
+    b.addLabel(cond_label());
+    getCondition().emitEvalBranch(b);
+    b.addLabel(stmt_label());
+    if(getCondition().canBeTrue()) {
+      getStmt().jimplify2(b);
+      if(getStmt().canCompleteNormally()) {
+        b.setLine(this);
+        b.add(b.newGotoStmt(cond_label(), this));
+      }
+    }
+    if(canCompleteNormally())
+      b.addLabel(end_label());
+  }
+
+  syn lazy soot.jimple.Stmt DoStmt.begin_label() = newLabel();
+  syn lazy soot.jimple.Stmt DoStmt.cond_label() = newLabel();
+  syn lazy soot.jimple.Stmt DoStmt.end_label() = newLabel();
+
+  public void DoStmt.jimplify2(Body b) {
+    b.setLine(this);
+    b.addLabel(begin_label());
+    getStmt().jimplify2(b);
+    b.addLabel(cond_label());
+    getCondition().emitEvalBranch(b);
+    if(canCompleteNormally())
+      b.addLabel(end_label());
+  }
+
+  syn lazy soot.jimple.Stmt ForStmt.cond_label() = newLabel();
+  syn lazy soot.jimple.Stmt ForStmt.begin_label() = newLabel();
+  syn lazy soot.jimple.Stmt ForStmt.update_label() = newLabel();
+  syn lazy soot.jimple.Stmt ForStmt.end_label() = newLabel();
+
+  public void ForStmt.jimplify2(Body b) {
+    for (int i=0; i<getNumInitStmt(); i++) {
+      getInitStmt(i).jimplify2(b);
+    }
+    b.addLabel(cond_label());
+    getCondition().emitEvalBranch(b);
+    if(getCondition().canBeTrue()) {
+      b.addLabel(begin_label());
+      getStmt().jimplify2(b);
+      b.addLabel(update_label());	
+      for (int i=0; i < getNumUpdateStmt(); i++)
+        getUpdateStmt(i).jimplify2(b);
+      b.setLine(this);
+      b.add(b.newGotoStmt(cond_label(), this));
+    }
+    if(canCompleteNormally()) {
+      b.addLabel(end_label());
+    }
+  }
+
+  syn soot.jimple.Stmt Stmt.break_label() {
+    throw new UnsupportedOperationException("Can not break at this statement of type " + getClass().getName());
+  }
+  eq ForStmt.break_label() = end_label();
+  eq WhileStmt.break_label() = end_label();
+  eq DoStmt.break_label() = end_label();
+  eq LabeledStmt.break_label() = end_label();
+  eq SwitchStmt.break_label() = end_label();
+  eq TryStmt.break_label() =  label_finally();
+
+  public void BreakStmt.jimplify2(Body b) {
+    ArrayList list = exceptionRanges();
+    if(!inSynchronizedBlock())
+      endExceptionRange(b, list);
+    for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+      FinallyHost stmt = (FinallyHost)iter.next();
+      stmt.emitFinallyCode(b);
+    }
+    if(inSynchronizedBlock())
+      endExceptionRange(b, list);
+    b.setLine(this);
+    b.add(b.newGotoStmt(targetStmt().break_label(), this));
+    beginExceptionRange(b, list);
+  }
+
+  syn soot.jimple.Stmt Stmt.continue_label() {
+    throw new UnsupportedOperationException("Can not continue at this statement");
+  }
+  eq ForStmt.continue_label() = update_label();
+  eq WhileStmt.continue_label() = cond_label();
+  eq DoStmt.continue_label() = cond_label();
+  eq LabeledStmt.continue_label() = getStmt().continue_label();
+  eq TryStmt.continue_label() = label_finally();
+
+  public void ContinueStmt.jimplify2(Body b) {
+    ArrayList list = exceptionRanges();
+    if(!inSynchronizedBlock())
+      endExceptionRange(b, list);
+    for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+      FinallyHost stmt = (FinallyHost)iter.next();
+      stmt.emitFinallyCode(b);
+    }
+    if(inSynchronizedBlock())
+      endExceptionRange(b, list);
+    b.setLine(this);
+    b.add(b.newGotoStmt(targetStmt().continue_label(), this));
+    beginExceptionRange(b, list);
+  }
+
+  syn lazy boolean ReturnStmt.inSynchronizedBlock() =
+    !finallyList().isEmpty() && finallyList().iterator().next() instanceof SynchronizedStmt;
+  syn lazy boolean BreakStmt.inSynchronizedBlock() =
+    !finallyList().isEmpty() && finallyList().iterator().next() instanceof SynchronizedStmt;
+  syn lazy boolean ContinueStmt.inSynchronizedBlock() =
+    !finallyList().isEmpty() && finallyList().iterator().next() instanceof SynchronizedStmt;
+
+  public void ASTNode.endExceptionRange(Body b, ArrayList list) {
+    if(list != null) {
+      soot.jimple.Stmt label = newLabel();
+      b.addLabel(label);
+      list.add(label);
+      //list.add(b.previousStmt());
+    }
+  }
+  public void ASTNode.beginExceptionRange(Body b, ArrayList list) {
+    if(list != null)
+      b.addNextStmt(list);
+  }
+
+  public void ReturnStmt.jimplify2(Body b) {
+    if(hasResult()) {
+      TypeDecl type = returnType();
+      if(type.isVoid()) {
+        throw new Error("Can not return a value from a void body");
+      }
+      Local local = asLocal(b,
+        getResult().type().emitCastTo(b,
+          getResult().eval(b),
+          type,
+          getResult()
+        ),
+        type.getSootType()
+      );
+      ArrayList list = exceptionRanges();
+      if(!inSynchronizedBlock())
+        endExceptionRange(b, list);
+      for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+        FinallyHost stmt = (FinallyHost)iter.next();
+        stmt.emitFinallyCode(b);
+      }
+      b.setLine(this);
+      if(inSynchronizedBlock())
+        endExceptionRange(b, list);
+      b.add(b.newReturnStmt(local, this));
+      beginExceptionRange(b, list);
+    }
+    else {
+      ArrayList list = exceptionRanges();
+      if(!inSynchronizedBlock())
+        endExceptionRange(b, list);
+      for(Iterator iter = finallyList().iterator(); iter.hasNext(); ) {
+        FinallyHost stmt = (FinallyHost)iter.next();
+        stmt.emitFinallyCode(b);
+      }
+      b.setLine(this);
+      if(inSynchronizedBlock())
+        endExceptionRange(b, list);
+      b.add(b.newReturnVoidStmt(this));
+      beginExceptionRange(b, list);
+    }
+  }
+
+  public void ThrowStmt.jimplify2(Body b) {
+    b.setLine(this);
+    b.add(b.newThrowStmt(
+      asImmediate(b, getExpr().eval(b)),
+      this
+    ));
+  }
+  syn lazy soot.jimple.Stmt FinallyHost.label_finally_block();
+
+  public void FinallyHost.emitFinallyCode(Body b);
+  public void TryStmt.emitFinallyCode(Body b) {
+    if(hasFinally()) {
+      // Clear cached attributes to force re-evaluation of local variables
+      getFinally().flushCaches();
+      getFinally().jimplify2(b);
+    }
+  }
+
+  syn lazy soot.Local SynchronizedStmt.monitor(Body b) {
+    return b.newTemp(getExpr().eval(b));
+  }
+
+  public void SynchronizedStmt.emitFinallyCode(Body b) {
+    b.setLine(this);
+    b.add(b.newExitMonitorStmt(monitor(b), this));
+  }
+
+  syn lazy soot.jimple.Stmt TryStmt.label_begin() = newLabel();
+  syn lazy soot.jimple.Stmt TryStmt.label_block_end() = newLabel();
+  syn lazy soot.jimple.Stmt TryStmt.label_end() = newLabel();
+  syn lazy soot.jimple.Stmt TryStmt.label_finally() = newLabel();
+  eq TryStmt.label_finally_block() = newLabel();
+  syn lazy soot.jimple.Stmt TryStmt.label_exception_handler() = newLabel();
+  syn lazy soot.jimple.Stmt TryStmt.label_catch_end() = newLabel();
+
+  syn boolean TryStmt.needsFinallyTrap() = getNumCatchClause() != 0 || enclosedByExceptionHandler();
+  inh boolean TryStmt.enclosedByExceptionHandler();
+  eq Program.getChild().enclosedByExceptionHandler() = false;
+  eq TypeDecl.getBodyDecl().enclosedByExceptionHandler() = false;
+  eq MethodDecl.getBlock().enclosedByExceptionHandler() = getNumException() != 0;
+  eq ConstructorDecl.getBlock().enclosedByExceptionHandler() = getNumException() != 0;
+  eq TryStmt.getBlock().enclosedByExceptionHandler() = true;
+  eq SynchronizedStmt.getBlock().enclosedByExceptionHandler() = true;
+  syn boolean SynchronizedStmt.needsFinallyTrap() = enclosedByExceptionHandler();
+  inh boolean SynchronizedStmt.enclosedByExceptionHandler();
+
+  public void TryStmt.jimplify2(Body b) {
+    ArrayList ranges = exceptionRanges();
+    b.addLabel(label_begin());
+    ranges.add(label_begin());
+    getBlock().jimplify2(b);
+    soot.jimple.Stmt label_block_end = null;
+    soot.jimple.Stmt label_end = null;
+    if(getBlock().canCompleteNormally()) {
+      if(hasFinally() && getNumCatchClause() != 0) {
+        label_block_end = label_block_end();
+        b.addLabel(label_block_end);
+      }
+      emitFinallyCode(b);
+      b.setLine(this);
+      if((!hasFinally() || getFinally().canCompleteNormally()) && (getNumCatchClause() != 0 || hasFinally()/*needsFinallyTrap()*/))
+        b.add(b.newGotoStmt(label_end = label_end(), this));
+    }
+    if(getNumCatchClause() != 0) {
+      if(label_block_end == null)
+        label_block_end = ((BasicCatch)getCatchClause(0)).label();
+      ranges.add(label_block_end);
+      ranges.add(label_block_end);
+      for(int i = 0; i < getNumCatchClause(); i++) {
+        //beginExceptionRange(b, ranges);
+        getCatchClause(i).jimplify2(b);
+        if(getCatchClause(i).getBlock().canCompleteNormally()) {
+          b.setLine(getCatchClause(i));
+          endExceptionRange(b, ranges);
+          emitFinallyCode(b);
+          if(!hasFinally() || getFinally().canCompleteNormally())
+            b.add(b.newGotoStmt(label_end = label_end(), this));
+          beginExceptionRange(b, ranges);
+        }
+        b.setLine(getCatchClause(i));
+        //endExceptionRange(b, ranges);
+      }
+    }
+    if(hasFinally() /*&& needsFinallyTrap()*/) {
+      b.addLabel(label_exception_handler());
+      emitExceptionHandler(b);
+      b.setLine(getFinally());
+      //if(getFinally().canCompleteNormally())
+      //  b.add(b.newGotoStmt(label_end(), this));
+    }
+    if(label_end != null)
+      b.addLabel(label_end);
+    // createExceptionTable
+    for(int i = 0; i < getNumCatchClause(); i++) {
+      for(Iterator iter = ranges.iterator(); iter.hasNext(); ) {
+        soot.jimple.Stmt stmtBegin = (soot.jimple.Stmt)iter.next();
+        soot.jimple.Stmt stmtEnd = (soot.jimple.Stmt)iter.next();
+        if(stmtBegin != stmtEnd) {
+        	soot.jimple.Stmt lbl = ((BasicCatch)getCatchClause(i)).label();
+			b.addTrap(
+	              ((BasicCatch)getCatchClause(i)).getParameter().type(),
+	              stmtBegin,
+	              stmtEnd,
+	              lbl
+	          );
+			addFallThroughLabelTag(b, lbl, label_end);
+        }
+        if(stmtEnd == label_block_end)
+          break;
+      }
+    }
+    if(hasFinally() /*&& needsFinallyTrap()*/) {
+      for(Iterator iter = ranges.iterator(); iter.hasNext(); ) {
+        soot.jimple.Stmt stmtBegin = (soot.jimple.Stmt)iter.next();
+        soot.jimple.Stmt stmtEnd;
+        if(iter.hasNext())
+          stmtEnd = (soot.jimple.Stmt)iter.next();
+        else
+          stmtEnd = label_exception_handler();
+        if(stmtBegin != stmtEnd) {
+          soot.jimple.Stmt lbl = label_exception_handler();
+		  b.addTrap(typeThrowable(), stmtBegin, stmtEnd, lbl);
+  		  addFallThroughLabelTag(b, lbl, label_end);
+        }
+      }
+      /*
+      b.addTrap(
+        typeThrowable(),
+        label_begin(),
+        label_exception_handler(),
+        label_exception_handler()
+      );
+      */
+    }
+  }
+
+  protected void TryStmt.addFallThroughLabelTag(Body b, soot.jimple.Stmt handler, soot.jimple.Stmt fallThrough) {
+	soot.Body body = b.body;
+	soot.tagkit.TryCatchTag tag = (soot.tagkit.TryCatchTag) body.getTag(soot.tagkit.TryCatchTag.NAME);
+	if(tag == null) {
+		tag = new soot.tagkit.TryCatchTag();
+		body.addTag(tag);
+	}
+	tag.register(handler, fallThrough);
+  }
+
+  inh ArrayList ReturnStmt.exceptionRanges();
+  inh ArrayList ContinueStmt.exceptionRanges();
+  inh ArrayList BreakStmt.exceptionRanges();
+  eq TryStmt.getBlock().exceptionRanges() = exceptionRanges();
+  eq TryStmt.getCatchClause().exceptionRanges() = exceptionRanges();
+  eq SynchronizedStmt.getBlock().exceptionRanges() = exceptionRanges();
+  eq BodyDecl.getChild().exceptionRanges() = null;
+  eq Program.getChild().exceptionRanges() = null;
+  syn lazy ArrayList TryStmt.exceptionRanges() = new ArrayList();
+  syn lazy ArrayList SynchronizedStmt.exceptionRanges() = new ArrayList();
+
+  syn lazy soot.jimple.Stmt BasicCatch.label() = newLabel();
+  public void BasicCatch.jimplify2(Body b) {
+    b.addLabel(label());
+    Local local = b.newLocal(getParameter().name(), getParameter().type().getSootType());
+    b.setLine(this);
+    b.add(b.newIdentityStmt(local, b.newCaughtExceptionRef(getParameter()), this));
+    getParameter().local = local;
+    getBlock().jimplify2(b);
+  }
+
+  inh TypeDecl TryStmt.typeThrowable();
+  inh TypeDecl SynchronizedStmt.typeThrowable();
+ 
+  public void TryStmt.emitExceptionHandler(Body b) {
+    Local l = b.newTemp(typeThrowable().getSootType());
+    b.setLine(this);
+    b.add(b.newIdentityStmt(l, b.newCaughtExceptionRef(this), this));
+    emitFinallyCode(b);
+    //if(hasFinally() && getFinally().canCompleteNormally()) {
+      soot.jimple.Stmt throwStmt = b.newThrowStmt(l, this);
+      throwStmt.addTag(new soot.tagkit.ThrowCreatedByCompilerTag());
+      b.add(throwStmt);
+    //}
+  }
+
+  syn lazy soot.jimple.Stmt SynchronizedStmt.label_begin() = newLabel();
+  syn lazy soot.jimple.Stmt SynchronizedStmt.label_end() = newLabel();
+  syn lazy soot.jimple.Stmt SynchronizedStmt.label_finally() = newLabel();
+  eq SynchronizedStmt.label_finally_block() = newLabel();
+  syn lazy soot.jimple.Stmt SynchronizedStmt.label_exception_handler() = newLabel();
+
+  public void SynchronizedStmt.jimplify2(Body b) {
+    b.setLine(this);
+    b.add(b.newEnterMonitorStmt(monitor(b), this));
+    b.addLabel(label_begin());
+    exceptionRanges().add(label_begin());
+    getBlock().jimplify2(b);
+    if(getBlock().canCompleteNormally()) {
+      emitFinallyCode(b);
+      b.add(b.newGotoStmt(label_end(), this));
+    }
+    b.addLabel(label_exception_handler());
+
+    // emitExceptionHandler
+    Local l = b.newTemp(typeThrowable().getSootType());
+    b.add(b.newIdentityStmt(l, b.newCaughtExceptionRef(this), this));
+    emitFinallyCode(b);
+    b.addLabel(label_end());
+    soot.jimple.Stmt throwStmt = b.newThrowStmt(l, this);
+    throwStmt.addTag(new soot.tagkit.ThrowCreatedByCompilerTag());
+    b.add(throwStmt);
+
+    // createExceptionTable
+    for(Iterator iter = exceptionRanges().iterator(); iter.hasNext(); ) {
+      soot.jimple.Stmt stmtBegin = (soot.jimple.Stmt)iter.next();
+      soot.jimple.Stmt stmtEnd;
+      if(iter.hasNext())
+        stmtEnd = (soot.jimple.Stmt)iter.next();
+      else
+        stmtEnd = label_end();
+      if(stmtBegin != stmtEnd)
+        b.addTrap(typeThrowable(), stmtBegin, stmtEnd, label_exception_handler());
+    }
+  }
+
+  public void LocalClassDeclStmt.jimplify2(Body b) {
+  }
+}

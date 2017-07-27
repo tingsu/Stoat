@@ -1,0 +1,33 @@
+The Java1.5Frontend is part of the JastAdd project (http://www.jastadd.org)
+The source code copyright is held by Torbjörn Ekman, tobbe@ekman.net
+
+Java1.5Frontend - Version R20071019
+
+The Java1.5Frontend is an extension of the Java1.4Frontend and implements the
+language extensions in Java 1.5.
+
+A main program JavaCompiler is included that parses Java source code,
+performs static-semantic checking and generated .class files.
+
+BUILDING
+
+This module depends on the Java1.4Frontend  available at http://www.jastadd.org
+All tools needed (jastadd2, jflex, beaver, etc.) are included. You only need to
+have javac and Apache Ant installed in order to continue. An example ant build
+file is included. 
+
+RUNNING
+
+Usage: java JavaChecker <options> <source files>
+  -verbose                  Output messages about what the compiler is doing
+  -classpath <path>         Specify where to find user class files
+  -sourcepath <path>        Specify where to find input source files
+  -bootclasspath <path>     Override location of bootstrap class files
+  -extdirs <dirs>           Override location of installed extensions
+  -d <directory>            Specify where to place generated class files
+  -help                     Print a synopsis of standard options
+  -version                  Print version information
+
+LICENSING
+
+The Java1.5Frontend source code is covered by the BSD license.

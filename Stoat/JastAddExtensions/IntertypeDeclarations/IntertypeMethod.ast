@@ -1,0 +1,7 @@
+// Each IntertypeMethodDecl generates one static method holding the method body in the aspect and one
+// delegating method in the introduced type.
+IntertypeMethodDecl : MethodDecl ::= TargetType:Access;
+
+// The aspect method is of type IntroducedMethodDecl and has specialized name binding behavior
+IntroducedMethodDecl : MethodDecl ::= <IntroducedType:TypeDecl> <ITDBodyDecl:BodyDecl>;
+

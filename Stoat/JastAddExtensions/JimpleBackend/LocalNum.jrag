@@ -1,0 +1,54 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect LocalNum {
+  inh lazy int VariableDeclaration.localNum();
+  inh lazy int Stmt.localNum();
+  inh lazy int ParameterDeclaration.localNum();
+
+  eq Program.getCompilationUnit(int index).localNum() = 0;
+
+  syn lazy int MethodDecl.offsetBeforeParameters() = 0;
+  
+  syn lazy int MethodDecl.offsetAfterParameters() {
+    if(getNumParameter() == 0)
+      return offsetBeforeParameters();
+    return getParameter(getNumParameter()-1).localNum() + 
+           getParameter(getNumParameter()-1).type().variableSize();
+  }
+  
+  eq MethodDecl.getParameter(int index).localNum() {
+    if(index == 0)
+      return offsetBeforeParameters();
+    return getParameter(index-1).localNum() + getParameter(index-1).type().variableSize();
+  }
+
+  syn lazy int ConstructorDecl.localNumOfFirstParameter() {
+    int i = 0;
+    if(hostType().needsEnclosing())
+      i++;
+    if(hostType().needsSuperEnclosing())
+      i++;
+    return i;
+  }
+
+  syn lazy int ConstructorDecl.offsetFirstEnclosingVariable() = getNumParameter() == 0 ?
+    localNumOfFirstParameter() :
+    getParameter(getNumParameter()-1).localNum() + getParameter(getNumParameter()-1).type().variableSize();
+
+  eq ConstructorDecl.getParameter(int index).localNum() {
+    if(index == 0) {
+      return localNumOfFirstParameter();
+    }
+    return getParameter(index-1).localNum() + getParameter(index-1).type().variableSize();
+  }
+
+  syn int TypeDecl.variableSize() = 1;
+}
+

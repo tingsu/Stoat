@@ -1,0 +1,108 @@
+aspect ClassLoading {
+
+  public static final int Program.SRC_PREC_JAVA = 1;
+  public static final int Program.SRC_PREC_CLASS = 2;
+  public static final int Program.SRC_PREC_ONLY_CLASS = 3;
+
+  private int Program.srcPrec = 0;
+  public void Program.setSrcPrec(int i) {
+    srcPrec = i;
+  }
+
+  public boolean CompilationUnit.isResolved = false;
+
+  private HashMap Program.loadedCompilationUnit = new HashMap();
+  public boolean Program.hasLoadedCompilationUnit(String fileName) {
+    return loadedCompilationUnit.containsKey(fileName);
+  }
+  public CompilationUnit Program.getCachedOrLoadCompilationUnit(String fileName) {
+    if(loadedCompilationUnit.containsKey(fileName))
+      return (CompilationUnit)loadedCompilationUnit.get(fileName);
+    addSourceFile(fileName);
+    return (CompilationUnit)loadedCompilationUnit.get(fileName);
+  }
+
+  refine void Program.addCompilationUnit(CompilationUnit unit) {
+    try {
+      if(unit.pathName() != null) {
+        String fileName = new File(unit.pathName()).getCanonicalPath();
+        loadedCompilationUnit.put(fileName, unit);
+      }
+    } catch (IOException e) {
+    }
+    refined(unit);
+  }
+
+  refine ClassPath public CompilationUnit Program.getCompilationUnit(String name) {
+    initPaths();
+    try {
+      if(sourceFiles.selectCompilationUnit(name))
+        return sourceFiles.getCompilationUnit();
+      PathPart sourcePart = null;
+      PathPart classPart = null;
+      for(Iterator iter = sourcePath.iterator(); iter.hasNext() && sourcePart == null; ) {
+        PathPart part = (PathPart)iter.next();
+        if(part.selectCompilationUnit(name))
+          sourcePart = part;
+      }
+      for(Iterator iter = classPath.iterator(); iter.hasNext() && classPart == null; ) {
+        PathPart part = (PathPart)iter.next();
+        if(part.selectCompilationUnit(name))
+          classPart = part;
+      }
+      
+      if(sourcePart != null && srcPrec == SRC_PREC_JAVA) {
+        CompilationUnit unit = getCachedOrLoadCompilationUnit(new File(sourcePart.pathName).getCanonicalPath());
+        int index = name.lastIndexOf('.');
+        if(index == -1)
+          return unit;
+        String pkgName = name.substring(0, index);
+        if(pkgName.equals(unit.getPackageDecl()))
+          return unit;
+      }
+      if(classPart != null && srcPrec == SRC_PREC_CLASS) {
+        CompilationUnit unit = classPart.getCompilationUnit();
+        int index = name.lastIndexOf('.');
+        if(index == -1)
+          return unit;
+        String pkgName = name.substring(0, index);
+        if(pkgName.equals(unit.getPackageDecl()))
+          return unit;
+      }
+      if(srcPrec == SRC_PREC_ONLY_CLASS) {
+        if(classPart != null) {
+          CompilationUnit unit = classPart.getCompilationUnit();
+          int index = name.lastIndexOf('.');
+          if(index == -1)
+            return unit;
+          String pkgName = name.substring(0, index);
+          if(pkgName.equals(unit.getPackageDecl()))
+            return unit;
+        }
+      }
+      else if(sourcePart != null && (classPart == null || classPart.age <= sourcePart.age)) {
+        CompilationUnit unit = getCachedOrLoadCompilationUnit(new File(sourcePart.pathName).getCanonicalPath());
+        int index = name.lastIndexOf('.');
+        if(index == -1)
+          return unit;
+        String pkgName = name.substring(0, index);
+        if(pkgName.equals(unit.getPackageDecl()))
+          return unit;
+      }
+      else if(classPart != null) {
+        CompilationUnit unit = classPart.getCompilationUnit();
+        int index = name.lastIndexOf('.');
+        if(index == -1)
+          return unit;
+        String pkgName = name.substring(0, index);
+        if(pkgName.equals(unit.getPackageDecl()))
+          return unit;
+      }
+      return null;
+    }
+    catch(IOException e) {
+    }
+    return null;
+  }
+
+}

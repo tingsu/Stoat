@@ -1,0 +1,19 @@
+/*
+ * JastAddJ is covered by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2011, Jesper Öqvist <jesper.oqvist@cs.lth.se>
+ * All rights reserved.
+ */
+
+aspect PrettyPrint {
+	
+	/**
+ 	 * Parser debug printout.
+ 	 */
+	public void ParseName.toString(StringBuffer sb) {
+		sb.append(getID());
+	}
+
+
+}

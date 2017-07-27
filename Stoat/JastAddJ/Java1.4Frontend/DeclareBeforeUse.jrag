@@ -1,0 +1,50 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+import java.util.*;
+
+aspect DeclareBeforeUse {
+  public int ASTNode.varChildIndex(Block b) {
+    ASTNode node = this;
+    while(node.getParent().getParent() != b) {
+      node = node.getParent();
+    }
+    return b.getStmtListNoTransform().getIndexOfChild(node);
+  }
+
+  public boolean Block.declaredBeforeUse(Variable decl, ASTNode use) {
+    int indexDecl = ((ASTNode)decl).varChildIndex(this);
+    int indexUse = use.varChildIndex(this);
+    return indexDecl <= indexUse;
+  }
+  public boolean Block.declaredBeforeUse(Variable decl, int indexUse) {
+    int indexDecl = ((ASTNode)decl).varChildIndex(this);
+    return indexDecl <= indexUse;
+  }
+
+  public int ASTNode.varChildIndex(TypeDecl t) {
+    ASTNode node = this;
+    while(node != null && node.getParent() != null && node.getParent().getParent() != t) {
+      node = node.getParent();
+    }
+    if(node == null)
+      return -1;
+    return t.getBodyDeclListNoTransform().getIndexOfChild(node);
+  }
+
+  public boolean TypeDecl.declaredBeforeUse(Variable decl, ASTNode use) {
+    int indexDecl = ((ASTNode)decl).varChildIndex(this);
+    int indexUse = use.varChildIndex(this);
+    return indexDecl < indexUse;
+  }
+  public boolean TypeDecl.declaredBeforeUse(Variable decl, int indexUse) {
+    int indexDecl = ((ASTNode)decl).varChildIndex(this);
+    return indexDecl < indexUse;
+  }
+}

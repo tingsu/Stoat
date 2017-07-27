@@ -1,0 +1,271 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect BytecodeCONSTANT {
+  class CONSTANT_Class_Info extends CONSTANT_Info {
+    public int name_index;
+
+    public CONSTANT_Class_Info(BytecodeParser parser) {
+      super(parser);
+      name_index = p.u2();
+    }
+
+    public String toString() {
+      return "ClassInfo: " + name();
+    }
+
+    public String name() {
+      String name = ((CONSTANT_Utf8_Info) this.p.constantPool[name_index]).string();
+      //name = name.replaceAll("\\/", ".");
+      name = name.replace('/', '.');
+      return name;
+    }
+
+    public String simpleName() {
+      String name = name();
+      //name = name.replace('$', '.');
+      int pos = name.lastIndexOf('.');
+      return name.substring(pos + 1, name.length());
+    }
+
+    public String packageDecl() {
+      String name = name();
+      //name = name.replace('$', '.');
+      int pos = name.lastIndexOf('.');
+      if(pos == -1)
+        return "";
+      return name.substring(0, pos);
+    }
+
+    public Access access() {
+      String name = name();
+      int pos = name.lastIndexOf('.');
+      String typeName = name.substring(pos + 1, name.length());
+      String packageName = pos == -1 ? "" : name.substring(0, pos);
+      if(typeName.indexOf('$') != -1)
+        return new BytecodeTypeAccess(packageName, typeName);
+      else
+        return new TypeAccess(packageName, typeName);
+    }
+  }
+  
+  // refineable methods for literal building
+  public static Literal Literal.buildDoubleLiteral(double value) {
+    return new DoubleLiteral(Double.toString(value));
+  }
+
+  public static Literal Literal.buildFloatLiteral(float value) {
+    return new FloatingPointLiteral(Double.toString(value));
+  }
+
+  public static Literal Literal.buildIntegerLiteral(int value) {
+    return new IntegerLiteral("0x"+Integer.toHexString(value));
+  }
+
+  public static Literal Literal.buildLongLiteral(long value) {
+    return new LongLiteral("0x"+Long.toHexString(value));
+  }
+
+  public static Literal Literal.buildBooleanLiteral(boolean value) {
+    return new BooleanLiteral(value ? "true" : "false");
+  }
+
+  public static Literal Literal.buildStringLiteral(String value) {
+    return new StringLiteral(value);
+  }
+
+  class CONSTANT_Double_Info extends CONSTANT_Info {
+    public double value;
+
+    public CONSTANT_Double_Info(BytecodeParser parser) {
+      super(parser);
+      value = this.p.readDouble();
+    }
+
+    public String toString() {
+      return "DoubleInfo: " + Double.toString(value);
+    }
+
+    public Expr expr() {
+      return Literal.buildDoubleLiteral(value);
+    }
+  }
+
+  class CONSTANT_Fieldref_Info extends CONSTANT_Info {
+    public int class_index;
+    public int name_and_type_index;
+
+    public CONSTANT_Fieldref_Info(BytecodeParser parser) {
+      super(parser);
+      class_index = p.u2();
+      name_and_type_index = p.u2();
+    }
+
+    public String toString() {
+      return "FieldRefInfo: " + p.constantPool[class_index] + " "
+        + p.constantPool[name_and_type_index];
+    }
+  }
+
+  class CONSTANT_Float_Info extends CONSTANT_Info {
+    public float value;
+
+    public CONSTANT_Float_Info(BytecodeParser parser) {
+      super(parser);
+      value = p.readFloat();
+    }
+
+    public String toString() {
+      return "FloatInfo: " + Float.toString(value);
+    }
+
+    public Expr expr() {
+      return Literal.buildFloatLiteral(value);
+    }
+  }
+
+  class CONSTANT_Info {
+    protected BytecodeParser p;
+    public CONSTANT_Info(BytecodeParser parser) {
+      p = parser;
+
+    }
+    public Expr expr() {
+      throw new Error("CONSTANT_info.expr() should not be computed for " + getClass().getName());
+    }
+    public Expr exprAsBoolean() {
+      return expr();
+    }
+  }
+
+  class CONSTANT_Integer_Info extends CONSTANT_Info {
+    public int value;
+
+    public CONSTANT_Integer_Info(BytecodeParser parser) {
+      super(parser);
+      value = p.readInt();
+    }
+
+    public String toString() {
+      return "IntegerInfo: " + Integer.toString(value);
+    }
+
+    public Expr expr() {
+      return Literal.buildIntegerLiteral(value);
+    }
+    public Expr exprAsBoolean() {
+      return Literal.buildBooleanLiteral(value == 0);
+    }
+  }
+  class CONSTANT_InterfaceMethodref_Info extends CONSTANT_Info {
+    public int class_index;
+    public int name_and_type_index;
+
+    public CONSTANT_InterfaceMethodref_Info(BytecodeParser parser) {
+      super(parser);
+      class_index = p.u2();
+      name_and_type_index = p.u2();
+    }
+
+    public String toString() {
+      return "InterfaceMethodRefInfo: " + p.constantPool[class_index] + " "
+        + p.constantPool[name_and_type_index];
+    }
+  }
+  class CONSTANT_Long_Info extends CONSTANT_Info {
+    public long value;
+
+    public CONSTANT_Long_Info(BytecodeParser parser) {
+      super(parser);
+      value = p.readLong();
+    }
+
+    public String toString() {
+      return "LongInfo: " + Long.toString(value);
+    }
+
+    public Expr expr() {
+      return Literal.buildLongLiteral(value);
+    }
+  }
+  class CONSTANT_Methodref_Info extends CONSTANT_Info {
+    public int class_index;
+    public int name_and_type_index;
+
+    public CONSTANT_Methodref_Info(BytecodeParser parser) {
+      super(parser);
+      class_index = p.u2();
+      name_and_type_index = p.u2();
+    }
+
+    public String toString() {
+      return "MethodRefInfo: " + class_index + " " + name_and_type_index;
+    }
+  }
+
+  class CONSTANT_NameAndType_Info extends CONSTANT_Info {
+    public int name_index;
+    public int descriptor_index;
+
+    public CONSTANT_NameAndType_Info(BytecodeParser parser) {
+      super(parser);
+      name_index = p.u2();
+      descriptor_index = p.u2();
+    }
+
+    public String toString() {
+      return "NameAndTypeInfo: " + name_index + " " + descriptor_index;
+    }
+  }
+
+  class CONSTANT_String_Info extends CONSTANT_Info {
+    public int string_index;
+
+    public CONSTANT_String_Info(BytecodeParser parser) {
+      super(parser);
+      string_index = p.u2();
+    }
+
+    public Expr expr() {
+      CONSTANT_Utf8_Info i = (CONSTANT_Utf8_Info)p.constantPool[string_index];
+      return Literal.buildStringLiteral(i.string);
+    }
+
+    public String toString() {
+      return "StringInfo: " + p.constantPool[string_index];
+    }
+  }
+
+  class CONSTANT_Utf8_Info extends CONSTANT_Info {
+    public String string;
+
+    public CONSTANT_Utf8_Info(BytecodeParser parser) {
+      super(parser);
+      string = p.readUTF();
+    }
+
+    public String toString() {
+      return "Utf8Info: " + string;
+    }
+
+    public Expr expr() {
+      return Literal.buildStringLiteral(string);
+    }
+
+    public String string() {
+      return string;
+    }
+  }
+
+
+
+
+
+
+}

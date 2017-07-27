@@ -1,0 +1,62 @@
+/*
+ * The JastAdd Extensible Java Compiler (http://jastadd.org) is covered
+ * by the modified BSD License. You should have received a copy of the
+ * modified BSD license with this compiler.
+ * 
+ * Copyright (c) 2005-2008, Torbjorn Ekman
+ * All rights reserved.
+ */
+
+aspect Arrays {
+  syn lazy int TypeDecl.dimension() = 0;
+  eq ArrayDecl.dimension() = componentType().dimension() + 1;
+  
+  // TypeDecl.elementType() - the ground type that the array is based on
+  syn lazy TypeDecl TypeDecl.elementType() = this;
+  eq ArrayDecl.elementType() = componentType().elementType();
+
+  // TypeDecl.componentType() -  the elements in an array has this type
+  eq Program.getChild().componentType() = unknownType();
+  eq TypeDecl.arrayType().componentType() = this;
+  inh lazy TypeDecl TypeDecl.componentType();
+
+  syn nta TypeDecl TypeDecl.arrayType() {
+    String name = name() + "[]";
+    TypeDecl typeDecl =
+      new ArrayDecl(
+        new Modifiers(new List().add(new Modifier("public"))),
+        name,
+        new Opt(typeObject().createQualifiedAccess()), // [SuperClassAccess]
+        new List().add(typeCloneable().createQualifiedAccess()).add(typeSerializable().createQualifiedAccess()), // Implements*
+        new List().add( // BodyDecl*
+          new FieldDeclaration(
+            new Modifiers(new List().add(new Modifier("public")).add(new Modifier("final"))),
+            new PrimitiveTypeAccess("int"),
+            "length",
+            new Opt() // [Init:Expr]
+          )).add(
+          new MethodDecl(
+            new Modifiers(new List().add(new Modifier("public"))),
+            typeObject().createQualifiedAccess(),
+            "clone",
+            new List(),
+            new List(),
+            new Opt(new Block())
+          )
+        )
+      );
+    return typeDecl;
+  }
+  inh TypeDecl TypeDecl.typeCloneable();
+  inh TypeDecl TypeDecl.typeSerializable();
+  
+  eq ArrayDecl.name() = fullName();
+  eq ArrayDecl.fullName() = getID();
+
+  syn lazy String ArrayTypeAccess.getPackage() = getAccess().type().packageName();
+  syn lazy String ArrayTypeAccess.getID() = getAccess().type().name();
+
+  public Access ArrayDecl.createQualifiedAccess() {
+    return new ArrayTypeAccess(componentType().createQualifiedAccess());
+  }
+}

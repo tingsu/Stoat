@@ -1,0 +1,3 @@
+DeclareParentsExtends : BodyDecl ::= Pattern:Access TypeAccess:Access*;
+DeclareParentsImplements : BodyDecl ::= Pattern:Access TypeAccess:Access*;
+

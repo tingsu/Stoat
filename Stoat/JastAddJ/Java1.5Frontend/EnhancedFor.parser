@@ -1,0 +1,22 @@
+Stmt statement = 
+  enhanced_for_statement.f                             {: return f; :}
+  ; 
+
+Stmt statement_no_short_if = 
+	enhanced_for_statement_no_short_if.f                 {: return f; :}
+	;
+
+Stmt enhanced_for_statement =
+	FOR LPAREN enhanced_for_parameter.p COLON expression.e RPAREN statement.s
+	{:  return new EnhancedForStmt(p, e, s);  :}
+	;
+
+Stmt enhanced_for_statement_no_short_if =
+	FOR LPAREN enhanced_for_parameter.p COLON expression.e RPAREN statement_no_short_if.s 
+	{: return new EnhancedForStmt(p, e, s);  :}
+	;
+
+VariableDeclaration enhanced_for_parameter = 
+  modifiers.m? type.t IDENTIFIER dims.d?     {: return new VariableDeclaration(new Modifiers(m), t.addArrayDims(d), IDENTIFIER, new Opt()); :}
+  ;
+

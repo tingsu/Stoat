@@ -1,0 +1,3 @@
+BodyDecl aspect_body_declaration = 
+  intertype_member_declaration.a {: return a; :}
+  ;

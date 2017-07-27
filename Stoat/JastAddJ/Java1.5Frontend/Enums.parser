@@ -1,0 +1,51 @@
+TypeDecl type_declaration =
+  enum_declaration.i {:  return i;  :}
+  ;
+
+BodyDecl interface_member_declaration =
+  enum_declaration.i {:  return new MemberClassDecl(i);  :}
+  ;
+
+BodyDecl class_member_declaration =
+  enum_declaration.i {:  return new MemberClassDecl(i);  :}
+  ;
+
+EnumDecl enum_declaration =
+  modifiers.m? ENUM IDENTIFIER.id interfaces.i? enum_body.b {: return new EnumDecl(new Modifiers(m), id, i, b); :}
+  ;
+
+List enum_body =
+    LBRACE RBRACE {: return new List(); :}
+  | LBRACE enum_constants RBRACE {: return enum_constants; :}
+  | LBRACE COMMA RBRACE {: return new List(); :}
+  | LBRACE enum_constants COMMA RBRACE {: return enum_constants; :}
+  | LBRACE enum_body_declarations RBRACE {: return enum_body_declarations; :}
+  | LBRACE enum_constants.c enum_body_declarations.d RBRACE
+    {: for(int i = 0; i < d.getNumChildNoTransform(); i++) c.add(d.getChildNoTransform(i)); return c; :}
+  | LBRACE COMMA enum_body_declarations RBRACE {: return enum_body_declarations; :}
+  | LBRACE enum_constants.c COMMA enum_body_declarations.d RBRACE
+    {: for(int i = 0; i < d.getNumChildNoTransform(); i++) c.add(d.getChildNoTransform(i)); return c; :}
+  ;
+
+List enum_constants =
+    enum_constant {: return new List().add(enum_constant); :}
+  | enum_constants COMMA enum_constant {: return enum_constants.add(enum_constant); :}
+  ;
+
+BodyDecl enum_constant =
+  annotations? IDENTIFIER.id arguments? class_body? 
+    {: return new EnumConstant(new Modifiers(annotations), id, arguments, class_body); :}
+  ;
+
+List arguments =
+  LPAREN argument_list RPAREN {: return argument_list; :}
+  ;
+
+List annotations =
+    annotation             {: return new List().add(annotation); :}
+  | annotations annotation {: return annotations.add(annotation); :}
+  ;
+
+List enum_body_declarations =
+  SEMICOLON class_body_declarations? {: return class_body_declarations; :}
+  ;

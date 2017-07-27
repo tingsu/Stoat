@@ -1,0 +1,36 @@
+ExprStmt explicit_constructor_invocation =
+		type_arguments.a THIS LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(new ParConstructorAccess("this", l, a));  :}
+	|	type_arguments.a SUPER LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(new ParSuperConstructorAccess("super", l, a));  :}
+	|	primary.p DOT type_arguments.a SUPER LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(p.qualifiesAccess(new ParSuperConstructorAccess("super", l, a))); :}
+	|	name.n DOT type_arguments.a SUPER LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(n.qualifiesAccess(new ParSuperConstructorAccess("super", l, a))); :}
+	;
+	
+Access method_invocation =
+		primary.p DOT type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return p.qualifiesAccess(new ParMethodAccess(IDENTIFIER, l, a));  :}
+	|	name.n DOT type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return n.qualifiesAccess(new ParMethodAccess(IDENTIFIER, l, a));  :}
+	|	SUPER DOT type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return new SuperAccess("super").qualifiesAccess(
+		                    new ParMethodAccess(IDENTIFIER, l, a));  :}
+	|	name.n DOT.d1 SUPER DOT.d2 type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return n.qualifiesAccess(new SuperAccess("super")).qualifiesAccess(
+                            new ParMethodAccess(IDENTIFIER, l, a));  :}
+	;
+
+MethodDecl method_header =
+	  modifiers.m? LT type_parameter_list_1.l type.t IDENTIFIER LPAREN formal_parameter_list.p? RPAREN dims.d? throws.tl?
+    {: return new GenericMethodDecl(new Modifiers(m), t.addArrayDims(d), IDENTIFIER, p, tl, new Opt(), l); :}
+	| modifiers.m? LT type_parameter_list_1.l VOID IDENTIFIER LPAREN formal_parameter_list.p? RPAREN throws.tl?
+    {: return new GenericMethodDecl(new Modifiers(m), new PrimitiveTypeAccess("void"), IDENTIFIER, p, tl, new Opt(), l); :}
+  ;
+
+ConstructorDecl constructor_declaration =
+	  modifiers.m? LT type_parameter_list_1.l IDENTIFIER LPAREN formal_parameter_list.pl? RPAREN throws.tl? 
+		LBRACE explicit_constructor_invocation.c? block_statements.bl? RBRACE
+    {: return new GenericConstructorDecl(new Modifiers(m), IDENTIFIER, pl, tl, c, new Block(bl), l); :}
+  ;

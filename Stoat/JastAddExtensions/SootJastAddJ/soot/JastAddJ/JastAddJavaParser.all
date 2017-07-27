@@ -1,0 +1,1420 @@
+%header {:
+ package soot.JastAddJ;
+:};
+%embed {:
+  class Events extends Parser.Events {
+    public void scannerError(Scanner.Exception e) {
+      errors.add(new Problem(null, e.getMessage(), e.line, e.column, Problem.Severity.ERROR, Problem.Kind.LEXICAL));
+    }
+    public void syntaxError(Symbol token) {
+      int line = token.getLine(token.getStart());
+      int column = token.getColumn(token.getStart());
+      int endLine = token.getLine(token.getEnd());
+      int endColumn = token.getColumn(token.getEnd());
+      String value = token.value != null ? token.value.toString() : Terminals.NAMES[token.getId()];
+      errors.add(new Problem(null, "unexpected token \"" + value + "\"", line, column, endLine, endColumn, Problem.Severity.ERROR, Problem.Kind.SYNTACTIC));
+    }
+    public void unexpectedTokenRemoved(Symbol token) {
+    }
+    public void missingTokenInserted(Symbol token) {
+    }
+    public void misspelledTokenReplaced(Symbol token) {
+    }
+    public void errorPhraseRemoved(Symbol error) {
+    }
+  }
+
+        {
+            report = new Events(); // Use error handler in parser
+        }
+
+   public CompilationUnit parse(java.io.InputStream is, String fileName) throws java.io.IOException, beaver.Parser.Exception {
+     CompilationUnit cu;
+     errors = new ArrayList();
+     try {
+       JavaScanner scanner = new JavaScanner(new Unicode(is));
+       cu = (CompilationUnit)parse(scanner);
+     } catch(Parser.Exception e) {
+       // build empty compilation unit for failed error recovery
+       cu = new CompilationUnit();
+     } catch(Error e) {
+       cu = new CompilationUnit();
+       errors.add(new Problem(null, e.getMessage(), 0, 0, Problem.Severity.ERROR, Problem.Kind.LEXICAL));
+     }
+     for(java.util.Iterator iter = errors.iterator(); iter.hasNext(); ) {
+       Problem p = (Problem)iter.next();
+       p.setFileName(fileName);
+       cu.addParseError(p);
+     }
+     return cu;
+   }
+   protected java.util.Collection errors = new ArrayList();
+:};
+
+CompilationUnit goal =
+    compilation_unit.cu      {: return cu; :}
+  ;
+      
+Expr literal =
+    INTEGER_LITERAL        {: return new IntegerLiteral(INTEGER_LITERAL); :}
+  | LONG_LITERAL           {: return new LongLiteral(LONG_LITERAL); :}
+  | FLOATING_POINT_LITERAL {: return new FloatingPointLiteral(FLOATING_POINT_LITERAL); :}
+  | DOUBLE_LITERAL         {: return new DoubleLiteral(DOUBLE_LITERAL); :}
+  | BOOLEAN_LITERAL        {: return new BooleanLiteral(BOOLEAN_LITERAL); :}
+  | CHARACTER_LITERAL      {: return new CharacterLiteral(CHARACTER_LITERAL); :}
+  | STRING_LITERAL         {: return new StringLiteral(STRING_LITERAL); :}
+  | NULL_LITERAL             {: return new NullLiteral(NULL_LITERAL); :}
+  ;
+Access type =
+    primitive_type.t         {: return t; :}
+  | reference_type.t         {: return t; :}
+  ;
+Access primitive_type =
+    numeric_type.t           {: return t; :}
+  | BOOLEAN                  {: return new PrimitiveTypeAccess("boolean"); :}
+  ;
+Access numeric_type =
+    integral_type.t          {: return t; :}
+  | floating_point_type.t    {: return t; :}
+  ;
+Access integral_type =
+    BYTE                     {: return new PrimitiveTypeAccess("byte"); :}
+  | SHORT                    {: return new PrimitiveTypeAccess("short"); :}
+  | INT                      {: return new PrimitiveTypeAccess("int"); :}
+  | LONG                     {: return new PrimitiveTypeAccess("long"); :}
+  | CHAR                     {: return new PrimitiveTypeAccess("char"); :}
+  ;
+Access floating_point_type =
+    FLOAT                    {: return new PrimitiveTypeAccess("float"); :}
+  | DOUBLE                   {: return new PrimitiveTypeAccess("double"); :}
+  ;
+Access reference_type =
+    class_or_interface_type.t {: return t; :}
+  | array_type.t              {: return t; :}
+  ;
+Access class_or_interface_type =
+    name.n                    {: return n; :}
+  ;
+Access class_type =
+    class_or_interface_type.n {: return n; :}
+  ;
+Access interface_type =
+    class_or_interface_type.n {: return n; :}
+  ;
+Access array_type =
+    primitive_type.t dims.d   {: return t.addArrayDims(d); :}
+  | name.n dims.d             {: return n.addArrayDims(d); :}
+  ;
+Access name =
+    simple_name.s             {: return s; :}
+  | qualified_name.q          {: return q; :}
+  ;
+Access simple_name =
+    IDENTIFIER              {: return new ParseName(IDENTIFIER); :}
+  ;
+Access qualified_name =
+    name.n DOT simple_name.i   {: return n.qualifiesAccess(i); :}
+  ;
+CompilationUnit compilation_unit =
+    package_declaration.p import_declarations.i? type_declarations.t? {: return new CompilationUnit(p.getID(), i, t); :}
+  |                       import_declarations.i? type_declarations.t? {: return new CompilationUnit("", i, t); :}
+  ;
+List import_declarations =
+    import_declaration.i                       {: return new List().add(i); :}
+  | import_declarations.l import_declaration.i {: return l.add(i); :}
+  ;
+List type_declarations =
+    type_declaration.t                         {: return !(t instanceof EmptyType) ? new List().add(t) : new List() ; :}
+  | type_declarations.l type_declaration.t     {: return !(t instanceof EmptyType) ? l.add(t) : l; :}
+  ;
+IdUse package_declaration =
+    PACKAGE name_decl.n SEMICOLON              {: return n; :}
+  ;
+IdUse name_decl =
+    simple_name_decl.s        {: return s; :}
+  | qualified_name_decl.q     {: return q; :}
+  ;
+IdUse simple_name_decl =
+    IDENTIFIER              {: return new IdUse(IDENTIFIER); :}
+  ;
+IdUse qualified_name_decl =
+    name_decl.n DOT IDENTIFIER.i {: return new IdUse(n.getID() + "." + i); :}
+  ;
+ImportDecl import_declaration =
+    single_type_import_declaration.s           {: return s; :}
+  | type_import_on_demand_declaration.t        {: return t; :}
+  ;
+ImportDecl single_type_import_declaration =
+    IMPORT name.n SEMICOLON                    {: return new SingleTypeImportDecl(n); :}
+  ;
+ImportDecl type_import_on_demand_declaration =
+    IMPORT name.n DOT MULT SEMICOLON           {: return new TypeImportOnDemandDecl(n); :}
+  ;
+TypeDecl type_declaration =
+    class_declaration.c                        {: return c; :}
+  | interface_declaration.i                    {: return i; :}
+  | SEMICOLON                                  {: return new EmptyType(new Modifiers(), "EmptyType", new Opt(), new List()); :}
+  ;
+List modifiers =
+    modifier.m                                 {: return new List().add(m); :}
+  | modifiers.l modifier.m                     {: return l.add(m); :}
+  ;
+Modifier modifier =
+    PUBLIC                                     {: return new Modifier("public"); :}
+  | PROTECTED                                  {: return new Modifier("protected"); :}
+  | PRIVATE                                    {: return new Modifier("private"); :}
+  | STATIC                                     {: return new Modifier("static"); :}
+  | ABSTRACT                                   {: return new Modifier("abstract"); :}
+  | FINAL                                      {: return new Modifier("final"); :}
+  | NATIVE                                     {: return new Modifier("native"); :}
+  | SYNCHRONIZED                               {: return new Modifier("synchronized"); :}
+  | TRANSIENT                                  {: return new Modifier("transient"); :}
+  | VOLATILE                                   {: return new Modifier("volatile"); :}
+  | STRICTFP                                   {: return new Modifier("strictfp"); :}
+  ;
+ClassDecl class_declaration =
+    modifiers.m? CLASS IDENTIFIER super.s? interfaces.i? class_body.b 
+                                               {: return new ClassDecl(new Modifiers(m), IDENTIFIER, s, i, b); :}
+  ;
+Opt super =
+    EXTENDS class_type.c                       {: return new Opt(c); :}
+  ;
+List interfaces =
+    IMPLEMENTS interface_type_list.i           {: return i; :}
+  ;
+List interface_type_list =
+    interface_type.i                              {: return new List().add(i); :}
+  | interface_type_list.l COMMA interface_type.i  {: return l.add(i); :}
+  ;
+List class_body =
+    LBRACE class_body_declarations.c? RBRACE    {: return c; :}
+  ;
+List class_body_declarations =
+    class_body_declaration.c                           {: return new List().add(c); :}
+  | class_body_declarations.l class_body_declaration.c {: return l.add(c); :}
+  ;
+BodyDecl class_body_declaration =
+    class_member_declaration.c                 {: return c; :}
+  | instance_initializer.i                     {: return i; :}
+  | static_initializer.si                      {: return si; :}
+  | constructor_declaration.c                  {: return c; :}
+  ;
+BodyDecl class_member_declaration =
+    field_declaration.f                        {: return f; :}
+  | method_declaration.m                       {: return m; :}
+  | class_declaration.c                        {: return new MemberClassDecl(c); :}
+  | interface_declaration.i                    {: return new MemberInterfaceDecl(i); :}
+  | SEMICOLON                                  {: return new InstanceInitializer(new Block()); :}
+  ;
+BodyDecl field_declaration =
+    modifiers.m? type.t variable_declarators.v SEMICOLON {: return new FieldDecl(new Modifiers(m), t, v); :}
+  ;
+List variable_declarators =
+    variable_declarator.v                              {: return new List().add(v); :}
+  | variable_declarators.l COMMA variable_declarator.v {: return l.add(v); :}
+  ;
+VariableDecl variable_declarator =
+    variable_declarator_id.v                           {: return v; :}
+  | variable_declarator_id.v EQ variable_initializer.i {: v.setInit(i); return v; :}
+  ;
+VariableDecl variable_declarator_id =
+    IDENTIFIER dims.d?                       {: return new VariableDecl(IDENTIFIER, d, new Opt()); :}
+  ;
+Expr variable_initializer =
+    expression.e                               {: return e; :}
+  | array_initializer.a                        {: return a; :}
+  ;
+MethodDecl method_declaration =
+    method_header.m method_body.b              {: m.setBlockOpt(b); return m; :}
+  ;
+      
+MethodDecl method_header =
+    modifiers.m? type.t IDENTIFIER LPAREN formal_parameter_list.l? RPAREN dims.d? throws.tl?
+    {: return new MethodDecl(new Modifiers(m), t.addArrayDims(d), IDENTIFIER, l, tl, new Opt()); :}
+  | modifiers.m? VOID   IDENTIFIER LPAREN formal_parameter_list.l? RPAREN throws.tl?
+    {: return new MethodDecl(new Modifiers(m), new PrimitiveTypeAccess("void"), IDENTIFIER, l, tl, new Opt()); :}
+  ;
+                                                                
+List formal_parameter_list =
+    formal_parameter.f                                  {: return new List().add(f); :}
+  | formal_parameter_list.l COMMA formal_parameter.f    {: return l.add(f); :}
+  ;
+ParameterDeclaration formal_parameter =
+  modifiers.m? type.t IDENTIFIER dims.d?     {: return new ParameterDeclaration(new Modifiers(m), t.addArrayDims(d), IDENTIFIER); :}
+  ;
+List throws =
+    THROWS class_type_list.l                   {: return l; :}
+  ;
+List class_type_list =
+    class_type.c                               {: return new List().add(c); :}
+  | class_type_list.l COMMA class_type.c       {: return l.add(c); :}
+  ;
+Opt method_body =
+    block.b                                    {: return new Opt(b); :}
+  | SEMICOLON                                  {: return new Opt(); :}
+  ;
+StaticInitializer static_initializer =
+    STATIC block.b                             {: return new StaticInitializer(b); :}
+  ;
+InstanceInitializer instance_initializer =
+    block.b                                    {: return new InstanceInitializer(b); :}
+  ;
+ConstructorDecl constructor_declaration =
+    modifiers.m? IDENTIFIER LPAREN formal_parameter_list.pl? RPAREN throws.tl? 
+		LBRACE explicit_constructor_invocation.c? block_statements.l? RBRACE
+    {: Block b = new Block(l); l.setStart(LBRACE.getStart() + 1); b.setStart(LBRACE.getStart()); b.setEnd(RBRACE.getEnd());
+       return new ConstructorDecl(new Modifiers(m), IDENTIFIER, pl, tl, c, b); :}
+ ;
+ExprStmt explicit_constructor_invocation =
+    THIS LPAREN argument_list.l? RPAREN SEMICOLON 
+    {: ConstructorAccess c = new ConstructorAccess("this", l);
+       c.setStart(THIS.getStart());
+       c.setEnd(RPAREN.getEnd());
+       return new ExprStmt(c); :}
+  | SUPER LPAREN argument_list.l? RPAREN SEMICOLON 
+    {: SuperConstructorAccess c = new SuperConstructorAccess("super", l);
+       c.setStart(SUPER.getStart());
+       c.setEnd(RPAREN.getEnd());
+       return new ExprStmt(c); :}
+  | primary.p DOT SUPER LPAREN argument_list.l? RPAREN SEMICOLON
+    {: SuperConstructorAccess c = new SuperConstructorAccess("super", l);
+       c.setStart(SUPER.getStart());
+       c.setEnd(RPAREN.getEnd());
+       return new ExprStmt(p.qualifiesAccess(c)); :}
+  | name.n DOT SUPER LPAREN argument_list.l? RPAREN SEMICOLON
+    {: SuperConstructorAccess c = new SuperConstructorAccess("super", l);
+       c.setStart(SUPER.getStart());
+       c.setEnd(RPAREN.getEnd());
+       return new ExprStmt(n.qualifiesAccess(c)); :}
+  ;
+InterfaceDecl interface_declaration =
+  modifiers.m? INTERFACE IDENTIFIER extends_interfaces.i? interface_body.b {: return new InterfaceDecl(new Modifiers(m), IDENTIFIER, i, b); :}
+  ;
+List extends_interfaces =
+    EXTENDS interface_type.i                    {: return new List().add(i); :}
+  | extends_interfaces.l COMMA interface_type.i {: return l.add(i); :}
+  ;
+    
+List interface_body =
+    LBRACE interface_member_declarations.i? RBRACE  {: return i; :}
+  ;   
+List interface_member_declarations =
+    interface_member_declaration.i                                  {: return new List().add(i); :}
+  | interface_member_declarations.l interface_member_declaration.i  {: return l.add(i); :}
+  ;
+BodyDecl interface_member_declaration =
+    constant_declaration.c                     {: return c; :}
+  | abstract_method_declaration.a              {: return a; :}
+  | class_declaration.c                        {: return new MemberClassDecl(c); :}
+  | interface_declaration.i                    {: return new MemberInterfaceDecl(i); :}
+  | SEMICOLON                                  {: return new StaticInitializer(new Block()); :}
+  ;
+BodyDecl constant_declaration =
+    field_declaration.f                        {: return f; :}
+  ;
+BodyDecl abstract_method_declaration =
+    method_header.m SEMICOLON                  {: return m; :}
+  ;
+ArrayInit array_initializer =
+    LBRACE variable_initializers.v? COMMA? RBRACE   {: return new ArrayInit(v); :}
+  ;
+List variable_initializers =
+    variable_initializer.v                                {: return new List().add(v); :}
+  | variable_initializers.l COMMA variable_initializer.v  {: return l.add(v); :}
+  ;
+Block block =
+    LBRACE block_statements.l? RBRACE {: return new Block(l); :}
+  ;
+List block_statements =
+    block_statement.b                     {: return new List().add(b); :}
+  | block_statements.l block_statement.b  {: return l.add(b); :}
+  ;
+Stmt block_statement =
+    local_variable_declaration_statement.l  {: return l; :}
+  | class_declaration.c                     {: return new LocalClassDeclStmt(c); :}
+  | statement.s                             {: return s; :}
+  ;
+VarDeclStmt local_variable_declaration_statement =
+    local_variable_declaration.l SEMICOLON  {: return l; :}
+  ;
+VarDeclStmt local_variable_declaration =
+  modifiers.m? type.t variable_declarators.l {: return new VarDeclStmt(new Modifiers(m), t, l); :}
+  ;
+Stmt statement =
+    statement_without_trailing_substatement.s  {: return s; :}
+  | labeled_statement.l                        {: return l; :}
+  | if_then_statement.i                        {: return i; :}
+  | if_then_else_statement.i                   {: return i; :}
+  | while_statement.w                          {: return w; :}
+  | for_statement.f                            {: return f; :}
+  ;
+Stmt statement_without_trailing_substatement =
+    block.b                                    {: return b; :}
+  | empty_statement.e                          {: return e; :}
+  | expression_statement.e                     {: return e; :}
+  | switch_statement.s                         {: return s; :}
+  | do_statement.d                             {: return d; :}
+  | break_statement.b                          {: return b; :}
+  | continue_statement.c                       {: return c; :}
+  | return_statement.r                         {: return r; :}
+  | synchronized_statement.s                   {: return s; :}
+  | throw_statement.t                          {: return t; :}
+  | try_statement.t                            {: return t; :}
+  | assert_statement.a                         {: return a; :}
+  ;
+Stmt statement_no_short_if =
+    statement_without_trailing_substatement.s  {: return s; :}
+  | labeled_statement_no_short_if.l            {: return l; :}
+  | if_then_else_statement_no_short_if.i       {: return i; :}
+  | while_statement_no_short_if.w              {: return w; :}
+  | for_statement_no_short_if.f                {: return f; :}
+  ;
+IfStmt if_then_statement =
+    IF LPAREN expression.e RPAREN statement.s  {: return new IfStmt(e, s, new Opt()); :}
+  ;
+IfStmt if_then_else_statement =
+    IF LPAREN expression.e RPAREN statement_no_short_if.t ELSE statement.els {: return new IfStmt(e, t, new Opt(els)); :}
+  ;
+IfStmt if_then_else_statement_no_short_if =
+    IF LPAREN expression.e RPAREN statement_no_short_if.t ELSE statement_no_short_if.els {: return new IfStmt(e, t, new Opt(els)); :}
+  ;
+EmptyStmt empty_statement =
+    SEMICOLON                                  {: return new EmptyStmt(); :}
+  ;
+LabeledStmt labeled_statement =
+    IDENTIFIER.id COLON statement.s            {: return new LabeledStmt(id, s); :}
+  ;
+LabeledStmt labeled_statement_no_short_if =
+    IDENTIFIER.id COLON statement_no_short_if.s {: return new LabeledStmt(id, s); :}
+  ;
+ExprStmt expression_statement =
+    statement_expression.e SEMICOLON           {: return e; :}
+  ;
+ExprStmt statement_expression =
+    assignment.a                               {: return new ExprStmt(a); :}
+  | preincrement_expression.e                  {: return new ExprStmt(e); :}
+  | predecrement_expression.e                  {: return new ExprStmt(e); :}
+  | postincrement_expression.e                 {: return new ExprStmt(e); :}
+  | postdecrement_expression.e                 {: return new ExprStmt(e); :}
+  | method_invocation.i                        {: return new ExprStmt(i); :}
+  | class_instance_creation_expression.e       {: return new ExprStmt(e); :}
+  ;
+SwitchStmt switch_statement =
+    SWITCH LPAREN expression.e RPAREN switch_block.l {: return new SwitchStmt(e, l); :}
+  ;
+Block switch_block =
+    LBRACE switch_block_statement_groups.l switch_labels.s RBRACE 
+                        {: for(int ii = 0; ii < s.getNumChildNoTransform(); ii++) l.add(s.getChildNoTransform(ii)); return new Block(l); :}
+  | LBRACE switch_block_statement_groups.l RBRACE   {: return new Block(l); :}
+  | LBRACE switch_labels.l RBRACE              {: return new Block(l); :}
+  | LBRACE RBRACE                              {: return new Block(new List()); :}
+  ;
+List switch_block_statement_groups =
+    switch_block_statement_group.g             {: return g; :}
+  | switch_block_statement_groups.l switch_block_statement_group.g 
+      {: for(int ii = 0; ii < g.getNumChildNoTransform(); ii++)
+           l.add(g.getChildNoTransform(ii));
+         return l; :}
+  ;
+List switch_block_statement_group =
+    switch_labels.l block_statements.bl 
+    {:  for(int ii = 0; ii < bl.getNumChildNoTransform(); ii++)
+          l.add(bl.getChildNoTransform(ii));
+          return l; :}
+  ;
+List switch_labels =
+    switch_label.s                             {: return new List().add(s); :}
+  | switch_labels.l switch_label.s             {: return l.add(s); :}
+  ;
+Case switch_label =
+    CASE constant_expression.e COLON           {: return new ConstCase(e); :}
+  | DEFAULT COLON                              {: return new DefaultCase(); :}
+  ;
+WhileStmt while_statement =
+    WHILE LPAREN expression.e RPAREN statement.s {: return new WhileStmt(e, s); :}
+  ;
+WhileStmt while_statement_no_short_if =
+    WHILE LPAREN expression.e RPAREN statement_no_short_if.s {: return new WhileStmt(e, s); :}
+  ;
+DoStmt do_statement =
+    DO statement.s WHILE LPAREN expression.e RPAREN SEMICOLON {: return new DoStmt(s, e); :}
+  ;
+ForStmt for_statement =
+    FOR LPAREN for_init.i? SEMICOLON expression.e? SEMICOLON for_update.u? RPAREN statement.s {: return new ForStmt(i, e, u, s); :}
+  ;
+ForStmt for_statement_no_short_if =
+    FOR LPAREN for_init.i? SEMICOLON expression.e? SEMICOLON for_update.u? RPAREN statement_no_short_if.s {: return new ForStmt(i, e, u, s); :}
+  ;
+List for_init =
+    statement_expression_list.l        {: return l; :}
+  | local_variable_declaration.d       {: return new List().add(d); :};
+List for_update =
+    statement_expression_list.l        {: return l; :}
+  ;
+List statement_expression_list =
+    statement_expression.e                                   {: return new List().add(e); :}
+  | statement_expression_list.l COMMA statement_expression.e {: return l.add(e); :}
+  ;
+BreakStmt break_statement =
+    BREAK IDENTIFIER.id SEMICOLON              {: return new BreakStmt(id); :}
+  | BREAK               SEMICOLON              {: return new BreakStmt(""); :}
+  ; 
+ContinueStmt continue_statement =
+    CONTINUE IDENTIFIER.id SEMICOLON           {: return new ContinueStmt(id); :}
+  | CONTINUE               SEMICOLON           {: return new ContinueStmt(""); :}
+  ;
+ReturnStmt return_statement =
+    RETURN expression.e? SEMICOLON              {: return new ReturnStmt(e); :}
+  ;
+ThrowStmt throw_statement =
+    THROW expression.e SEMICOLON               {: return new ThrowStmt(e); :}
+  ;
+SynchronizedStmt synchronized_statement =
+    SYNCHRONIZED LPAREN expression.e RPAREN block.b {: return new SynchronizedStmt(e, b); :}
+  ;
+TryStmt try_statement =
+    TRY block.b catches.c                        {: return new TryStmt(b, c, new Opt()); :}
+  | TRY block.b            finally.f             {: return new TryStmt(b, new List(), new Opt(f)); :}
+  | TRY block.b catches.c  finally.f             {: return new TryStmt(b, c, new Opt(f)); :}
+  ;
+List catches =
+    catch_clause.c                             {: return new List().add(c); :}
+  | catches.l catch_clause.c                   {: return l.add(c); :}
+  ;
+CatchClause catch_clause =
+    CATCH LPAREN formal_parameter.p RPAREN block.b {: return new BasicCatch(p, b); :}
+  ;
+Block finally =
+    FINALLY block.b {: return b; :}
+  ;
+AssertStmt assert_statement =
+    ASSERT expression.e                    SEMICOLON {: return new AssertStmt(e, new Opt()); :}
+  | ASSERT expression.e COLON expression.s SEMICOLON {: return new AssertStmt(e, new Opt(s)); :}
+  ;
+Expr primary =
+    primary_no_new_array.p                     {: return p; :}
+  | array_creation_init.a                      {: return a; :}
+  | array_creation_uninit.a                    {: return a; :}
+  ;
+
+ClassAccess class_literal =
+  CLASS {: return new ClassAccess(); :}
+  ;
+
+Expr primary_no_new_array =
+    literal.l                                  {: return l; :}
+  | primitive_type.n dims.d? DOT class_literal.c       {: return n.addArrayDims(d).qualifiesAccess(c); :}
+  | name.n dims.d? DOT class_literal.c                 {: return n.addArrayDims(d).qualifiesAccess(c); :}
+  | VOID DOT class_literal.c                   {: PrimitiveTypeAccess v = new PrimitiveTypeAccess("void");
+                                                  v.setStart(VOID.getStart());
+                                                  v.setEnd(VOID.getEnd());
+                                                  return v.qualifiesAccess(c); :}
+  | THIS                                       {: return new ThisAccess("this"); :}
+  | name.n DOT THIS                            {: ThisAccess t = new ThisAccess("this");
+                                                  t.setStart(THIS.getStart()); t.setEnd(THIS.getEnd());
+                                                  return n.qualifiesAccess(t); :}
+  | LPAREN expression.e RPAREN                 {: return new ParExpr(e); :}
+  | LPAREN name.n RPAREN                       {: return new ParExpr(n); :}
+  | class_instance_creation_expression.c       {: return c; :}
+  | field_access.f                             {: return f; :}
+  | method_invocation.m                        {: return m; :}
+  | array_access.a                             {: return a; :}
+  ;
+Expr class_instance_creation_expression =
+    NEW class_or_interface_type.t LPAREN argument_list.l? RPAREN 
+    {: return new ClassInstanceExpr(t, l, new Opt()); :}
+  | primary.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN
+    {: ClassInstanceExpr e = new ClassInstanceExpr(id, l, new Opt());
+       e.setStart(NEW.getStart());
+       e.setEnd(RPAREN.getEnd());
+       return n.qualifiesAccess(e); :}
+  | name.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN
+    {: ClassInstanceExpr e = new ClassInstanceExpr(id, l, new Opt());
+       e.setStart(NEW.getStart());
+       e.setEnd(RPAREN.getEnd());
+       return n.qualifiesAccess(e); :}
+  | NEW class_or_interface_type.t LPAREN argument_list.l? RPAREN subclass_body.b 
+    {: return new ClassInstanceExpr(t, l, b); :}
+  | primary.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b
+    {: ClassInstanceExpr e = new ClassInstanceExpr(id, l, b);
+       e.setStart(NEW.getStart());
+       e.setEnd(b.getEnd());
+       return n.qualifiesAccess(e); :}
+  | name.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b
+    {: ClassInstanceExpr e = new ClassInstanceExpr(id, l, b);
+       e.setStart(NEW.getStart());
+       e.setEnd(b.getEnd());
+       return n.qualifiesAccess(e); :}
+  ;
+Opt subclass_body =
+    class_body.b                               {: return new Opt(new AnonymousDecl(new Modifiers(), "Anonymous", b)); :}
+  ;
+
+List argument_list =
+    expression.e                               {: return new List().add(e); :}
+  | argument_list.l COMMA expression.e         {: return l.add(e); :}
+  ;
+
+Expr array_creation_uninit =
+    NEW primitive_type.t dim_exprs.d           {: return new ArrayCreationExpr(t.addArrayDims(d), new Opt()); :}
+  | NEW primitive_type.t dim_exprs.d dims.e    {: return new ArrayCreationExpr(t.addArrayDims(d).addArrayDims(e), new Opt()); :}
+  | NEW class_or_interface_type.t dim_exprs.d  {: return new ArrayCreationExpr(t.addArrayDims(d), new Opt()); :}
+  | NEW class_or_interface_type.t dim_exprs.d dims.e {: return new ArrayCreationExpr(t.addArrayDims(d).addArrayDims(e), new Opt()); :}
+  ;
+Expr array_creation_init =
+    NEW primitive_type.t dims.d array_initializer.i           {: return new ArrayCreationExpr(t.addArrayDims(d), new Opt(i)); :}
+  | NEW class_or_interface_type.t dims.d array_initializer.i  {: return new ArrayCreationExpr(t.addArrayDims(d), new Opt(i)); :}
+  ;
+List dim_exprs =
+    dim_expr.e                                 {: return new List().add(e); :}
+  | dim_exprs.l dim_expr.e                     {: return l.add(e); :}
+  ;
+Dims dim_expr =
+    LBRACK expression.e RBRACK                 {: return new Dims(new Opt(e)); :}
+  ;
+List dims =
+    LBRACK RBRACK                              {: Dims d = new Dims(new Opt()); d.setStart(LBRACK.getStart()); d.setEnd(RBRACK.getEnd());
+                                                  return new List().add(d); :}
+  | dims.l LBRACK RBRACK                       {: Dims d = new Dims(new Opt()); d.setStart(LBRACK.getStart()); d.setEnd(RBRACK.getEnd());
+                                                  return l.add(d); :}
+  ;
+
+Access field_access =
+    primary.p DOT simple_name.id                {: return p.qualifiesAccess(id); :}
+  | SUPER DOT simple_name.id 
+    {: SuperAccess s = new SuperAccess("super");
+       s.setStart(SUPER.getStart());
+       s.setEnd(SUPER.getEnd());
+       return s.qualifiesAccess(id); :}
+  | name.n DOT SUPER DOT simple_name.id
+    {: SuperAccess s = new SuperAccess("super");
+       s.setStart(SUPER.getStart());
+       s.setEnd(SUPER.getEnd());
+       return n.qualifiesAccess(s).qualifiesAccess(id); :}
+  ;
+Access method_invocation =
+      name.n LPAREN argument_list.l? RPAREN {: 
+                                                             if(n instanceof AbstractDot) {    
+                                                               AbstractDot d = (AbstractDot)n; 
+                                                               ParseName pn = (ParseName)d.extractLast();
+                                                               MethodAccess m = new MethodAccess(pn.getID(), l);
+                                                               m.setStart(pn.getStart()); // add location information
+                                                               m.setEnd(RPAREN.getEnd()); // add location information
+                                                               m.IDstart = pn.getStart();
+                                                               m.IDend = pn.getStart() + pn.getID().length() - 1;
+                                                               d.replaceLast(m);
+                                                               return d;
+                                                             }
+                                                             else {
+                                                               ParseName pn = (ParseName)n;
+                                                               MethodAccess m = new MethodAccess(pn.getID(), l);
+                                                               m.setStart(pn.getStart()); // add location information
+                                                               m.setEnd(RPAREN.getEnd()); // add location information
+                                                               m.IDstart = pn.getStart();
+                                                               m.IDend = pn.getStart() + pn.getID().length() - 1;
+                                                               return m;
+                                                             }
+                                                               :}
+   | primary.p DOT IDENTIFIER LPAREN argument_list.l? RPAREN 
+     {: MethodAccess m = new MethodAccess(IDENTIFIER, l);
+        m.setStart(IDENTIFIER.getStart()); // add location information
+        m.setEnd(RPAREN.getEnd()); // add location information
+        return p.qualifiesAccess(m); :}
+   | SUPER DOT IDENTIFIER LPAREN argument_list.l? RPAREN
+     {: SuperAccess s = new SuperAccess("super");
+        s.setStart(SUPER.getStart());
+        s.setEnd(SUPER.getEnd());
+        MethodAccess m = new MethodAccess(IDENTIFIER, l);
+        m.setStart(IDENTIFIER.getStart());
+        m.setEnd(RPAREN.getEnd());
+        return s.qualifiesAccess(m); :}
+   | name.n DOT SUPER DOT IDENTIFIER LPAREN argument_list.l? RPAREN
+     {: SuperAccess s = new SuperAccess("super");
+        s.setStart(SUPER.getStart());
+        s.setEnd(SUPER.getEnd());
+        MethodAccess m = new MethodAccess(IDENTIFIER, l);
+        m.setStart(IDENTIFIER.getStart());
+        m.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(s).qualifiesAccess(m); :}
+   ;
+Access array_access =
+    name.n LBRACK expression.e RBRACK                 {: ArrayAccess a = new ArrayAccess(e);
+                                                         a.setStart(LBRACK.getStart());
+                                                         a.setEnd(RBRACK.getEnd());
+                                                         return n.qualifiesAccess(a); :}
+  | primary_no_new_array.p LBRACK expression.e RBRACK {: ArrayAccess a = new ArrayAccess(e);
+                                                         a.setStart(LBRACK.getStart());
+                                                         a.setEnd(RBRACK.getEnd());
+                                                         return p.qualifiesAccess(a); :}
+/*  | array_creation_init.i LBRACK expression.e RBRACK  {: ArrayAccess a = new ArrayAccess(e);
+                                                         a.setStart(LBRACK.getStart());
+                                                         a.setEnd(RBRACK.getEnd());
+                                                         return i.qualifiesAccess(a); :}
+                                                      */
+  ;
+Expr postfix_expression =
+    primary.p                                  {: return p; :}
+  | name.n                                     {: return n; :}
+  | postincrement_expression.e                 {: return e; :}
+  | postdecrement_expression.e                 {: return e; :}
+  ;
+Expr postincrement_expression =
+    postfix_expression.e PLUSPLUS              {: return new PostIncExpr(e); :}
+  ;
+Expr postdecrement_expression =
+    postfix_expression.e MINUSMINUS            {: return new PostDecExpr(e); :}
+  ;
+Expr unary_expression =
+    preincrement_expression.e                  {: return e; :}
+  | predecrement_expression.e                  {: return e; :}
+  | PLUS unary_expression.e                    {: return new PlusExpr(e); :}
+  | MINUS unary_expression.e                   {: return new MinusExpr(e); :}
+  | unary_expression_not_plus_minus.e          {: return e; :}
+  ;
+Expr preincrement_expression =
+    PLUSPLUS unary_expression.e                {: return new PreIncExpr(e); :}
+  ;
+Expr predecrement_expression =
+    MINUSMINUS unary_expression.e              {: return new PreDecExpr(e); :}
+  ;
+Expr unary_expression_not_plus_minus =
+    postfix_expression.e                       {: return e; :}
+  | COMP unary_expression.e                    {: return new BitNotExpr(e); :}
+  | NOT unary_expression.e                     {: return new LogNotExpr(e); :}
+  | cast_expression.e                          {: return e; :}
+  ;
+Expr cast_expression =
+    LPAREN primitive_type.t dims.d? RPAREN unary_expression.e      {: return new CastExpr(t.addArrayDims(d), e); :}
+  | LPAREN name.t dims.d? RPAREN unary_expression_not_plus_minus.e {: return new CastExpr(t.addArrayDims(d), e); :}
+  ;
+Expr multiplicative_expression =
+    unary_expression.e                                     {: return e; :}
+  | multiplicative_expression.e1 MULT unary_expression.e2  {: return new MulExpr(e1, e2); :}
+  | multiplicative_expression.e1 DIV unary_expression.e2   {: return new DivExpr(e1, e2); :}
+  | multiplicative_expression.e1 MOD unary_expression.e2   {: return new ModExpr(e1, e2); :}
+  ;
+Expr additive_expression =
+    multiplicative_expression.e                                {: return e; :}
+  | additive_expression.e1 PLUS multiplicative_expression.e2   {: return new AddExpr(e1, e2); :}
+  | additive_expression.e1 MINUS multiplicative_expression.e2  {: return new SubExpr(e1, e2); :}
+  ;
+Expr shift_expression =
+    additive_expression.e                               {: return e; :}
+  | shift_expression.e1 LSHIFT additive_expression.e2   {: return new LShiftExpr(e1, e2); :}
+  | shift_expression.e1 RSHIFT additive_expression.e2   {: return new RShiftExpr(e1, e2); :}
+  | shift_expression.e1 URSHIFT additive_expression.e2  {: return new URShiftExpr(e1, e2); :}
+  ;
+Expr relational_expression =
+    shift_expression.e                                  {: return e; :}
+  | relational_expression.e1 LT shift_expression.e2     {: return new LTExpr(e1, e2); :}
+  | relational_expression.e1 GT shift_expression.e2     {: return new GTExpr(e1, e2); :}
+  | relational_expression.e1 LTEQ shift_expression.e2   {: return new LEExpr(e1, e2); :}
+  | relational_expression.e1 GTEQ shift_expression.e2   {: return new GEExpr(e1, e2); :}
+  | relational_expression.e INSTANCEOF reference_type.t {: return new InstanceOfExpr(e, t); :}
+  ;
+Expr equality_expression =
+    relational_expression.e                               {: return e; :}
+  | equality_expression.e1 EQEQ relational_expression.e2  {: return new EQExpr(e1, e2); :}
+  | equality_expression.e1 NOTEQ relational_expression.e2 {: return new NEExpr(e1, e2); :}
+  ;
+Expr and_expression =
+    equality_expression.e                               {: return e; :}
+  | and_expression.e1 AND equality_expression.e2        {: return new AndBitwiseExpr(e1, e2); :}
+  ;
+Expr exclusive_or_expression =
+    and_expression.e                                    {: return e; :}
+  | exclusive_or_expression.e1 XOR and_expression.e2    {: return new XorBitwiseExpr(e1, e2); :}
+  ;
+Expr inclusive_or_expression =
+    exclusive_or_expression.e                                {: return e; :}
+  | inclusive_or_expression.e1 OR exclusive_or_expression.e2 {: return new OrBitwiseExpr(e1, e2); :}
+  ;
+Expr conditional_and_expression =
+    inclusive_or_expression.e                                       {: return e; :}
+  | conditional_and_expression.e1 ANDAND inclusive_or_expression.e2 {: return new AndLogicalExpr(e1, e2); :}
+  ;
+Expr conditional_or_expression =
+    conditional_and_expression.e                                    {: return e; :}
+  | conditional_or_expression.e1 OROR conditional_and_expression.e2 {: return new OrLogicalExpr(e1, e2); :}
+  ;
+Expr conditional_expression =
+    conditional_or_expression.c                                                        {: return c; :}
+  | conditional_or_expression.c QUESTION expression.e1 COLON conditional_expression.e2 {: return new ConditionalExpr(c, e1, e2); :}
+  ;
+Expr assignment_expression =
+    conditional_expression.c {: return c; :}
+  | assignment.a {: return a; :}
+  ;
+Expr assignment =
+    postfix_expression.dest EQ assignment_expression.source {: return new AssignSimpleExpr(dest, source); :}
+  | postfix_expression.dest MULTEQ assignment_expression.source {: return new AssignMulExpr(dest, source); :}
+  | postfix_expression.dest DIVEQ assignment_expression.source {: return new AssignDivExpr(dest, source); :}
+  | postfix_expression.dest MODEQ assignment_expression.source {: return new AssignModExpr(dest, source); :}
+  | postfix_expression.dest PLUSEQ assignment_expression.source {: return new AssignPlusExpr(dest, source); :}
+  | postfix_expression.dest MINUSEQ assignment_expression.source {: return new AssignMinusExpr(dest, source); :}
+  | postfix_expression.dest LSHIFTEQ assignment_expression.source {: return new AssignLShiftExpr(dest, source); :}
+  | postfix_expression.dest RSHIFTEQ assignment_expression.source {: return new AssignRShiftExpr(dest, source); :}
+  | postfix_expression.dest URSHIFTEQ assignment_expression.source {: return new AssignURShiftExpr(dest, source); :}
+  | postfix_expression.dest ANDEQ assignment_expression.source {: return new AssignAndExpr(dest, source); :}
+  | postfix_expression.dest XOREQ assignment_expression.source {: return new AssignXorExpr(dest, source); :}
+  | postfix_expression.dest OREQ assignment_expression.source {: return new AssignOrExpr(dest, source); :}
+  ;
+Expr expression =
+    assignment_expression.a                    {: return a; :}
+  ;
+Expr constant_expression =
+    expression.e                               {: return e; :}
+  ;
+BodyDecl class_body_declaration =
+    error SEMICOLON {: return new InstanceInitializer(new Block()); :}
+  | error LBRACE {: return new InstanceInitializer(new Block()); :}
+  ;
+
+Block block =
+    LBRACE error RBRACE {: return new Block(new List()); :}
+  ;
+
+Block switch_block =
+   LBRACE error RBRACE {: return new Block(new List()); :}
+   ;
+
+Stmt statement =
+    error SEMICOLON {: return new EmptyStmt(); :}
+  ;
+TypeDecl type_declaration =
+  annotation_type_declaration.i {:  return i;  :}
+  ;
+  
+BodyDecl interface_member_declaration =
+  annotation_type_declaration.i 
+  {:  
+   MemberInterfaceDecl mid = new MemberInterfaceDecl(i);  
+   mid.setStart(i.getStart());
+   mid.setEnd(i.getEnd());
+   return mid;
+  :}
+  ;
+
+BodyDecl class_member_declaration =
+  annotation_type_declaration.i
+  {:  
+   MemberInterfaceDecl mid = new MemberInterfaceDecl(i);  
+   mid.setStart(i.getStart());
+   mid.setEnd(i.getEnd());
+   return mid;
+  :}
+  ;
+
+// a comment
+AnnotationDecl annotation_type_declaration =
+  modifiers.m? AT INTERFACE IDENTIFIER annotation_type_body.b 
+  {:  
+   AnnotationDecl a = new AnnotationDecl(new Modifiers(m), IDENTIFIER, b); 
+   a.setStart(m.getStart());
+   a.setEnd(b.getEnd());
+   return a;
+  :}
+  ;
+
+List annotation_type_body =
+  LBRACE annotation_type_element_declarations.i? RBRACE {: return i; :}
+  ;
+
+List annotation_type_element_declarations =
+     annotation_type_element_declaration.i {:  return new List().add(i); :}
+  |  annotation_type_element_declarations.l annotation_type_element_declaration.i {:  return l.add(i);  :};
+
+BodyDecl annotation_type_element_declaration =
+    modifiers.m? type.t IDENTIFIER LPAREN RPAREN default_value? SEMICOLON
+    {: 
+     AnnotationMethodDecl a = new AnnotationMethodDecl(new Modifiers(m), t, IDENTIFIER, new List(), new List(), new Opt(), default_value); 
+     a.setStart(m.getStart());
+     a.setEnd(SEMICOLON.getEnd());
+     return a;
+    :}
+  | constant_declaration
+  | class_declaration 
+    {: 
+     MemberClassDecl m = new MemberClassDecl(class_declaration); 
+     m.setStart(class_declaration.getStart());
+     m.setEnd(class_declaration.getEnd());
+     return m;
+    :}
+  | interface_declaration 
+    {: 
+     MemberInterfaceDecl m = new MemberInterfaceDecl(interface_declaration); 
+     m.setStart(interface_declaration.getStart());
+     m.setEnd(interface_declaration.getEnd());
+     return m;
+    :}
+  | enum_declaration 
+    {: 
+     MemberClassDecl m = new MemberClassDecl(enum_declaration); 
+     m.setStart(enum_declaration.getStart());
+     m.setEnd(enum_declaration.getEnd());
+     return m;
+    :}
+  | annotation_type_declaration 
+    {: 
+     MemberInterfaceDecl m = new MemberInterfaceDecl(annotation_type_declaration); 
+     m.setStart(annotation_type_declaration.getStart());
+     m.setEnd(annotation_type_declaration.getEnd());
+     return m;
+    :}    
+  | SEMICOLON {: return new StaticInitializer(new Block()); :}
+  ;
+
+ElementValue default_value =
+  DEFAULT element_value {: return element_value; :}
+  ;
+
+
+Modifier modifier =
+  annotation
+  ;
+
+Annotation annotation =
+    normal_annotation
+  | marker_annotation
+  | single_element_annotation
+  ;
+
+Modifier normal_annotation =
+  AT name LPAREN element_value_pairs? RPAREN 
+    {: 
+     Annotation a = new Annotation("annotation", name, element_value_pairs); 
+     a.setStart(AT.getStart());
+     a.setEnd(RPAREN.getEnd());
+     return a;
+    :}
+  ;
+
+List element_value_pairs =
+    element_value_pair {: return new List().add(element_value_pair); :}
+  | element_value_pairs COMMA element_value_pair {: return element_value_pairs.add(element_value_pair); :}
+  ;
+
+ElementValuePair element_value_pair =
+  IDENTIFIER EQ element_value 
+    {: 
+     ElementValuePair evp = new ElementValuePair(IDENTIFIER, element_value);
+     evp.setStart(IDENTIFIER.getStart());
+     evp.setEnd(element_value.getEnd());
+     return evp;
+    :}
+  ;
+
+ElementValue element_value =
+  conditional_expression              
+    {: 
+     ElementConstantValue e = new ElementConstantValue(conditional_expression);
+     e.setStart(conditional_expression.getStart());
+     e.setEnd(conditional_expression.getEnd());
+     return e; 
+    :}
+  | annotation                        {: return new ElementAnnotationValue(annotation); :}
+  | element_value_array_initializer.e {: return e; :}
+  ;
+
+ElementArrayValue element_value_array_initializer =
+  LBRACE element_values? COMMA? RBRACE {: return new ElementArrayValue(element_values); :}
+  ;
+
+List element_values =
+    element_value {: return new List().add(element_value); :}
+  | element_values COMMA element_value {: return element_values.add(element_value); :}
+  ;
+  
+Modifier marker_annotation =
+  AT name {: return new Annotation("annotation", name, new List()); :}
+  ;
+  
+Modifier single_element_annotation =
+  AT name LPAREN element_value RPAREN 
+    {: 
+     Annotation a = new Annotation("annotation", name, new List().add(new ElementValuePair("value", element_value)));
+     a.setStart(AT.getStart());
+     a.setEnd(RPAREN.getEnd());
+     return a;
+    :}
+  ;
+  
+
+CompilationUnit compilation_unit =
+  modifiers.a package_declaration.p import_declarations.i? type_declarations.t?
+    {: return new AnnotatedCompilationUnit(p.getID(), i, t, new Modifiers(a)); :}
+  ;
+Stmt statement = 
+  enhanced_for_statement.f                             {: return f; :}
+  ; 
+
+Stmt statement_no_short_if = 
+	enhanced_for_statement_no_short_if.f                 {: return f; :}
+	;
+
+Stmt enhanced_for_statement =
+	FOR LPAREN enhanced_for_parameter.p COLON expression.e RPAREN statement.s
+	{:  return new EnhancedForStmt(p, e, s);  :}
+	;
+
+Stmt enhanced_for_statement_no_short_if =
+	FOR LPAREN enhanced_for_parameter.p COLON expression.e RPAREN statement_no_short_if.s 
+	{: return new EnhancedForStmt(p, e, s);  :}
+	;
+
+VariableDeclaration enhanced_for_parameter = 
+  modifiers.m? type.t IDENTIFIER dims.d?     {: return new VariableDeclaration(new Modifiers(m), t.addArrayDims(d), IDENTIFIER, new Opt()); :}
+  ;
+
+TypeDecl type_declaration =
+  enum_declaration.i {:  return i;  :}
+  ;
+
+BodyDecl interface_member_declaration =
+  enum_declaration.i {:  return new MemberClassDecl(i);  :}
+  ;
+
+BodyDecl class_member_declaration =
+  enum_declaration.i {:  return new MemberClassDecl(i);  :}
+  ;
+
+EnumDecl enum_declaration =
+  modifiers.m? ENUM IDENTIFIER.id interfaces.i? enum_body.b {: return new EnumDecl(new Modifiers(m), id, i, b); :}
+  ;
+
+List enum_body =
+    LBRACE RBRACE {: return new List(); :}
+  | LBRACE enum_constants RBRACE {: return enum_constants; :}
+  | LBRACE COMMA RBRACE {: return new List(); :}
+  | LBRACE enum_constants COMMA RBRACE {: return enum_constants; :}
+  | LBRACE enum_body_declarations RBRACE {: return enum_body_declarations; :}
+  | LBRACE enum_constants.c enum_body_declarations.d RBRACE
+    {: for(int i = 0; i < d.getNumChildNoTransform(); i++) c.add(d.getChildNoTransform(i)); return c; :}
+  | LBRACE COMMA enum_body_declarations RBRACE {: return enum_body_declarations; :}
+  | LBRACE enum_constants.c COMMA enum_body_declarations.d RBRACE
+    {: for(int i = 0; i < d.getNumChildNoTransform(); i++) c.add(d.getChildNoTransform(i)); return c; :}
+  ;
+
+List enum_constants =
+    enum_constant {: return new List().add(enum_constant); :}
+  | enum_constants COMMA enum_constant {: return enum_constants.add(enum_constant); :}
+  ;
+
+BodyDecl enum_constant =
+  annotations? IDENTIFIER.id arguments? class_body? 
+    {: return new EnumConstant(new Modifiers(annotations), id, arguments, class_body); :}
+  ;
+
+List arguments =
+  LPAREN argument_list RPAREN {: return argument_list; :}
+  ;
+
+List annotations =
+    annotation             {: return new List().add(annotation); :}
+  | annotations annotation {: return annotations.add(annotation); :}
+  ;
+
+List enum_body_declarations =
+  SEMICOLON class_body_declarations? {: return class_body_declarations; :}
+  ;
+ExprStmt explicit_constructor_invocation =
+		type_arguments.a THIS LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(new ParConstructorAccess("this", l, a));  :}
+	|	type_arguments.a SUPER LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(new ParSuperConstructorAccess("super", l, a));  :}
+	|	primary.p DOT type_arguments.a SUPER LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(p.qualifiesAccess(new ParSuperConstructorAccess("super", l, a))); :}
+	|	name.n DOT type_arguments.a SUPER LPAREN argument_list.l? RPAREN SEMICOLON 
+		{:  return new ExprStmt(n.qualifiesAccess(new ParSuperConstructorAccess("super", l, a))); :}
+	;
+	
+Access method_invocation =
+		primary.p DOT type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return p.qualifiesAccess(new ParMethodAccess(IDENTIFIER, l, a));  :}
+	|	name.n DOT type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return n.qualifiesAccess(new ParMethodAccess(IDENTIFIER, l, a));  :}
+	|	SUPER DOT type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return new SuperAccess("super").qualifiesAccess(
+		                    new ParMethodAccess(IDENTIFIER, l, a));  :}
+	|	name.n DOT.d1 SUPER DOT.d2 type_arguments.a IDENTIFIER LPAREN argument_list.l? RPAREN 
+		{: return n.qualifiesAccess(new SuperAccess("super")).qualifiesAccess(
+                            new ParMethodAccess(IDENTIFIER, l, a));  :}
+	;
+
+MethodDecl method_header =
+	  modifiers.m? LT type_parameter_list_1.l type.t IDENTIFIER LPAREN formal_parameter_list.p? RPAREN dims.d? throws.tl?
+    {: return new GenericMethodDecl(new Modifiers(m), t.addArrayDims(d), IDENTIFIER, p, tl, new Opt(), l); :}
+	| modifiers.m? LT type_parameter_list_1.l VOID IDENTIFIER LPAREN formal_parameter_list.p? RPAREN throws.tl?
+    {: return new GenericMethodDecl(new Modifiers(m), new PrimitiveTypeAccess("void"), IDENTIFIER, p, tl, new Opt(), l); :}
+  ;
+
+ConstructorDecl constructor_declaration =
+	  modifiers.m? LT type_parameter_list_1.l IDENTIFIER LPAREN formal_parameter_list.pl? RPAREN throws.tl? 
+		LBRACE explicit_constructor_invocation.c? block_statements.bl? RBRACE
+    {: return new GenericConstructorDecl(new Modifiers(m), IDENTIFIER, pl, tl, c, new Block(bl), l); :}
+  ;
+ClassDecl class_declaration =
+	modifiers.m? CLASS IDENTIFIER type_parameters.p super.s? interfaces.i? class_body.b 
+		{:  return new GenericClassDecl(new Modifiers(m), IDENTIFIER, s, i, b, p);  :}
+	;
+
+InterfaceDecl interface_declaration =
+	modifiers.m? INTERFACE IDENTIFIER type_parameters.p extends_interfaces.i? interface_body.b 
+		{:  return new GenericInterfaceDecl(new Modifiers(m), IDENTIFIER, i, b, p);  :}
+	;
+
+Access class_or_interface =
+    name.n {: return n; :}
+  | class_or_interface.n LT type_argument_list_1.l DOT name.end {: return new ParTypeAccess(n, l).qualifiesAccess(end); :}
+  ;
+
+Access class_or_interface_type :=
+    class_or_interface.n {: return n; :}
+  | class_or_interface.n LT type_argument_list_1.l {: return new ParTypeAccess(n, l); :}
+	;
+Access array_type =
+    class_or_interface.t LT type_argument_list_1.l DOT name.n dims.d 
+    {: return new ParTypeAccess(t, l).qualifiesAccess(n).addArrayDims(d); :}
+	|	class_or_interface.t LT type_argument_list_1.l dims.d 
+		{: return new ParTypeAccess(t, l).addArrayDims(d); :}
+	;
+
+List type_arguments =
+		LT type_argument_list_1.l {:  return l;  :}
+	;
+      
+Access wildcard =
+		QUESTION                             {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type.t    {: return new WildcardExtends(t); :}
+    |	QUESTION SUPER reference_type.t    {: return new WildcardSuper(t); :}
+    ;
+   
+Access wildcard_1 =
+		QUESTION GT                          {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type_1.t  {: return new WildcardExtends(t); :}
+	|	QUESTION SUPER reference_type_1.t    {: return new WildcardSuper(t); :}
+	;
+	
+Access wildcard_2 =
+		QUESTION RSHIFT                      {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type_2.t  {: return new WildcardExtends(t); :}
+	|	QUESTION SUPER reference_type_2.t    {: return new WildcardSuper(t); :}
+	;
+	
+Access wildcard_3 =
+		QUESTION URSHIFT                     {: return new Wildcard(); :}
+	|	QUESTION EXTENDS reference_type_3.t  {: return new WildcardExtends(t); :}
+	|	QUESTION SUPER reference_type_3.t    {: return new WildcardSuper(t); :}
+	;
+
+Expr class_instance_creation_expression :=
+    NEW class_or_interface_type.t LPAREN argument_list.l? RPAREN subclass_body.b?
+    {: return new ClassInstanceExpr(t, l, b); :}
+  |	NEW type_arguments.a class_or_interface_type.t LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return new ParClassInstanceExpr(t, l, b, a); :}
+	|	primary.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(id, l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	primary.n DOT NEW simple_name.id type_arguments.a LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(new ParTypeAccess(id, a), l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	primary.n DOT NEW type_arguments.ca simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(id, l, b, ca)); :}
+	|	primary.n DOT NEW type_arguments.ca simple_name.id type_arguments.ta LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(new ParTypeAccess(id, ta), l, b, ca)); :}
+	|	name.n DOT NEW simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(id, l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	name.n DOT NEW simple_name.id type_arguments.a LPAREN argument_list.l? RPAREN subclass_body.b?
+    {:  ClassInstanceExpr e = new ClassInstanceExpr(new ParTypeAccess(id, a), l, b); 
+        e.setStart(NEW.getStart());
+        e.setEnd(RPAREN.getEnd());
+        return n.qualifiesAccess(e);
+    :}
+	|	name.n DOT NEW type_arguments.ca simple_name.id LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(id, l, b, ca)); :}
+	|	name.n DOT NEW type_arguments.ca simple_name.id type_arguments.ta LPAREN argument_list.l? RPAREN subclass_body.b?
+		{:  return n.qualifiesAccess(new ParClassInstanceExpr(new ParTypeAccess(id, ta), l, b, ca)); :}
+	;
+
+List type_argument_list =
+		type_argument.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument.a {:  return l.add(a);  :}
+	;
+	
+List type_argument_list_1 =
+		type_argument_1.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument_1.a {:  return l.add(a);  :}
+	;
+	
+List type_argument_list_2 =
+		type_argument_2.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument_2.a {:  return l.add(a);  :}
+	;
+	
+List type_argument_list_3 =
+		type_argument_3.a {:  return new List().add(a);  :}
+	|	type_argument_list.l COMMA type_argument_3.a {:  return l.add(a);  :}
+	;
+	
+Access type_argument =
+		reference_type.t {:  return t;  :}
+	|	wildcard.w {: return w; :}
+	;
+	
+Access type_argument_1 =
+		reference_type_1.t {:  return t;  :}
+	|	wildcard_1.w {: return w; :}
+	;
+	
+Access type_argument_2 =
+		reference_type_2.t {:  return t;  :}
+	|	wildcard_2.w {: return w; :}
+	;
+	
+Access type_argument_3 =
+		reference_type_3.t {:  return t;  :}
+	|	wildcard_3.w {: return w; :}
+	;
+  
+Access reference_type_1 =
+		reference_type.t GT {:  return t;  :}
+	|	class_or_interface.t LT type_argument_list_2.l {:  return new ParTypeAccess(t, l);  :}
+	;
+	
+Access reference_type_2 =
+		reference_type.t RSHIFT {:  return t;  :}
+	|	class_or_interface.t LT type_argument_list_3.l {:  return new ParTypeAccess(t, l);  :}
+	;
+	
+Access reference_type_3 =
+		reference_type.t URSHIFT {:  return t;  :}
+	;
+Expr cast_expression =
+		LPAREN name.n LT type_argument_list_1.a dims.d? RPAREN unary_expression_not_plus_minus.e 
+		{:  return new CastExpr(new ParTypeAccess(n, a).addArrayDims(d), e);  :}
+	|	LPAREN name.n LT type_argument_list_1.a DOT class_or_interface_type.t dims.d? RPAREN unary_expression_not_plus_minus.e 
+		{:  return new CastExpr(new ParTypeAccess(n, a).qualifiesAccess(t).addArrayDims(d), e);  :}
+  ;
+
+List type_parameters =
+		LT type_parameter_list_1.l {:  return l;  :}
+	;
+	
+List type_parameter_list =
+		type_parameter_list.l COMMA type_parameter.p {:  return l.add(p);  :}
+	|	type_parameter.p {:  return new List().add(p);  :}
+	;
+	
+List type_parameter_list_1 =
+		type_parameter_1.p {:  return new List().add(p);  :}
+	|	type_parameter_list.l COMMA type_parameter_1.p {:  return l.add(p);  :}
+	;
+	
+TypeVariable type_parameter =
+		IDENTIFIER              {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), new List());  :}
+	|	IDENTIFIER type_bound.l {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), l); :}
+	;
+	
+TypeVariable type_parameter_1 =
+		IDENTIFIER GT             {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), new List());  :}
+  |	IDENTIFIER type_bound_1.l {:  return new TypeVariable(new Modifiers(), IDENTIFIER, new List(), l);  :}
+	;
+	
+List type_bound =
+		EXTENDS reference_type.t {:  return new List().add(t);  :}
+	|	EXTENDS reference_type.t additional_bound_list.l {:  l.insertChild(t,0); return l; :}
+    ;
+    
+List type_bound_1 =
+		EXTENDS reference_type_1.t {:  return new List().add(t);  :}
+	|	EXTENDS reference_type.t additional_bound_list_1.l {:  l.insertChild(t,0); return l; :}
+    ;
+    
+List additional_bound_list =
+		additional_bound.b additional_bound_list.l {:  l.insertChild(b,0); return l; :}
+	|	additional_bound.b {:  return new List().add(b);  :}
+    ;
+    
+List additional_bound_list_1 =
+		additional_bound.b additional_bound_list_1.l {:  l.insertChild(b,0); return l; :}
+	|	additional_bound_1.b {:  return new List().add(b);  :}
+    ;
+    
+Access additional_bound =
+		AND interface_type.t {:  return t;  :}
+	;
+	
+Access additional_bound_1 =
+		AND reference_type_1.t {:  return t;  :}
+	;
+
+ImportDecl import_declaration =
+      single_static_import_declaration.s {:  return s;  :}
+    |  static_import_on_demand_declaration.t {:  return t;  :}
+    ;
+
+ImportDecl single_static_import_declaration =
+      IMPORT STATIC name.n DOT IDENTIFIER SEMICOLON {: return new SingleStaticImportDecl(n, IDENTIFIER);  :};
+
+ImportDecl static_import_on_demand_declaration =
+      IMPORT STATIC name.n DOT MULT SEMICOLON {: return new StaticImportOnDemandDecl(n);  :};
+ParameterDeclaration formal_parameter =
+    modifiers.m? type.t ELLIPSIS IDENTIFIER dims.d? 
+    {: return new VariableArityParameterDeclaration(new Modifiers(m), t.addArrayDims(d), IDENTIFIER); :}  ;
+
+Expr primary_no_new_array :=
+    literal.l                                  {: return l; :}
+  | primitive_type.n dims.d? DOT class_literal.c {: return n.addArrayDims(d).qualifiesAccess(c); :}
+  | name.n dims.d? DOT class_literal.c          {: return n.addArrayDims(d).qualifiesAccess(c); :}
+  | VOID DOT class_literal.c                   {: PrimitiveTypeAccess v = new PrimitiveTypeAccess("void");
+                                                  v.setStart(VOID.getStart());
+                                                  v.setEnd(VOID.getEnd());
+                                                  return v.qualifiesAccess(c); :}
+  | THIS                                       {: return new ThisAccess("this"); :}
+  | name.n DOT THIS                            {: ThisAccess t = new ThisAccess("this");
+                                                  t.setStart(THIS.getStart()); t.setEnd(THIS.getEnd());
+                                                  return n.qualifiesAccess(t); :}
+  | LPAREN expression_nn.e RPAREN                 {: return new ParExpr(e); :}
+  | LPAREN name.n RPAREN                       {: return new ParExpr(n); :}
+  | class_instance_creation_expression.c       {: return c; :}
+  | field_access.f                             {: return f; :}
+  | method_invocation.m                        {: return m; :}
+  | array_access.a                             {: return a; :}
+  ;
+
+
+Expr postfix_expression_nn =
+    primary.p                                  {: return p; :}
+  | postincrement_expression.e                 {: return e; :}
+  | postdecrement_expression.e                 {: return e; :}
+  ;
+Expr unary_expression_nn =
+    preincrement_expression.e                  {: return e; :}
+  | predecrement_expression.e                  {: return e; :}
+  | PLUS unary_expression.e                    {: return new PlusExpr(e); :}
+  | MINUS unary_expression.e                   {: return new MinusExpr(e); :}
+  | unary_expression_not_plus_minus_nn.e          {: return e; :}
+  ;
+Expr unary_expression_not_plus_minus_nn =
+    postfix_expression_nn.e                       {: return e; :}
+  | COMP unary_expression.e                    {: return new BitNotExpr(e); :}
+  | NOT unary_expression.e                     {: return new LogNotExpr(e); :}
+  | cast_expression.e                          {: return e; :}
+  ;
+Expr multiplicative_expression_nn =
+    unary_expression_nn.e                                     {: return e; :}
+  | name.e1 MULT unary_expression.e2  {: return new MulExpr(e1, e2); :}
+  | multiplicative_expression_nn.e1 MULT unary_expression.e2  {: return new MulExpr(e1, e2); :}
+  | name.e1 DIV unary_expression.e2   {: return new DivExpr(e1, e2); :}
+  | multiplicative_expression_nn.e1 DIV unary_expression.e2   {: return new DivExpr(e1, e2); :}
+  | name.e1 MOD unary_expression.e2   {: return new ModExpr(e1, e2); :}
+  | multiplicative_expression_nn.e1 MOD unary_expression.e2   {: return new ModExpr(e1, e2); :}
+  ;
+Expr additive_expression_nn =
+    multiplicative_expression_nn.e                                {: return e; :}
+  | name.e1 PLUS multiplicative_expression.e2   {: return new AddExpr(e1, e2); :}
+  | additive_expression_nn.e1 PLUS multiplicative_expression.e2   {: return new AddExpr(e1, e2); :}
+  | name.e1 MINUS multiplicative_expression.e2  {: return new SubExpr(e1, e2); :}
+  | additive_expression_nn.e1 MINUS multiplicative_expression.e2  {: return new SubExpr(e1, e2); :}
+  ;
+Expr shift_expression_nn =
+    additive_expression_nn.e                               {: return e; :}
+  | name.e1 LSHIFT additive_expression.e2   {: return new LShiftExpr(e1, e2); :}
+  | shift_expression_nn.e1 LSHIFT additive_expression.e2   {: return new LShiftExpr(e1, e2); :}
+  | name.e1 RSHIFT additive_expression.e2   {: return new RShiftExpr(e1, e2); :}
+  | shift_expression_nn.e1 RSHIFT additive_expression.e2   {: return new RShiftExpr(e1, e2); :}
+  | name.e1 URSHIFT additive_expression.e2  {: return new URShiftExpr(e1, e2); :}
+  | shift_expression_nn.e1 URSHIFT additive_expression.e2  {: return new URShiftExpr(e1, e2); :}
+  ;
+Expr relational_expression_nn =
+    shift_expression_nn.e                                  {: return e; :}
+  | name.e1 LT shift_expression.e2     {: return new LTExpr(e1, e2); :}
+  | shift_expression_nn.e1 LT shift_expression.e2     {: return new LTExpr(e1, e2); :}
+  | name.e1 GT shift_expression.e2     {: return new GTExpr(e1, e2); :}
+  | shift_expression_nn.e1 GT shift_expression.e2     {: return new GTExpr(e1, e2); :}
+  | name.e1 LTEQ shift_expression.e2   {: return new LEExpr(e1, e2); :}
+  | relational_expression_nn.e1 LTEQ shift_expression.e2   {: return new LEExpr(e1, e2); :}
+  | name.e1 GTEQ shift_expression.e2   {: return new GEExpr(e1, e2); :}
+  | relational_expression_nn.e1 GTEQ shift_expression.e2   {: return new GEExpr(e1, e2); :}
+  | name.e INSTANCEOF reference_type.t {: return new InstanceOfExpr(e, t); :}
+  | relational_expression_nn.e INSTANCEOF reference_type.t {: return new InstanceOfExpr(e, t); :}
+  ;
+Expr equality_expression_nn =
+    relational_expression_nn.e                               {: return e; :}
+  | name.e1 EQEQ relational_expression.e2  {: return new EQExpr(e1, e2); :}
+  | equality_expression_nn.e1 EQEQ relational_expression.e2  {: return new EQExpr(e1, e2); :}
+  | name.e1 NOTEQ relational_expression.e2 {: return new NEExpr(e1, e2); :}
+  | equality_expression_nn.e1 NOTEQ relational_expression.e2 {: return new NEExpr(e1, e2); :}
+  ;
+Expr and_expression_nn =
+    equality_expression_nn.e                               {: return e; :}
+  | name.e1 AND equality_expression.e2        {: return new AndBitwiseExpr(e1, e2); :}
+  | and_expression_nn.e1 AND equality_expression.e2        {: return new AndBitwiseExpr(e1, e2); :}
+  ;
+Expr exclusive_or_expression_nn =
+    and_expression_nn.e                                    {: return e; :}
+  | name.e1 XOR and_expression.e2    {: return new XorBitwiseExpr(e1, e2); :}
+  | exclusive_or_expression_nn.e1 XOR and_expression.e2    {: return new XorBitwiseExpr(e1, e2); :}
+  ;
+Expr inclusive_or_expression_nn =
+    exclusive_or_expression_nn.e                                {: return e; :}
+  | name.e1 OR exclusive_or_expression.e2 {: return new OrBitwiseExpr(e1, e2); :}
+  | inclusive_or_expression_nn.e1 OR exclusive_or_expression.e2 {: return new OrBitwiseExpr(e1, e2); :}
+  ;
+Expr conditional_and_expression_nn =
+    inclusive_or_expression_nn.e                                       {: return e; :}
+  | name.e1 ANDAND inclusive_or_expression.e2 {: return new AndLogicalExpr(e1, e2); :}
+  | conditional_and_expression_nn.e1 ANDAND inclusive_or_expression.e2 {: return new AndLogicalExpr(e1, e2); :}
+  ;
+Expr conditional_or_expression_nn =
+    conditional_and_expression_nn.e                                    {: return e; :}
+  | name.e1 OROR conditional_and_expression.e2 {: return new OrLogicalExpr(e1, e2); :}
+  | conditional_or_expression_nn.e1 OROR conditional_and_expression.e2 {: return new OrLogicalExpr(e1, e2); :}
+  ;
+Expr conditional_expression_nn =
+    conditional_or_expression_nn.c                                                        {: return c; :}
+  | name.c QUESTION expression.e1 COLON conditional_expression.e2 {: return new ConditionalExpr(c, e1, e2); :}
+  | conditional_or_expression_nn.c QUESTION expression.e1 COLON conditional_expression.e2 {: return new ConditionalExpr(c, e1, e2); :}
+  ;
+Expr assignment_expression_nn =
+    conditional_expression_nn.c {: return c; :}
+  | assignment.a {: return a; :}
+  ;
+
+Expr expression_nn =
+    assignment_expression_nn
+  ;
+
+Expr literal :=
+  NUMERIC_LITERAL
+  {: return new NumericLiteral(NUMERIC_LITERAL); :}
+| BOOLEAN_LITERAL
+  {:
+    return new BooleanLiteral(BOOLEAN_LITERAL);
+  :}
+
+| CHARACTER_LITERAL
+  {:
+    return new CharacterLiteral(CHARACTER_LITERAL);
+  :}
+
+| STRING_LITERAL
+  {:
+    return new StringLiteral(STRING_LITERAL);
+  :}
+
+| NULL_LITERAL
+  {:
+    return new NullLiteral(NULL_LITERAL);
+  :}
+;
