@@ -1,4 +1,4 @@
-# Stoat
+# Stoat Prototype
 Stoat (STochastic model App Tester) is a guided approach to perform stochastic model-based testing on Android Apps. The idea is to thoroughly test the functionalities of an app from its GUI model, and validate the app’s behavior by enforcing various user/system interactions. 
 
 # Publication
@@ -116,12 +116,15 @@ stoat_mcmc_sampling_output: the outputs of mcmc sampling.
      
 coverage: the all coverage data during two phases
 
+# Benchmark
 
+Some benchmark apps used in our paper.
 
 ##  Notes
 * This implementation has been tested with Android 4.4, running on Ubuntu 14.04. 
 * If measure statement coverage for open-sourced apps, the subjects need to be processed to support EMMA/JaCoCo instrumentation:
-(Please refer to [Dynodroid](https://code.google.com/archive/p/dyno-droid/) for details.)
+(Please refer to [Dynodroid](https://code.google.com/archive/p/dyno-droid/) for details.) You can also refer to the apps in the benchmark.
+* This version only supports testing ant projects.
 
 ## Contact
 <tsuletgo@gmail.com>
