@@ -122,7 +122,7 @@ Some benchmark apps used in our paper.
 
 ##  Notes
 * This implementation has been tested with Android 4.4, running on Ubuntu 14.04. 
-* If measure statement coverage for open-sourced apps, the subjects need to be processed to support EMMA/JaCoCo instrumentation:
+* If measure statement coverage for open-sourced apps, the subjects need to be processed to support EMMA instrumentation:
 (Please refer to [Dynodroid](https://code.google.com/archive/p/dyno-droid/) for details.) You can also refer to the apps in the benchmark.
 * This version only supports testing ant projects.
 
