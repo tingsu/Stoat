@@ -128,3 +128,4 @@ Some benchmark apps used in our paper.
 
 ## Contact
 <tsuletgo@gmail.com>
+All Copyright Reserved.
