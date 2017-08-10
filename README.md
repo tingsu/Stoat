@@ -127,5 +127,5 @@ Some benchmark apps used in our paper.
 * This version only supports testing ant projects.
 
 ## Contact
-<tsuletgo@gmail.com>
+[Ting Su](http://tingsu.github.io/)
 All Copyright Reserved.
