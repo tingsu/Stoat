@@ -58,10 +58,11 @@ Please export ANDROID_HOME (for android sdk), PYTHON_PATH (for uiautomator), CLA
   export CLASSPATH="/home/XX/fsmdroid/soot-github/lib/soot-develop.jar
   export PATH=$PATH:${ANDROID_HOME}/build-tools/25.0.0:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:
   ```
+You may also need to modify "Stoat/CONF.txt" to set the tool path.
   
 # Usage
 
-Stoat provides several ways to test android apps by command lines. Note before running Stoat, please disable keyboard (for emulator, add "hw.keyboard=yes" in its config.ini; for real device, please install the "com.wparam.nullkeyboard_1.apk" at "fsmdroid/bin", and configure it to be the default input method)
+Stoat provides several ways to test android apps by command lines. Note before running Stoat, please disable keyboard (for emulator, add "hw.keyboard=yes" in its config.ini; for real device, please install the "com.wparam.nullkeyboard_1.apk" at "Stoat/bin/sdcard", and configure it to be the default input method)
 
 1. Ant opens-soruce projects
 
