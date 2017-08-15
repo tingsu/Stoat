@@ -16,7 +16,7 @@ APP_START_WAIT_TIME = 3
 
 # Server side (MCMC Sampling) Parameters
 # enable/disable static analysis: "yes"/"no"
-STATIC_ANALYSIS = yes
+STATIC_ANALYSIS = no
 # the max iterations of mcmc sampling
 MAX_MCMC_ITERATION = 1000
 # the max size of the generated test suite
