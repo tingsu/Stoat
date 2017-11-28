@@ -70,7 +70,7 @@ Stoat provides several ways to test android apps by command lines. Note before r
  	
 2. apk without instrumentation
 
-	Note this may mitigate Stoat's power due to lack of coverage info for test optimization. Otherwise, you need to instrument apk with Ella
+	**Note this may mitigate Stoat's power due to lack of coverage info for test optimization. Otherwise, you need to instrument apk with Ella**
     
 	ruby run_stoat_testing.rb --app_dir /home/XX/Bites.apk --avd_name testAVD_1 --avd_port 5554 --stoat_port 2000 (the output will be under "/home/XX/Bites-output")
  	 
