@@ -28,7 +28,7 @@ Stoat (STochastic model App Tester) is a guided approach to perform stochastic m
 
 # Quick Review
 
-Click this [link](https://sites.google.com/site/stoat2017/) for quick review on the approach workflow, evaluation results, demo and etc.
+Click this [link](https://tingsu.github.io/files/stoat.html) for quick review on the approach workflow, evaluation results, demo and etc.
 
 # Setup 
 
