@@ -35,9 +35,11 @@ Click this [link](https://tingsu.github.io/files/stoat.html) for quick review on
 You can checkout Stoat from this repo.
 
 ### Environment Configration
-* Ruby: 2.2 
+* Ruby: 2.1 
 
 * [Nokogiri](http://www.nokogiri.org/tutorials/installing_nokogiri.html)
+
+(If your default ruby version is lower than 2.1, the installation of Nokogiri will fail. In this case, please [upgrade ruby to 2.1 or higher](https://stackoverflow.com/questions/26595620/how-to-install-ruby-2-1-4-on-ubuntu-14-04). If the installation still fails due to [this issue](https://github.com/github/pages-gem/issues/133), you need to execute "sudo apt-get install ruby2.1-dev")
 
 * Python: 2.7
 
@@ -46,6 +48,7 @@ You can checkout Stoat from this repo.
 * Ubuntu 14.04/Linux
 
 * uiautomator (A python wrapper of [UIAutomator](https://github.com/xiaocong/uiautomator))
+
 
 We strongly recommend to run Stoat on a physical machine to ensure the performance instead of ruuning on virtual machines (e.g., VirtualBox or Docker). In addition, please choose x86 image if you use Android emulators, and [setup hardware acceleration](https://developer.android.com/studio/run/emulator-acceleration.html) for [Ubuntu](https://help.ubuntu.com/community/KVM/Installation).
 
