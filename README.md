@@ -5,18 +5,26 @@ Stoat (STochastic model App Tester) is a guided approach to perform stochastic m
 [1] Guided, Stochastic Model-based GUI Testing of Android Apps (FSE'2017)
 
 ```
-@inproceedings{stoat17,
-    author = {Ting Su and Guozhu Meng and Yuting Chen and Ke Wu and Weiming Yang and Yao Yao and Geguang Pu and Yang Liu and Zhendong Su},
-    title = {Guided, Stochastic Model-based GUI Testing of Android Apps},
-    booktitle = {The 11th joint meeting of the European Software Engineering Conference and the ACM SIGSOFT Symposium on the Foundations of Software Engineering},
-    year = {2017}
+@inproceedings{Stoat2017,
+author = {Su, Ting and Meng, Guozhu and Chen, Yuting and Wu, Ke and Yang, Weiming and Yao, Yao and Pu, Geguang and Liu, Yang and Su, Zhendong},
+title = {Guided, Stochastic Model-based GUI Testing of Android Apps},
+booktitle = {Proceedings of the 2017 11th Joint Meeting on Foundations of Software Engineering},
+series = {ESEC/FSE 2017},
+year = {2017},
+isbn = {978-1-4503-5105-8},
+location = {Paderborn, Germany},
+pages = {245--256},
+numpages = {12},
+publisher = {ACM},
+address = {New York, NY, USA},
+keywords = {GUI Testing, Mobile Apps, Model-based Testing},
 } 
 ```
 
 [2] FSMdroid: Guided GUI Testing of Android Apps (ICSE'16, ACM SRC)
 
 ```
-@inproceedings{Su16,
+@inproceedings{FSMdroid16,
   author    = {Ting Su},
   title     = {FSMdroid: guided {GUI} testing of android apps},
   booktitle = {Proceedings of the 38th International Conference on Software Engineering,
