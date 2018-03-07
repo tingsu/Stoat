@@ -98,7 +98,7 @@ end
 
 def cleanup()
 
-	execute_shell_cmd("for pid in $(ps | grep java | awk '{print $1}'); do kill -9 $pid; done")
+	execute_shell_cmd("for pid in $(ps a | grep 'Server.jar' | awk '{print $1}'); do kill -9 $pid; done")
   	execute_shell_cmd("for pid in $(ps | grep adb | awk '{print $1}'); do kill -9 $pid; done")
   	execute_shell_cmd("for pid in $(ps | grep sleep | awk '{print $1}'); do kill -9 $pid; done")
 end
