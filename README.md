@@ -91,9 +91,9 @@ Stoat provides several ways to test android apps by command lines. Note before r
     
  	ruby run_stoat_testing.rb --app_dir /home/XX/caldwell.ben.bites_4_src/ --real_device_serial cf00b9e6 --stoat_port 2000 --project_type ant 
 	
-4. A list of apps
+4. A list of apps (If they are apks, append the option "--project_type apk")
 
-	ruby run_stoat_testing.rb --apps_dir /home/XX/test_apps/ --apps_list /home/XX/test_apps/apps_list.txt --avd_name testAVD_1 --avd_port 5554 --stoat_port 2000 --force_restart
+	ruby run_stoat_testing.rb --apps_dir /home/XX/test_apps/ --apps_list /home/XX/test_apps/apps_list.txt --avd_name testAVD_1 --avd_port 5554 --stoat_port 2000 --force_restart 
 
 
 ### Subject Requirement:
