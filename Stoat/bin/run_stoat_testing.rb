@@ -549,7 +549,7 @@ cleanup()
 if (not app_dir.eql?("")) && File.exist?(app_dir) then  # for testing one app at one time
 
 	if force_to_create then
-		create_avd(avd_name, avd_sdk_version, force_to_create)
+		create_avd(avd_name, avd_sdk_version)
 	end
 
 	if not is_real_device then # if no real device, use emulators
@@ -573,7 +573,7 @@ if (not app_dir.eql?("")) && File.exist?(app_dir) then  # for testing one app at
 elsif (not apps_list.eql?("")) && File.exist?(apps_list) then # for testing multiple apps listed in a file at one time
 
 	if force_to_create then
-		create_avd(avd_name, avd_sdk_version, force_to_create)
+		create_avd(avd_name, avd_sdk_version)
 	end
 
 	File.readlines(apps_list).each do |line|
