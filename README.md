@@ -37,14 +37,24 @@ Stoat (STochastic model App Tester) is a guided approach to perform stochastic m
 [3] Large-Scale Analysis of Framework-Specific Exceptions in Android Apps (ICSE'18)
 
 ```
-@inproceedings{large18,
-  author    = {Lingling Fan and Ting Su and Sen Chen and Guozhu Meng and Yang Liu and Lihua Xu and Geguang Pu and Zhendong Su},
-  title     = {Large-Scale Analysis of Framework-Specific Exceptions in Android Apps},
+@inproceedings{FanSCMLXPS18,
+  author    = {Lingling Fan and
+               Ting Su and
+               Sen Chen and
+               Guozhu Meng and
+               Yang Liu and
+               Lihua Xu and
+               Geguang Pu and
+               Zhendong Su},
+  title     = {Large-scale analysis of framework-specific exceptions in Android apps},
   booktitle = {Proceedings of the 40th International Conference on Software Engineering,
-               {ICSE} 2018, Gothenburg, Sweden, May 27-3 June, 2018},
+               {ICSE} 2018, Gothenburg, Sweden, May 27 - June 03, 2018},
+  pages     = {408--419},
   year      = {2018}
 }
 ```
+
+[4] Efficiently Manifesting Asynchronous Programming Errors in Android Apps (ASE'18)
 
 
 # Quick Review
