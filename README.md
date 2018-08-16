@@ -74,7 +74,9 @@ You can checkout Stoat from this repo.
 
 * Python: 2.7
 
-* Android SDK: API 18/19
+* Android SDK: API 18+ 
+
+(Android SDK recently makes an update about emulators. If you cannot start the emulator (like "Cannot launch AVD in emulator:QT library not found"), please check [this post](https://stackoverflow.com/questions/42554337/cannot-launch-avd-in-emulatorqt-library-not-found) for solution.)
 
 * Ubuntu 14.04/Linux
 
