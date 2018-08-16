@@ -92,7 +92,7 @@ Please export ANDROID_HOME (for android sdk), PYTHON_PATH (for uiautomator), CLA
   export ANDROID_HOME="/home/XX/Android/Sdk"
   export PYTHONPATH="/home/XX/uiautomator"
   export CLASSPATH="/home/XX/fsmdroid/soot-github/lib/soot-develop.jar
-  export PATH=$PATH:${ANDROID_HOME}/build-tools/25.0.0:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:
+  export PATH=$PATH:${ANDROID_HOME}/build-tools/25.0.0:${ANDROID_HOME}/emulator:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:
   ```
 You may also need to modify "Stoat/CONF.txt" to set the tool path.
   
