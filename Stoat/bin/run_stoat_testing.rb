@@ -32,8 +32,8 @@ def create_avd(avd_name="testAVD_1", sdk_version="android-18")
 	end
 	
 	# create the avd
-	#avdmanager create avd -f -n testAVD_1 -k 'system-images;android-18;google_apis;x86' -b google_apis/x86 -c 512M -d 14
-	execute_shell_cmd_output("echo no | avdmanager create avd --force --name #{avd_name} -k 'system-images;#{sdk_version};google_apis;x86' --abi google_apis/x86 --sdcard 512M --device 14")
+	#avdmanager create avd -f -n testAVD_1 -k 'system-images;android-18;google_apis;x86' -b google_apis/x86 -c 512M -d 'Nexus 7'
+	execute_shell_cmd_output("echo no | avdmanager create avd --force --name #{avd_name} --package 'system-images;#{sdk_version};google_apis;x86' --abi google_apis/x86 --sdcard 512M --device 'Nexus 7'")
 	sleep 2
 
 end
