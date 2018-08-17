@@ -23,16 +23,17 @@ end
 def create_avd(avd_name="testAVD_1", sdk_version="android-18")
 
 	# check whether #avd_name already exist?
-	res = execute_shell_cmd("android list avd | grep #{avd_name}")
+	res = execute_shell_cmd("avdmanager list avd | grep #{avd_name}")
 
 	if (not res.strip.eql?("")) then # if exist and forced to create a new one, delete it
 		kill_avd() # make sure the avd is stopped
-		execute_shell_cmd_output("android delete avd -n #{avd_name}")
+		execute_shell_cmd_output("avdmanager delete avd -n #{avd_name}")
 		sleep 1 # wait a while
 	end
 	
 	# create the avd
-	execute_shell_cmd_output("echo no | android create avd -n #{avd_name} -t #{sdk_version} -c 512M -b x86 -s WXGA800-7in")
+	#avdmanager create avd -f -n testAVD_1 -k 'system-images;android-18;google_apis;x86' -b google_apis/x86 -c 512M -d 14
+	execute_shell_cmd_output("echo no | avdmanager create avd --force --name #{avd_name} -k 'system-images;#{sdk_version};google_apis;x86' --abi google_apis/x86 --sdcard 512M --device 14")
 	sleep 2
 
 end

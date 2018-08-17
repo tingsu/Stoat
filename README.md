@@ -70,13 +70,13 @@ You can checkout Stoat from this repo.
 
 * [Nokogiri](http://www.nokogiri.org/tutorials/installing_nokogiri.html)
 
-(If your default ruby version is lower than 2.1, the installation of Nokogiri will fail. In this case, please [upgrade ruby to 2.1 or higher](https://stackoverflow.com/questions/26595620/how-to-install-ruby-2-1-4-on-ubuntu-14-04). If the installation still fails due to [this issue](https://github.com/github/pages-gem/issues/133), you need to execute "sudo apt-get install ruby2.1-dev")
+If your default ruby version is lower than 2.1, the installation of Nokogiri will fail. In this case, please [upgrade ruby to 2.1 or higher](https://stackoverflow.com/questions/26595620/how-to-install-ruby-2-1-4-on-ubuntu-14-04). If the installation still fails due to [this issue](https://github.com/github/pages-gem/issues/133), you need to execute "sudo apt-get install ruby2.1-dev".
 
 * Python: 2.7
 
 * Android SDK: API 18+ 
 
-(Android SDK recently makes an update about emulators. If you cannot start the emulator (like "Cannot launch AVD in emulator:QT library not found"), please check [this post](https://stackoverflow.com/questions/42554337/cannot-launch-avd-in-emulatorqt-library-not-found) for solution. You can create an emulator before running Stoat. See [this link](https://stackoverflow.com/questions/43275238/how-to-set-system-images-path-when-creating-an-android-avd) for how to create avd using [avdmanager](https://developer.android.com/studio/command-line/avdmanager).)
+Android SDK recently makes an update about emulators. If you cannot start the emulator (like "Cannot launch AVD in emulator:QT library not found"), please check [this post](https://stackoverflow.com/questions/42554337/cannot-launch-avd-in-emulatorqt-library-not-found) for solution. You can create an emulator before running Stoat. See [this link](https://stackoverflow.com/questions/43275238/how-to-set-system-images-path-when-creating-an-android-avd) for how to create avd using [avdmanager](https://developer.android.com/studio/command-line/avdmanager).
 
 * Ubuntu 14.04/Linux
 
