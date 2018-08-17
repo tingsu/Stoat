@@ -76,7 +76,7 @@ You can checkout Stoat from this repo.
 
 * Android SDK: API 18+ 
 
-(Android SDK recently makes an update about emulators. If you cannot start the emulator (like "Cannot launch AVD in emulator:QT library not found"), please check [this post](https://stackoverflow.com/questions/42554337/cannot-launch-avd-in-emulatorqt-library-not-found) for solution.)
+(Android SDK recently makes an update about emulators. If you cannot start the emulator (like "Cannot launch AVD in emulator:QT library not found"), please check [this post](https://stackoverflow.com/questions/42554337/cannot-launch-avd-in-emulatorqt-library-not-found) for solution. You can create an emulator before running Stoat. See [this link](https://stackoverflow.com/questions/43275238/how-to-set-system-images-path-when-creating-an-android-avd) for how to create avd using [avdmanager](https://developer.android.com/studio/command-line/avdmanager).)
 
 * Ubuntu 14.04/Linux
 
@@ -92,7 +92,7 @@ Please export ANDROID_HOME (for android sdk), PYTHON_PATH (for uiautomator), CLA
   export ANDROID_HOME="/home/XX/Android/Sdk"
   export PYTHONPATH="/home/XX/uiautomator"
   export CLASSPATH="/home/XX/fsmdroid/soot-github/lib/soot-develop.jar
-  export PATH=$PATH:${ANDROID_HOME}/build-tools/25.0.0:${ANDROID_HOME}/emulator:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:
+  export PATH=$PATH:${ANDROID_HOME}/build-tools/25.0.0:${ANDROID_HOME}/emulator:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:
   ```
 You may also need to modify "Stoat/CONF.txt" to set the tool path.
   
