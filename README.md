@@ -78,7 +78,11 @@ If your default ruby version is lower than 2.1, the installation of Nokogiri wil
 
 Android SDK recently makes an update about emulators. If you cannot start the emulator (like "Cannot launch AVD in emulator:QT library not found"), please check [this post](https://stackoverflow.com/questions/42554337/cannot-launch-avd-in-emulatorqt-library-not-found) for solution. You can create an emulator before running Stoat. See [this link](https://stackoverflow.com/questions/43275238/how-to-set-system-images-path-when-creating-an-android-avd) for how to create avd using [avdmanager](https://developer.android.com/studio/command-line/avdmanager).
 
-E.g. avdmanager create avd --force --name testAVD_1 --package 'system-images;android-18;google_apis;x86' --abi google_apis/x86 --sdcard 512M --device 'Nexus 7'
+E.g. 
+
+1. sdkmanager  "system-images;android-18;google_apis;x86"
+
+2. avdmanager create avd --force --name testAVD_1 --package 'system-images;android-18;google_apis;x86' --abi google_apis/x86 --sdcard 512M --device 'Nexus 7'
 
 * Ubuntu 14.04/Linux
 
