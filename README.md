@@ -56,6 +56,24 @@ Stoat (STochastic model App Tester) is a guided approach to perform stochastic m
 
 [4] Efficiently Manifesting Asynchronous Programming Errors in Android Apps (ASE'18)
 
+```
+@inproceedings{FanSCMLXP18,
+  author    = {Lingling Fan and
+               Ting Su and
+               Sen Chen and
+               Guozhu Meng and
+               Yang Liu and
+               Lihua Xu and
+               Geguang Pu},
+  title     = {Efficiently manifesting asynchronous programming errors in Android
+               apps},
+  booktitle = {Proceedings of the 33rd {ACM/IEEE} International Conference on Automated
+               Software Engineering, {ASE} 2018, Montpellier, France, September 3-7,
+               2018},
+  pages     = {486--497},
+  year      = {2018}
+}
+```
 
 # Quick Review
 
