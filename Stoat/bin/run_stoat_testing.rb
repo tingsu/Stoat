@@ -316,7 +316,9 @@ def mcmc_sampling_fuzzing_open_source_projects(app_dir, apk_path, avd_serial, st
 	cleanup()
 
 	# uninstall the app after all remainings are cleaned up
-	uninstall_app(avd_serial, apk_loc)
+	if auto_install then
+		uninstall_app(avd_serial, apk_loc)
+	end
 
 end
 
@@ -516,7 +518,7 @@ OptionParser.new do |opts|
   opts.on("--force_restart", "force to restart the current Android Virtual Device") do 
 	force_to_restart = true	
   end
-  opts.on("--disable_auto_install", "require install app manually, especially used when testing apps that needs pre-configurations, auto-install will remove these pre-configurations, e.g., login account info") do 
+  opts.on("--disable_auto_install", "require install app manually, especially used when testing apps that needs pre-configurations, auto-install will remove these pre-configurations, e.g., login account info. When this option is specified, Stoat will not uninstall the app after testing") do 
 	auto_install = false
   end
   opts.on("--xdot", "enable xdot to view the app model at runtime (make sure xdot is installed)") do 
@@ -565,7 +567,9 @@ if (not app_dir.eql?("")) && File.exist?(app_dir) then  # for testing one app at
 	if $only_gui_exploration then
 		# only construct the gui model for the app
 		construct_fsm(app_dir, apk_path, avd_serial, stoat_port)
-		uninstall_app(avd_serial, app_dir)
+		if auto_install then
+			uninstall_app(avd_serial, app_dir)
+		end
 	else
 		construct_fsm(app_dir, apk_path, avd_serial, stoat_port)
 		mcmc_sampling_fuzzing(app_dir, apk_path, avd_serial, stoat_port)
@@ -615,7 +619,9 @@ elsif (not apps_list.eql?("")) && File.exist?(apps_list) then # for testing mult
 		if $only_gui_exploration then
 			# only construct gui models for apps
 			construct_fsm(app_dir_from_file, apk_path_from_file, avd_serial, stoat_port)
-			uninstall_app(avd_serial, app_dir_from_file)
+			if auto_install then
+				uninstall_app(avd_serial, app_dir_from_file)
+			end
 		else
 			construct_fsm(app_dir_from_file, apk_path_from_file, avd_serial, stoat_port)
 			mcmc_sampling_fuzzing(app_dir_from_file, apk_path_from_file, avd_serial, stoat_port)
