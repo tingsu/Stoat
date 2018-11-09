@@ -2,7 +2,7 @@
 ## Ting Su <tsuletgo@gmail.com>
 ## All rights reserved.
 require_relative 'util'
-
+require 'time'
 
 # CrashReporter records app crashes at runtime. Once an app crash is detected, a bug report will be dumped, which contains the crash stack, 
 # the bug triggering trace, the screenshots, and the coverage meta data when the crash happens.
@@ -136,6 +136,7 @@ class CrashReporter
     UTIL.execute_shell_cmd("echo \"app code version: #{@app_code_version}\" >> #{@logcat_file_name}")
     UTIL.execute_shell_cmd("echo \"android sdk version: #{@androi_sdk_version}\" >> #{@logcat_file_name}")
     UTIL.execute_shell_cmd("echo \"product model: #{@ro_product_model}\" >> #{@logcat_file_name}")
+	UTIL.execute_shell_cmd("echo \"current time: #{@ro_product_model}\" >> #{@logcat_file_name}")
     UTIL.execute_shell_cmd("timeout 5s adb -s #{@dev_serial} shell dumpsys meminfo #{@package_name} >> #{@logcat_file_name}")
     UTIL.execute_shell_cmd("echo \"#{sep}\" >> #{@logcat_file_name}")
   end
