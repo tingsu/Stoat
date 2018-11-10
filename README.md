@@ -123,6 +123,7 @@ You may also need to modify "Stoat/CONF.txt" to set the tool path.
 # Usage
 
 Stoat provides several ways to test android apps by command lines. Note before running Stoat, please disable keyboard (for emulator, add "hw.keyboard=yes" in its config.ini; for real device, please install the "com.wparam.nullkeyboard_1.apk" at "Stoat/bin/sdcard", and configure it to be the default input method)
+Please also add "hw.mainKeys=yes" in the config.ini to disable the soft "main" keys if you use emulators, which may affect Stoat's exploration.
 
 1. Ant opens-soruce projects
 
