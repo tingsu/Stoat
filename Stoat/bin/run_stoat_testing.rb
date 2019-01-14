@@ -109,7 +109,7 @@ def install_app(avd_serial, app_dir, apk_path)
 
 	if app_dir.end_with?(".apk") then
 		# this is a closed-source app
-		execute_shell_cmd("adb -s #{avd_serial} install -r #{app_dir}")
+		execute_shell_cmd("adb -s #{avd_serial} install -g -r #{app_dir}")
 	else
 		apk =""
 		if $project_type.eql?("ant") then # ant project
@@ -117,7 +117,7 @@ def install_app(avd_serial, app_dir, apk_path)
 	    else # gradle project
 		  	apk=apk_path
 		end
-		execute_shell_cmd("adb -s #{avd_serial} install -r #{apk}")
+		execute_shell_cmd("adb -s #{avd_serial} install -g -r #{apk}")
 		
 	end
 	
