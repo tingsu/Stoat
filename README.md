@@ -191,3 +191,7 @@ Some benchmark apps used in our paper.
 ## Contact
 [Ting Su](http://tingsu.github.io/)
 All Copyright Reserved.
+
+## TODO
+1. use monkey to bypass welcome page in google play apps
+2. directly use monkey to start the app instead of using "am", the monkey way is more robust.
