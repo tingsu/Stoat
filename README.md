@@ -5,6 +5,8 @@ Stoat (STochastic model App Tester) is a guided approach to perform stochastic m
 
 We have made all the Stoat's source code publicly available. We hope this project can benefit other researchers or practiontiners in the field of automated GUI testing of Android apps. Feel free to contact us if you have any questions and issues. We will continue to maintain this project. Thanks for your feedback.
 
+Next step: We will integrate Jacoco with Stoat to handle gradle-based Android projects.
+
 # Publication
 [1] Guided, Stochastic Model-based GUI Testing of Android Apps (FSE'2017)
 
