@@ -185,21 +185,23 @@ All Copyright Reserved.
 
 ## Papers that uses, extends or compares with Stoat
 
-1. Yifei Lu, Minxue Pan, Juan Zhai, Tian Zhang, Xuandong Li; Preference-wise testing for Android applications. ESEC/SIGSOFT FSE 2019: 268-278
+1. Duling Lai, Julia Rubin. Goal-Driven Exploration for Android Applications. ASE 2019.
 
-2. Tianxiao Gu, Chengnian Sun, Xiaoxing Ma, Chun Cao, Chang Xu, Yuan Yao, Qirun Zhang, Jian Lu, Zhendong Su; Practical GUI testing of Android applications via model abstraction and refinement. ICSE 2019: 269-280
+2. Yifei Lu, Minxue Pan, Juan Zhai, Tian Zhang, Xuandong Li; Preference-wise testing for Android applications. ESEC/SIGSOFT FSE 2019: 268-278
 
-3. Wenyu Wang, Dengfeng Li, Wei Yang, Yurui Cao, Zhenwen Zhang, Yuetang Deng, Tao Xie; An empirical study of Android test generation tools in industrial cases. ASE 2018: 738-748
+3. Tianxiao Gu, Chengnian Sun, Xiaoxing Ma, Chun Cao, Chang Xu, Yuan Yao, Qirun Zhang, Jian Lu, Zhendong Su; Practical GUI testing of Android applications via model abstraction and refinement. ICSE 2019: 269-280
 
-4. Yuanchun Li, Ziyue Yang, Yao Guo, Xiangqun Chen; A Deep Learning based Approach to Automated Android App Testing. CoRR abs/1901.02633 (2019)
+4. Wenyu Wang, Dengfeng Li, Wei Yang, Yurui Cao, Zhenwen Zhang, Yuetang Deng, Tao Xie; An empirical study of Android test generation tools in industrial cases. ASE 2018: 738-748
 
-5. Yu Zhao, Tingting Yu, Ting Su, Yang Liu, Wei Zheng, Jingzhi Zhang, William G. J. Halfond; ReCDroid: automatically reproducing Android application crashes from bug reports. ICSE 2019: 128-139
+5. Yuanchun Li, Ziyue Yang, Yao Guo, Xiangqun Chen; A Deep Learning based Approach to Automated Android App Testing. CoRR abs/1901.02633 (2019)
 
-6. Sen Chen, Lingling Fan, Chunyang Chen, Ting Su, Wenhe Li, Yang Liu, Lihua Xu; StoryDroid: automated generation of storyboard for Android apps. ICSE 2019: 596-607
+6. Yu Zhao, Tingting Yu, Ting Su, Yang Liu, Wei Zheng, Jingzhi Zhang, William G. J. Halfond; ReCDroid: automatically reproducing Android application crashes from bug reports. ICSE 2019: 128-139
 
-7. Chunyang Chen, Ting Su, Guozhu Meng, Zhenchang Xing, Yang Liu; From UI design image to GUI skeleton: a neural machine translator to bootstrap mobile GUI implementation. ICSE 2018: 665-676
+7. Sen Chen, Lingling Fan, Chunyang Chen, Ting Su, Wenhe Li, Yang Liu, Lihua Xu; StoryDroid: automated generation of storyboard for Android apps. ICSE 2019: 596-607
 
-8. Lingling Fan, Ting Su, Sen Chen, Guozhu Meng, Yang Liu, Lihua Xu, Geguang Pu; Efficiently manifesting asynchronous programming errors in Android apps. ASE 2018: 486-497
+8. Chunyang Chen, Ting Su, Guozhu Meng, Zhenchang Xing, Yang Liu; From UI design image to GUI skeleton: a neural machine translator to bootstrap mobile GUI implementation. ICSE 2018: 665-676
+
+9. Lingling Fan, Ting Su, Sen Chen, Guozhu Meng, Yang Liu, Lihua Xu, Geguang Pu; Efficiently manifesting asynchronous programming errors in Android apps. ASE 2018: 486-497
 
 
 
