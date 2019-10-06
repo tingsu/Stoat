@@ -112,7 +112,7 @@ class CrashReporter
         #  end
         #end
 
-	if l =~ /:\s+at #{package_name}/ then
+	if l =~ /:\s+at #{@package_name}/ then
 	  return true
 	end
 
