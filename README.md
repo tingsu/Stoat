@@ -129,7 +129,7 @@ Please also add "hw.mainKeys=yes" in the config.ini to disable the soft "main" k
 	
 4. A list of apps (If they are apks, append the option "--project_type apk")
 
-	ruby run_stoat_testing.rb --apps_dir /home/XX/test_apps/ --apps_list /home/XX/test_apps/apps_list.txt --avd_name testAVD_1 --avd_port 5554 --stoat_port 2000 --force_restart 
+	ruby run_stoat_testing.rb **--apps_dir** /home/XX/test_apps/ --apps_list /home/XX/test_apps/apps_list.txt --avd_name testAVD_1 --avd_port 5554 --stoat_port 2000 --force_restart 
 
 
 ### Subject Requirement:
