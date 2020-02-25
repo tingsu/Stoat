@@ -185,31 +185,33 @@ All Copyright Reserved.
 
 ## Papers that uses, extends or compares with Stoat
 
-1. Zhen Dong, Marcel Böhme, Lucia Cojocaru, Abhik Roychoudhury; Time-travel Testing of Android Apps. ICSE 2020.
+14. Yuyu He, Lei Zhang, Zhemin Yang, Yinzhi Cao, Keke Lian, Shuai Li, Wei Yang, Zhibo Zhang, Min Yang, Yuan Zhang, Haixin Duan. *TextExerciser: Feedback-driven Text Input Exercising for Android Applications*. IEEE S&P 2020 
 
-2. Duling Lai, Julia Rubin. Goal-Driven Exploration for Android Applications. ASE 2019.
+13. Zhen Dong, Marcel Böhme, Lucia Cojocaru, Abhik Roychoudhury; *Time-travel Testing of Android Apps*. ICSE 2020.
 
-3. Henrique Neves da Silva, Paulo Roberto Farah, Willian Douglas Ferrari Mendonça, Silvia Regina Vergilio. Assessing Android Test Data Generation Tools via Mutation Testing. SAST 2019.
+12. Duling Lai, Julia Rubin. *Goal-Driven Exploration for Android Applications*. ASE 2019.
 
-3. Leon Sell, Michael Auer, Christoph Frädrich, Michael Gruber, Philemon Werli, Gordon Fraser; An Empirical Evaluation of Search Algorithms for App Testing. ICTSS 2019. 123-139
+11. Henrique Neves da Silva, Paulo Roberto Farah, Willian Douglas Ferrari Mendonça, Silvia Regina Vergilio. *Assessing Android Test Data Generation Tools via Mutation Testing*. SAST 2019.
 
-4. Yifei Lu, Minxue Pan, Juan Zhai, Tian Zhang, Xuandong Li; Preference-wise testing for Android applications. ESEC/SIGSOFT FSE 2019: 268-278
+10. Leon Sell, Michael Auer, Christoph Frädrich, Michael Gruber, Philemon Werli, Gordon Fraser; *An Empirical Evaluation of Search Algorithms for App Testing*. ICTSS 2019. 123-139
 
-5. Reyhaneh Jabbarvand, Jun-Wei Lin, and Sam Malek; Search-Based Energy Testing of Android. ICSE 2019. 1119-1130
+9. Yifei Lu, Minxue Pan, Juan Zhai, Tian Zhang, Xuandong Li; *Preference-wise testing for Android applications*. ESEC/SIGSOFT FSE 2019: 268-278
 
-6. Tianxiao Gu, Chengnian Sun, Xiaoxing Ma, Chun Cao, Chang Xu, Yuan Yao, Qirun Zhang, Jian Lu, Zhendong Su; Practical GUI testing of Android applications via model abstraction and refinement. ICSE 2019: 269-280
+8. Reyhaneh Jabbarvand, Jun-Wei Lin, and Sam Malek; *Search-Based Energy Testing of Android*. ICSE 2019. 1119-1130
 
-7. Wenyu Wang, Dengfeng Li, Wei Yang, Yurui Cao, Zhenwen Zhang, Yuetang Deng, Tao Xie; An empirical study of Android test generation tools in industrial cases. ASE 2018: 738-748
+7. Tianxiao Gu, Chengnian Sun, Xiaoxing Ma, Chun Cao, Chang Xu, Yuan Yao, Qirun Zhang, Jian Lu, Zhendong Su; *Practical GUI testing of Android applications via model abstraction and refinement*. ICSE 2019: 269-280
 
-8. Yuanchun Li, Ziyue Yang, Yao Guo, Xiangqun Chen; Humanoid: A Deep Learning-based Approach to Automated Black-box Android App Testing. ASE 2019. 
+6. Wenyu Wang, Dengfeng Li, Wei Yang, Yurui Cao, Zhenwen Zhang, Yuetang Deng, Tao Xie; *An empirical study of Android test generation tools in industrial cases*. ASE 2018: 738-748
 
-9. Yu Zhao, Tingting Yu, Ting Su, Yang Liu, Wei Zheng, Jingzhi Zhang, William G. J. Halfond; ReCDroid: automatically reproducing Android application crashes from bug reports. ICSE 2019: 128-139
+5. Yuanchun Li, Ziyue Yang, Yao Guo, Xiangqun Chen; *Humanoid: A Deep Learning-based Approach to Automated Black-box Android App Testing*. ASE 2019. 
 
-10. Sen Chen, Lingling Fan, Chunyang Chen, Ting Su, Wenhe Li, Yang Liu, Lihua Xu; StoryDroid: automated generation of storyboard for Android apps. ICSE 2019: 596-607
+4. Yu Zhao, Tingting Yu, Ting Su, Yang Liu, Wei Zheng, Jingzhi Zhang, William G. J. Halfond; *ReCDroid: automatically reproducing Android application crashes from bug reports*. ICSE 2019: 128-139
 
-11. Chunyang Chen, Ting Su, Guozhu Meng, Zhenchang Xing, Yang Liu; From UI design image to GUI skeleton: a neural machine translator to bootstrap mobile GUI implementation. ICSE 2018: 665-676
+3. Sen Chen, Lingling Fan, Chunyang Chen, Ting Su, Wenhe Li, Yang Liu, Lihua Xu; *StoryDroid: automated generation of storyboard for Android apps*. ICSE 2019: 596-607
 
-12. Lingling Fan, Ting Su, Sen Chen, Guozhu Meng, Yang Liu, Lihua Xu, Geguang Pu; Efficiently manifesting asynchronous programming errors in Android apps. ASE 2018: 486-497
+2. Chunyang Chen, Ting Su, Guozhu Meng, Zhenchang Xing, Yang Liu; *From UI design image to GUI skeleton: a neural machine translator to bootstrap mobile GUI implementation*. ICSE 2018: 665-676
+
+1. Lingling Fan, Ting Su, Sen Chen, Guozhu Meng, Yang Liu, Lihua Xu, Geguang Pu; *Efficiently manifesting asynchronous programming errors in Android apps*. ASE 2018: 486-497
 
 
 
