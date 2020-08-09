@@ -183,13 +183,15 @@ All Copyright Reserved.
 
 2. directly use monkey to start the app instead of using "am", the monkey way is more robust.
 
-## Papers that uses, extends or compares with Stoat
+## Papers that uses, extends or compares with Stoat 
 
 1. Minxue Pan, An Huang, Guoxin Wang, Tian Zhang, and Xuandong Li. *Reinforcement Learning Based Curiosity-driven Testing of Android Applications*. ISSTA 2020.
 
 2. Yuyu He, Lei Zhang, Zhemin Yang, Yinzhi Cao, Keke Lian, Shuai Li, Wei Yang, Zhibo Zhang, Min Yang, Yuan Zhang, Haixin Duan. *TextExerciser: Feedback-driven Text Input Exercising for Android Applications*. IEEE S&P 2020 
 
 3. Zhen Dong, Marcel Böhme, Lucia Cojocaru, Abhik Roychoudhury; *Time-travel Testing of Android Apps*. ICSE 2020.
+
+4. Wunan Guo, Liwei Shen, Ting Su, Xin Peng and Weiyang Xie. *Improving Automated GUI Exploration of Android Apps via Static Dependency Analysis*. ICSME 2020.
 
 4. Duling Lai, Julia Rubin. *Goal-Driven Exploration for Android Applications*. ASE 2019.
 
