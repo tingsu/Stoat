@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Text Edit</string>
+
+	<string name="warranty">Warranty Information: This software is provided AS IS and the author makes NO WARRANTY or representation either express or implied as to its quality, accuracy, or fitness for a particular purpose.</string>
+	<string name="warranty_short">This software is provided AS IS and the author makes NO WARRANTY or representation either express or implied as to its quality, accuracy, or fitness for a particular purpose.</string>
+
+	<!-- Basic Stuff -->
+	<string name="newFileName">Untitled</string>
+	<string name="onSaveMessage">File saved.</string>
+	<string name="onListCleared">List of recent files cleared.</string>
+	<string name="onSuggestionsCleared">List of recent searches cleared.</string>
+
+	<string name="newFile">New File</string>
+	<string name="openFile">Open File</string>
+	
+	<string name="openRecent">Open a Recent File</string>
+
+	<!-- Search stuff -->
+	<string name="searchLabel">TextEdit</string>
+	<string name="searchHint">Search file</string>
+
+	<!-- Dialog Texts -->
+	<string name="defaultFilePath">/sdcard/</string>
+	<string name="accessDenied">Could not save file, Access Denied!</string>
+	<string name="accessDeniedSDcard">Error saving to SD card.\nPossible causes:\n - Phone connected to PC\n - Invalid file name\n - SD card not installed\n - Out of disk space</string>
+	<string name="savingError">Problem saving.\nPossible causes:\n - Invalid file name\n - Out of disk space</string>
+	
+	<string name="shouldSave">File changed. Save it?</string>
+	<string name="shouldSaveIntent">You\'re opening another file. Save this one?</string>
+	<string name="shouldOverwrite">You\'re about to replace an existing file.</string>
+
+	<string name="onSendEmptyMessage">Can not send an empty untitled file.</string>
+	<string name="externalModify">This file has been modified externally. Reload?</string>
+	
+	<!-- Preference stuff 
+		    If you edit this stuff you need to change updateOptions() to make it match -->
+<!--  	<string name="linewrap">true</string>
+	<string name="autocase">true</string>
+	-->
+	<!--  File Browser stuff -->
+	<string name="nofilesindirectory">This directory is empty.</string>
+</resources>

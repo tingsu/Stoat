@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+	This is the main view for the whole filebrowser
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:background="@android:color/white">
+<TextView
+		android:id="@+id/filepath"
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content"
+		android:text="Location: /sdcard/"
+		android:textColor="@android:color/black"
+		android:paddingLeft="5dip"
+		android:paddingBottom="3dip"
+		android:paddingTop="0dip"
+		android:singleLine="true"
+		android:textAppearance="?android:attr/textAppearanceMedium" />
+
+	<ListView  xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:divider="@android:drawable/divider_horizontal_bright"
+	    android:background="@android:color/white"
+		android:cacheColorHint="#00000000"
+		android:id="@+id/filelist"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:color="@android:color/white" />
+	
+	<!-- This is to make sure the text box is always big -->
+	<View
+		android:layout_width="fill_parent" 
+		android:layout_height="fill_parent"
+		android:background="@android:color/white"
+		android:layout_weight="1" />
+		
+	<!-- The visibility of this is changed to visible when there are no files -->
+	<TextView	
+		android:id="@+id/nofilemessage"
+		android:layout_width="fill_parent" 
+		android:layout_height="fill_parent"
+		android:gravity="center_vertical|center_horizontal"
+		android:text="@string/nofilesindirectory"
+		android:textColor="#aaa" 
+		android:background="@android:color/white"
+		android:textAppearance="?android:attr/textAppearanceMedium" 
+		android:visibility="gone" />
+	<View
+		android:layout_width="fill_parent" 
+		android:layout_height="fill_parent"
+		android:background="@android:color/white" 
+		android:layout_weight="1" />
+	
+</LinearLayout>

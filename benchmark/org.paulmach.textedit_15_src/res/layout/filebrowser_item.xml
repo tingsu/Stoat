@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	The default layout for each item in the file list view,
+	Could be for openRecent or fileBrowser
+-->
+ 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="horizontal">
+
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/itemimage"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:layout_gravity="center_vertical"/>
+
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/itemtext"
+	style="?android:attr/dropDownItemStyle"
+	android:textAppearance="?android:attr/textAppearanceLargeInverse"
+	android:singleLine="false"
+	android:layout_width="fill_parent"
+	android:layout_height="50dip"
+	android:paddingLeft="10px"
+	android:paddingRight="3px"
+	android:paddingTop="3px"
+	android:paddingBottom="3px"
+	android:textSize="14.0sp"
+	android:scrollHorizontally="true" /> 
+		
+</LinearLayout>

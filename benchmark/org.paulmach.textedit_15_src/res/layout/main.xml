@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<TextView  
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content"
+		android:gravity="center_horizontal"
+		android:text="\nText Edit\n"
+		android:ems="20"
+		android:textSize="24.0px"
+		android:textAppearance="?android:attr/textAppearanceLarge" />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:gravity="center_horizontal">
+		<Button android:id="@+id/newfile_button"
+			android:layout_width="200px" 
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal|center_vertical"
+			android:gravity="center_horizontal|center_vertical"
+			android:text="@string/newFile"/>
+		<Button android:id="@+id/openfile_button"
+			android:layout_width="200px" 
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal|center_vertical"
+			android:gravity="center_horizontal|center_vertical"
+			android:text="@string/openFile"/>
+		<TextView android:id="@+id/warranty"  
+			android:layout_width="fill_parent" 
+			android:layout_height="fill_parent"
+			android:gravity="bottom"
+			android:text="@string/warranty" />
+	</LinearLayout>	
+</LinearLayout>

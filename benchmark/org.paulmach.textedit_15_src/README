@@ -1,0 +1,23 @@
+Text Edit for Android
+By Paul Mach (paulmach at gmail.com)
+
+SUMMARY
+
+Simple notepad app to open, edit and save text files to and from the SD card.
+
+** Some features
+-- open email attachments
+-- change font size, type and color
+-- delete/rename in file browser
+-- email as text or attachment
+-- Search using "search" button
+
+NOTES
+
+This app currently does everything I need it do. Minus some bug fixes, this is 
+probably it for Text Edit. There's nothing more I care to add.
+
+This app has been open sourced as a little gift to the open source community 
+that I've used and abused for over a decade. Thank you.
+
+Feel free to send questions to me, Paul Mach, at paulmach at gmail.com
