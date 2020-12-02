@@ -193,6 +193,8 @@ All Copyright Reserved.
 
 4. Wunan Guo, Liwei Shen, Ting Su, Xin Peng and Weiyang Xie. *Improving Automated GUI Exploration of Android Apps via Static Dependency Analysis*. ICSME 2020.
 
+4. Husam N. Yasin et. al. *An Empirical Analysis of Test Input Generation Tools for Android Apps through a Sequence of Events*. Symmetry 2020.
+
 4. Duling Lai, Julia Rubin. *Goal-Driven Exploration for Android Applications*. ASE 2019.
 
 5. Henrique Neves da Silva, Paulo Roberto Farah, Willian Douglas Ferrari Mendonça, Silvia Regina Vergilio. *Assessing Android Test Data Generation Tools via Mutation Testing*. SAST 2019.
