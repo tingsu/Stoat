@@ -199,6 +199,8 @@ All Copyright Reserved.
 
 4. Duling Lai, Julia Rubin. *Goal-Driven Exploration for Android Applications*. ASE 2019.
 
+5. Yun Ma, Yangyang Huang, Ziniu Hu, Xusheng Xiao, Xuanzhe Liu. *Paladin: Automated Generation of Reproducible Test Cases for Android Apps*. HotMobile 2019.
+
 5. Henrique Neves da Silva, Paulo Roberto Farah, Willian Douglas Ferrari Mendonça, Silvia Regina Vergilio. *Assessing Android Test Data Generation Tools via Mutation Testing*. SAST 2019.
 
 6. Leon Sell, Michael Auer, Christoph Frädrich, Michael Gruber, Philemon Werli, Gordon Fraser; *An Empirical Evaluation of Search Algorithms for App Testing*. ICTSS 2019. 123-139
