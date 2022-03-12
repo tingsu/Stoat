@@ -187,6 +187,8 @@ All Copyright Reserved.
 
 1. Wenyu Wang, Wing Lam, and Tao Xie. *An infrastructure approach to improving effectiveness of Android UI testing tools." Proceedings of the 30th ACM SIGSOFT International Symposium on Software Testing and Analysis*. ISSTA 2021.
 
+1. Ting Su, Jue Wang, Zhendong Su. *Benchmarking Automated GUI Testing for Android against Real-World Bugs*. ESEC/FSE 2021.
+
 1. Minxue Pan, An Huang, Guoxin Wang, Tian Zhang, and Xuandong Li. *Reinforcement Learning Based Curiosity-driven Testing of Android Applications*. ISSTA 2020.
 
 2. Yuyu He, Lei Zhang, Zhemin Yang, Yinzhi Cao, Keke Lian, Shuai Li, Wei Yang, Zhibo Zhang, Min Yang, Yuan Zhang, Haixin Duan. *TextExerciser: Feedback-driven Text Input Exercising for Android Applications*. IEEE S&P 2020 
@@ -194,6 +196,8 @@ All Copyright Reserved.
 3. Zhen Dong, Marcel Böhme, Lucia Cojocaru, Abhik Roychoudhury; *Time-travel Testing of Android Apps*. ICSE 2020.
 
 4. Wunan Guo, Liwei Shen, Ting Su, Xin Peng and Weiyang Xie. *Improving Automated GUI Exploration of Android Apps via Static Dependency Analysis*. ICSME 2020.
+
+4. Ting Su, Lingling Fan, Sen Chen, Yang Liu, Lihua Xu, Geguang Pu, and Zhendong Su. *Why My App Crashes? Understanding and Benchmarking Framework-specific Exceptions of Android apps*. TSE 2020.
 
 4. Husam N. Yasin et. al. *An Empirical Analysis of Test Input Generation Tools for Android Apps through a Sequence of Events*. Symmetry 2020.
 
