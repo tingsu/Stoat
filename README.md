@@ -189,6 +189,8 @@ All Copyright Reserved.
 
 1. Ting Su, Jue Wang, Zhendong Su. *Benchmarking Automated GUI Testing for Android against Real-World Bugs*. ESEC/FSE 2021.
 
+1. Hao Zhou, Ting Chen, Haoyu Wang, Le Yu, Xiapu Luo, Ting Wang, Wei Zhang. *UI Obfuscation and Its Effects on Automated UI Analysis for Android Apps*. ASE 2020.
+
 1. Minxue Pan, An Huang, Guoxin Wang, Tian Zhang, and Xuandong Li. *Reinforcement Learning Based Curiosity-driven Testing of Android Applications*. ISSTA 2020.
 
 2. Yuyu He, Lei Zhang, Zhemin Yang, Yinzhi Cao, Keke Lian, Shuai Li, Wei Yang, Zhibo Zhang, Min Yang, Yuan Zhang, Haixin Duan. *TextExerciser: Feedback-driven Text Input Exercising for Android Applications*. IEEE S&P 2020 
