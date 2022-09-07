@@ -1,6 +1,8 @@
 # Stoat Prototype
 Stoat (STochastic model App Tester) is a guided approach to perform stochastic model-based testing on Android Apps. The idea is to thoroughly test the functionalities of an app from its GUI model, and validate the app’s behavior by enforcing various user/system interactions. 
 
+*You can find more about our work on testing/analyzing Android apps at this [website](https://tingsu.github.io/files/mobile-app-analysis.html)*.
+
 # Update
 
 We have made all the Stoat's source code publicly available. We hope this project can benefit other researchers or practiontiners in the field of automated GUI testing of Android apps. Feel free to contact us if you have any questions and issues. We will continue to maintain this project. Thanks for your feedback.
@@ -184,6 +186,8 @@ All Copyright Reserved.
 2. directly use monkey to start the app instead of using "am", the monkey way is more robust.
 
 ## Papers that uses, extends or compares with Stoat 
+
+1. Zhengwei Lv, Chao Peng, Zhao Zhang, Ting Su, Kai Liu, Ping Yang. *Fastbot2: Reusable Automated Model-based GUI Testing for Android Enhanced by Reinforcement Learning*. ASE 2022.
 
 1. Wenyu Wang, Wing Lam, and Tao Xie. *An infrastructure approach to improving effectiveness of Android UI testing tools." Proceedings of the 30th ACM SIGSOFT International Symposium on Software Testing and Analysis*. ISSTA 2021.
 
