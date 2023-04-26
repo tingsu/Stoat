@@ -187,45 +187,47 @@ All Copyright Reserved.
 
 ## Papers that uses, extends or compares with Stoat 
 
-1. Zhengwei Lv, Chao Peng, Zhao Zhang, Ting Su, Kai Liu, Ping Yang. *Fastbot2: Reusable Automated Model-based GUI Testing for Android Enhanced by Reinforcement Learning*. ASE 2022.
+1. Zhe Liu, Chunyang Chen, Junjie Wang, Xing Che, Yuekai Huang, Jun Hu, Qing Wang. *Efficiency Matters: Speeding Up Automated Testing with GUI Rendering Inference*. ICSE 2023
 
-1. Wenyu Wang, Wing Lam, and Tao Xie. *An infrastructure approach to improving effectiveness of Android UI testing tools." Proceedings of the 30th ACM SIGSOFT International Symposium on Software Testing and Analysis*. ISSTA 2021.
+2. Zhengwei Lv, Chao Peng, Zhao Zhang, Ting Su, Kai Liu, Ping Yang. *Fastbot2: Reusable Automated Model-based GUI Testing for Android Enhanced by Reinforcement Learning*. ASE 2022.
 
-1. Ting Su, Jue Wang, Zhendong Su. *Benchmarking Automated GUI Testing for Android against Real-World Bugs*. ESEC/FSE 2021.
+3. Wenyu Wang, Wing Lam, and Tao Xie. *An infrastructure approach to improving effectiveness of Android UI testing tools." Proceedings of the 30th ACM SIGSOFT International Symposium on Software Testing and Analysis*. ISSTA 2021.
 
-1. Hao Zhou, Ting Chen, Haoyu Wang, Le Yu, Xiapu Luo, Ting Wang, Wei Zhang. *UI Obfuscation and Its Effects on Automated UI Analysis for Android Apps*. ASE 2020.
+4. Ting Su, Jue Wang, Zhendong Su. *Benchmarking Automated GUI Testing for Android against Real-World Bugs*. ESEC/FSE 2021.
 
-1. Minxue Pan, An Huang, Guoxin Wang, Tian Zhang, and Xuandong Li. *Reinforcement Learning Based Curiosity-driven Testing of Android Applications*. ISSTA 2020.
+5. Hao Zhou, Ting Chen, Haoyu Wang, Le Yu, Xiapu Luo, Ting Wang, Wei Zhang. *UI Obfuscation and Its Effects on Automated UI Analysis for Android Apps*. ASE 2020.
 
-2. Yuyu He, Lei Zhang, Zhemin Yang, Yinzhi Cao, Keke Lian, Shuai Li, Wei Yang, Zhibo Zhang, Min Yang, Yuan Zhang, Haixin Duan. *TextExerciser: Feedback-driven Text Input Exercising for Android Applications*. IEEE S&P 2020 
+6. Minxue Pan, An Huang, Guoxin Wang, Tian Zhang, and Xuandong Li. *Reinforcement Learning Based Curiosity-driven Testing of Android Applications*. ISSTA 2020.
 
-3. Zhen Dong, Marcel Böhme, Lucia Cojocaru, Abhik Roychoudhury; *Time-travel Testing of Android Apps*. ICSE 2020.
+7. Yuyu He, Lei Zhang, Zhemin Yang, Yinzhi Cao, Keke Lian, Shuai Li, Wei Yang, Zhibo Zhang, Min Yang, Yuan Zhang, Haixin Duan. *TextExerciser: Feedback-driven Text Input Exercising for Android Applications*. IEEE S&P 2020 
 
-4. Wunan Guo, Liwei Shen, Ting Su, Xin Peng and Weiyang Xie. *Improving Automated GUI Exploration of Android Apps via Static Dependency Analysis*. ICSME 2020.
+8. Zhen Dong, Marcel Böhme, Lucia Cojocaru, Abhik Roychoudhury; *Time-travel Testing of Android Apps*. ICSE 2020.
 
-4. Ting Su, Lingling Fan, Sen Chen, Yang Liu, Lihua Xu, Geguang Pu, and Zhendong Su. *Why My App Crashes? Understanding and Benchmarking Framework-specific Exceptions of Android apps*. TSE 2020.
+9. Wunan Guo, Liwei Shen, Ting Su, Xin Peng and Weiyang Xie. *Improving Automated GUI Exploration of Android Apps via Static Dependency Analysis*. ICSME 2020.
 
-4. Husam N. Yasin et. al. *An Empirical Analysis of Test Input Generation Tools for Android Apps through a Sequence of Events*. Symmetry 2020.
+10. Ting Su, Lingling Fan, Sen Chen, Yang Liu, Lihua Xu, Geguang Pu, and Zhendong Su. *Why My App Crashes? Understanding and Benchmarking Framework-specific Exceptions of Android apps*. TSE 2020.
 
-4. Duling Lai, Julia Rubin. *Goal-Driven Exploration for Android Applications*. ASE 2019.
+11. Husam N. Yasin et. al. *An Empirical Analysis of Test Input Generation Tools for Android Apps through a Sequence of Events*. Symmetry 2020.
 
-5. Yun Ma, Yangyang Huang, Ziniu Hu, Xusheng Xiao, Xuanzhe Liu. *Paladin: Automated Generation of Reproducible Test Cases for Android Apps*. HotMobile 2019.
+12. Duling Lai, Julia Rubin. *Goal-Driven Exploration for Android Applications*. ASE 2019.
 
-5. Henrique Neves da Silva, Paulo Roberto Farah, Willian Douglas Ferrari Mendonça, Silvia Regina Vergilio. *Assessing Android Test Data Generation Tools via Mutation Testing*. SAST 2019.
+13. Yun Ma, Yangyang Huang, Ziniu Hu, Xusheng Xiao, Xuanzhe Liu. *Paladin: Automated Generation of Reproducible Test Cases for Android Apps*. HotMobile 2019.
 
-6. Leon Sell, Michael Auer, Christoph Frädrich, Michael Gruber, Philemon Werli, Gordon Fraser; *An Empirical Evaluation of Search Algorithms for App Testing*. ICTSS 2019. 123-139
+14. Henrique Neves da Silva, Paulo Roberto Farah, Willian Douglas Ferrari Mendonça, Silvia Regina Vergilio. *Assessing Android Test Data Generation Tools via Mutation Testing*. SAST 2019.
 
-7. Yifei Lu, Minxue Pan, Juan Zhai, Tian Zhang, Xuandong Li; *Preference-wise testing for Android applications*. ESEC/SIGSOFT FSE 2019: 268-278
+15. Leon Sell, Michael Auer, Christoph Frädrich, Michael Gruber, Philemon Werli, Gordon Fraser; *An Empirical Evaluation of Search Algorithms for App Testing*. ICTSS 2019. 123-139
 
-8. Reyhaneh Jabbarvand, Jun-Wei Lin, and Sam Malek; *Search-Based Energy Testing of Android*. ICSE 2019. 1119-1130
+16. Yifei Lu, Minxue Pan, Juan Zhai, Tian Zhang, Xuandong Li; *Preference-wise testing for Android applications*. ESEC/SIGSOFT FSE 2019: 268-278
 
-9. Tianxiao Gu, Chengnian Sun, Xiaoxing Ma, Chun Cao, Chang Xu, Yuan Yao, Qirun Zhang, Jian Lu, Zhendong Su; *Practical GUI testing of Android applications via model abstraction and refinement*. ICSE 2019: 269-280
+17. Reyhaneh Jabbarvand, Jun-Wei Lin, and Sam Malek; *Search-Based Energy Testing of Android*. ICSE 2019. 1119-1130
 
-10. Wenyu Wang, Dengfeng Li, Wei Yang, Yurui Cao, Zhenwen Zhang, Yuetang Deng, Tao Xie; *An empirical study of Android test generation tools in industrial cases*. ASE 2018: 738-748
+18. Tianxiao Gu, Chengnian Sun, Xiaoxing Ma, Chun Cao, Chang Xu, Yuan Yao, Qirun Zhang, Jian Lu, Zhendong Su; *Practical GUI testing of Android applications via model abstraction and refinement*. ICSE 2019: 269-280
 
-11. Yuanchun Li, Ziyue Yang, Yao Guo, Xiangqun Chen; *Humanoid: A Deep Learning-based Approach to Automated Black-box Android App Testing*. ASE 2019. 
+19. Wenyu Wang, Dengfeng Li, Wei Yang, Yurui Cao, Zhenwen Zhang, Yuetang Deng, Tao Xie; *An empirical study of Android test generation tools in industrial cases*. ASE 2018: 738-748
 
-12. Yu Zhao, Tingting Yu, Ting Su, Yang Liu, Wei Zheng, Jingzhi Zhang, William G. J. Halfond; *ReCDroid: automatically reproducing Android application crashes from bug reports*. ICSE 2019: 128-139
+20. Yuanchun Li, Ziyue Yang, Yao Guo, Xiangqun Chen; *Humanoid: A Deep Learning-based Approach to Automated Black-box Android App Testing*. ASE 2019. 
+
+21. Yu Zhao, Tingting Yu, Ting Su, Yang Liu, Wei Zheng, Jingzhi Zhang, William G. J. Halfond; *ReCDroid: automatically reproducing Android application crashes from bug reports*. ICSE 2019: 128-139
 
 13. Sen Chen, Lingling Fan, Chunyang Chen, Ting Su, Wenhe Li, Yang Liu, Lihua Xu; *StoryDroid: automated generation of storyboard for Android apps*. ICSE 2019: 596-607
 
